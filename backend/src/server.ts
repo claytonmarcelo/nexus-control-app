@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
@@ -13,12 +14,41 @@ import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
+// Validar FRONTEND_URL em produção
+const isProduction = process.env.NODE_ENV === 'production';
+const frontendUrl = process.env.FRONTEND_URL;
+
+if (isProduction && !frontendUrl) {
+  throw new Error(
+    'FRONTEND_URL é obrigatório em produção. Configure a variável de ambiente FRONTEND_URL com a URL pública do frontend.'
+  );
+}
+
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map((origin) => origin.trim());
+const allowedOrigins = (frontendUrl || 'http://localhost:5173').split(',').map((origin) => origin.trim());
 
-app.use(helmet());
+// Configurar helmet com CSP explícita para Google Fonts e recursos necessários
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", ...allowedOrigins]
+    }
+  },
+  frameguard: { action: 'deny' },
+  hidePoweredBy: true,
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  hsts: { maxAge: 31536000, includeSubDomains: isProduction, preload: isProduction }
+}));
+
+app.use(compression());
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -37,6 +67,11 @@ const limiter = rateLimit({
   message: { error: 'Muitas requisições originadas deste IP, tente novamente mais tarde.' }
 });
 app.use('/api/', limiter);
+
+// Health check routes - sem rate limit para AWS health checks
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 app.get('/api/status', (req, res) => {
   res.json({ success: true, message: 'Nexus Control API está rodando' });
