@@ -300,9 +300,23 @@ d4f1acb
 
 ## 👨‍💻 Desenvolvedor
 
-**Clayton Marcelo**
-- GitHub: [github.com/claytonmarcelo](https://github.com/claytonmarcelo)
-- Email: [marcelolimadez@gmail.com](mailto:marcelolimadez@gmail.com)
+<div align="center">
+
+### Clayton Marcelo
+**C. Marcelo Dev. Brasil**
+
+📍 Brasil
+
+[![GitHub](https://img.shields.io/badge/GitHub-claytonmarcelo-181717?style=flat-square&logo=github)](https://github.com/claytonmarcelo)
+[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/cmarcelodev)
+[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square)](https://cmarcelodev.com)
+[![Email](https://img.shields.io/badge/Email-marcelolimadez%40gmail.com-D14836?style=flat-square&logo=gmail)](mailto:marcelolimadez@gmail.com)
+
+---
+
+*Full Stack Developer especializado em React, Node.js, Fastify, TypeScript, Prisma, MySQL e desenvolvimento de soluções SaaS Enterprise para Field Service Management.*
+
+</div>
 
 ---
 
@@ -551,9 +565,23 @@ d4f1acb - feat(backend): add compression middleware
 
 ## 👨‍💻 Developer
 
-**Clayton Marcelo**
-- GitHub: [github.com/claytonmarcelo](https://github.com/claytonmarcelo)
-- Email: [marcelolimadez@gmail.com](mailto:marcelolimadez@gmail.com)
+<div align="center">
+
+### Clayton Marcelo
+**C. Marcelo Dev. Brasil**
+
+📍 Brazil
+
+[![GitHub](https://img.shields.io/badge/GitHub-claytonmarcelo-181717?style=flat-square&logo=github)](https://github.com/claytonmarcelo)
+[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/cmarcelodev)
+[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square)](https://cmarcelodev.com)
+[![Email](https://img.shields.io/badge/Email-marcelolimadez%40gmail.com-D14836?style=flat-square&logo=gmail)](mailto:marcelolimadez@gmail.com)
+
+---
+
+*Full Stack Developer specialized in React, Node.js, Fastify, TypeScript, Prisma, MySQL and development of SaaS Enterprise solutions for Field Service Management.*
+
+</div>
 
 ---
 
