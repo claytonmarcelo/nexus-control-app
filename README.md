@@ -186,17 +186,17 @@ Configure as variáveis de ambiente `NODE_ENV=production` e `FRONTEND_URL=https:
 
 ## 📄 API Endpoints
 
-| Método | Rota | Descrição | Auth |
-|---|---|---|---|
-| POST | `/api/auth/register` | Cadastro de usuário | ❌ |
-| POST | `/api/auth/login` | Login e obtenção de tokens | ❌ |
-| POST | `/api/auth/refresh` | Renovação de access token | ❌ |
-| GET | `/api/itens` | Listagem do catálogo | ✅ |
-| POST | `/api/itens` | Criar novo item | ✅ Admin/Func |
-| POST | `/api/pedidos/checkout` | Finalizar compra | ✅ Cliente |
-| GET | `/api/pedidos/me` | Pedidos do usuário logado | ✅ |
-| GET | `/api/admin/overview` | Métricas gerais do sistema | ✅ Admin |
-| GET | `/api/usuarios` | Listagem de usuários | ✅ Admin |
+| Método | Rota | Descrição | Requer Login? | Status |
+|---|---|---|---|---|
+| POST | `/api/auth/register` | Cadastro de novo usuário | Não (Pública) | 🟢 100% Ativo |
+| POST | `/api/auth/login` | Login e geração de tokens JWT | Não (Pública) | 🟢 100% Ativo |
+| POST | `/api/auth/refresh` | Renovação de access token | Não (Pública) | 🟢 100% Ativo |
+| GET | `/api/itens` | Listagem do catálogo de produtos | Sim (JWT) | 🟢 100% Ativo |
+| POST | `/api/itens` | Criar novo item no catálogo | Sim (Admin/Func) | 🟢 100% Ativo |
+| POST | `/api/pedidos/checkout` | Finalizar compra ou aluguel | Sim (Cliente) | 🟢 100% Ativo |
+| GET | `/api/pedidos/me` | Pedidos do usuário logado | Sim (JWT) | 🟢 100% Ativo |
+| GET | `/api/admin/overview` | Métricas gerais do sistema | Sim (Admin) | 🟢 100% Ativo |
+| GET | `/api/usuarios` | Listagem e gestão de usuários | Sim (Admin) | 🟢 100% Ativo |
 
 ---
 
