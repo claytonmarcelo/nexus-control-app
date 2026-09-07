@@ -308,13 +308,13 @@ d4f1acb
 📍 Brasil
 
 [![GitHub](https://img.shields.io/badge/GitHub-claytonmarcelo-181717?style=flat-square&logo=github)](https://github.com/claytonmarcelo)
-[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/cmarcelodev)
-[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square)](https://cmarcelodev.com)
-[![Email](https://img.shields.io/badge/Email-marcelolimadez%40gmail.com-D14836?style=flat-square&logo=gmail)](mailto:marcelolimadez@gmail.com)
+[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/@cmarcelodev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-clayton--marcelo--dev-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/clayton-marcelo-dev/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square&logo=google-chrome)](https://cmarcelodev.com)
 
 ---
 
-*Full Stack Developer especializado em React, Node.js, Fastify, TypeScript, Prisma, MySQL e desenvolvimento de soluções SaaS Enterprise para Field Service Management.*
+*Desenvolvedor Full Stack especializado em React, Node.js, Fastify, TypeScript, Prisma, MySQL e desenvolvimento de soluções SaaS Enterprise para Field Service Management.*
 
 </div>
 
@@ -573,9 +573,9 @@ d4f1acb - feat(backend): add compression middleware
 📍 Brazil
 
 [![GitHub](https://img.shields.io/badge/GitHub-claytonmarcelo-181717?style=flat-square&logo=github)](https://github.com/claytonmarcelo)
-[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/cmarcelodev)
-[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square)](https://cmarcelodev.com)
-[![Email](https://img.shields.io/badge/Email-marcelolimadez%40gmail.com-D14836?style=flat-square&logo=gmail)](mailto:marcelolimadez@gmail.com)
+[![YouTube](https://img.shields.io/badge/YouTube-CMarceloDev-FF0000?style=flat-square&logo=youtube)](https://youtube.com/@cmarcelodev)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-clayton--marcelo--dev-0077B5?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/clayton-marcelo-dev/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-cmarcelodev.com-5865F2?style=flat-square&logo=google-chrome)](https://cmarcelodev.com)
 
 ---
 
