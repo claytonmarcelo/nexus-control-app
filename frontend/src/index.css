@@ -44,11 +44,20 @@
   html[data-theme='light'] .bg-dark-bg { background-color: #f5f2ea; }
   html[data-theme='light'] .bg-dark-card { background-color: #fffdf7; }
   html[data-theme='light'] .bg-dark-hover { background-color: #eee8dc; }
+  html[data-theme='light'] .bg-dark-border { background-color: #e8e0d3; }
   html[data-theme='light'] .text-nexus-300 { color: #755d17; }
   html[data-theme='light'] .text-nexus-400 { color: #806618; }
+  html[data-theme='light'] .text-nexus-500 { color: #8F7423; }
   html[data-theme='light'] .text-text-secondary { color: #5b554b; }
   html[data-theme='light'] .glass { background-color: rgba(255, 253, 247, 0.82); }
   html[data-theme='light'] .neumorphic-inner { background-color: #fffdf7; box-shadow: inset 8px 8px 16px rgba(145, 133, 109, 0.16), inset -8px -8px 16px rgba(255, 255, 255, 0.8); }
+  html[data-theme='light'] .border-dark-border { border-color: #d9cfc1; }
+  html[data-theme='light'] .divide-dark-border > * + * { border-color: #d9cfc1; }
+  html[data-theme='light'] .hover\:bg-dark-hover:hover { background-color: #eee8dc; }
+  html[data-theme='light'] .hover\:text-white:hover { color: #211f1a; }
+  html[data-theme='light'] .hover\:text-nexus-300:hover { color: #755d17; }
+  html[data-theme='light'] .hover\:text-nexus-400:hover { color: #806618; }
+  html[data-theme='light'] .hover\:bg-dark-border:hover { background-color: #e8e0d3; }
 
   * {
     @apply border-dark-border;
@@ -269,6 +278,96 @@
       @apply w-full;
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT THEME — Components (card, input, btn-secondary, etc)
+   ═══════════════════════════════════════════════════════ */
+html[data-theme='light'] .card {
+  background-color: #fffdf7;
+  border-color: #d9cfc1;
+}
+
+html[data-theme='light'] .card:hover {
+  border-color: #8F7423;
+}
+
+html[data-theme='light'] .input {
+  background-color: #fffdf7;
+  border-color: #d9cfc1;
+  color: #211f1a;
+}
+
+html[data-theme='light'] .input::placeholder {
+  color: #9c917d;
+}
+
+html[data-theme='light'] .input:focus {
+  border-color: #8F7423;
+  box-shadow: 0 0 0 2px rgba(143, 116, 35, 0.2);
+}
+
+html[data-theme='light'] .label {
+  color: #755d17;
+}
+
+html[data-theme='light'] .btn-secondary {
+  background-color: #fffdf7;
+  color: #211f1a;
+  border-color: #d9cfc1;
+}
+
+html[data-theme='light'] .btn-secondary:hover {
+  background-color: #eee8dc;
+  border-color: #8F7423;
+  color: #211f1a;
+}
+
+html[data-theme='light'] .btn-ghost {
+  background-color: transparent;
+  color: #211f1a;
+}
+
+html[data-theme='light'] .btn-ghost:hover {
+  background-color: #eee8dc;
+  color: #211f1a;
+}
+
+html[data-theme='light'] .btn-primary {
+  background: linear-gradient(135deg, #D4AF37, #B8962E);
+  color: #121212;
+}
+
+html[data-theme='light'] .btn-primary:hover {
+  background: linear-gradient(135deg, #E5C158, #D4AF37);
+}
+
+html[data-theme='light'] ::-webkit-scrollbar-track {
+  background-color: #f5f2ea;
+}
+
+html[data-theme='light'] ::-webkit-scrollbar-thumb {
+  background-color: #d9cfc1;
+}
+
+html[data-theme='light'] ::-webkit-scrollbar-thumb:hover {
+  background-color: #8F7423;
+}
+
+html[data-theme='light'] ::selection {
+  background-color: rgba(143, 116, 35, 0.3);
+  color: #211f1a;
+}
+
+html[data-theme='light'] .neumorphic {
+  background-color: #fffdf7;
+  box-shadow: 8px 8px 16px rgba(180, 168, 140, 0.25), -8px -8px 16px rgba(255, 255, 255, 0.9);
+  border-color: rgba(184, 150, 46, 0.15);
+}
+
+html[data-theme='light'] .glass {
+  background-color: rgba(255, 253, 247, 0.88);
+  border-color: rgba(184, 150, 46, 0.2);
 }
 
 @layer utilities {
@@ -1264,4 +1363,35 @@ html[data-theme='light'] .auth-footer__link:hover {
 
 html[data-theme='light'] .fp-msg--info {
   color: #8F7423;
+}
+
+
+/* Light theme for error page and additional components */
+html[data-theme='light'] .error-page {
+  background: #f5f2ea;
+  background-image: linear-gradient(135deg, rgba(245, 242, 234, 0.98), rgba(235, 229, 216, 0.94));
+  color: #211f1a;
+}
+
+html[data-theme='light'] .error-page__content {
+  border: 1px solid rgba(184, 150, 46, 0.2);
+  background: rgba(255, 253, 247, 0.85);
+  box-shadow: 0 24px 64px rgba(180, 168, 140, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+html[data-theme='light'] .error-page h1 {
+  color: #211f1a;
+}
+
+html[data-theme='light'] .error-page__message {
+  color: #635b4f;
+}
+
+html[data-theme='light'] .modal-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='light'] .modal-content {
+  background-color: rgba(255, 253, 247, 0.95);
+  border-color: rgba(184, 150, 46, 0.2);
 }
