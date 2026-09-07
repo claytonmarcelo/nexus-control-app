@@ -202,8 +202,11 @@ Configure as variáveis de ambiente `NODE_ENV=production` e `FRONTEND_URL=https:
 
 ## 👨‍💻 Desenvolvedor
 
-**Clayton Marcelo** — [github.com/claytonmarcelo](https://github.com/claytonmarcelo)
+**Clayton Marcelo**
+- GitHub: [github.com/claytonmarcelo](https://github.com/claytonmarcelo)
+- Email: [marcelolimadez@gmail.com](mailto:marcelolimadez@gmail.com)
 
 ---
 
-© 2025 Nexus Control App. Todos os direitos reservados.
+© 2026 Nexus Control App. Todos os direitos reservados.
+
