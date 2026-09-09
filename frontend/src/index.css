@@ -457,47 +457,6 @@
   }
 
   /* ═══════════════════════════════════════════════════════
-     ADMIN PANEL SPECIFIC
-     ═══════════════════════════════════════════════════════ */
-  .admin-container {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-  }
-
-  .admin-container .card {
-    background: var(--bg-secondary);
-    border-color: var(--border-color);
-  }
-
-  .admin-container .glass {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-  }
-
-  .admin-container .input {
-    background: var(--input-bg);
-    color: var(--text-primary);
-    border-color: var(--input-border);
-  }
-
-  .admin-container .input::placeholder {
-    color: var(--input-placeholder);
-  }
-
-  .admin-container .text-white {
-    color: var(--text-primary);
-  }
-
-  .admin-container h1,
-  .admin-container h2,
-  .admin-container h3,
-  .admin-container h4,
-  .admin-container h5,
-  .admin-container h6 {
-    color: var(--text-primary);
-  }
-
-  /* ═══════════════════════════════════════════════════════
      MODAL & OVERLAY
      ═══════════════════════════════════════════════════════ */
   .modal-overlay {
