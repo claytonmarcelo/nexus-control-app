@@ -4,9 +4,7 @@
 
 ## Full-Stack E-Commerce & Catalog Management System
 
-Sistema completo para gestão de catálogos, e-commerce com múltiplos perfis de acesso, checkout em tempo real (Pix/Cartão) e painel administrativo com controle granular de permissões.
-
-🇧🇷 **Português** | [🇺🇸 English](#english-version)
+### 🇧🇷 [Português](#portuguese-version) | 🇺🇸 [English](#english-version)
 
 ---
 
@@ -24,6 +22,22 @@ Sistema completo para gestão de catálogos, e-commerce com múltiplos perfis de
 
 </div>
 
+---
+
+<a name="portuguese-version"></a>
+
+# 🇧🇷 Versão em Português
+
+<div align="center">
+
+## Sistema Completo de E-Commerce & Gestão de Catálogos
+
+Sistema completo para gestão de catálogos, e-commerce com múltiplos perfis de acesso, checkout em tempo real (Pix/Cartão) e painel administrativo com controle granular de permissões.
+
+</div>
+
+O **Nexus Control App** é uma plataforma completa de controle e gerenciamento corporativo. O sistema oferece autenticação com múltiplos perfis de acesso (Admin, Funcionário e Cliente), catálogo interativo de produtos e serviços de tecnologia/infraestrutura, fluxo completo de e-commerce com checkout em tempo real (Pix e Cartão de Crédito), além de um painel administrativo com controle granular de usuários, permissões e pedidos.
+
 ## 📖 Página "Quem Somos"
 
 A aplicação inclui uma página institucional completa (`/sobre`) com:
@@ -40,8 +54,6 @@ Acesse via menu ou rodapé: [Quem Somos](/sobre)
 
 ---
 
-O **Nexus Control App** é uma plataforma completa de controle e gerenciamento corporativo. O sistema oferece autenticação com múltiplos perfis de acesso (Admin, Funcionário e Cliente), catálogo interativo de produtos e serviços de tecnologia/infraestrutura, fluxo completo de e-commerce com checkout em tempo real (Pix e Cartão de Crédito), além de um painel administrativo com controle granular de usuários, permissões e pedidos.
-
 ### 🎯 Funcionalidades Principais
 
 - **🔐 Autenticação Multi-Perfil**: Login seguro com JWT + Refresh Token. Perfis: Admin, Funcionário e Cliente com permissões granulares por página.
@@ -52,23 +64,23 @@ O **Nexus Control App** é uma plataforma completa de controle e gerenciamento c
 - **🌙 Dark/Light Mode**: Toggle de tema com preferência salva na sessão. Tema Light com 400+ estilos customizados.
 - **📱 Mobile First**: Layout 100% responsivo com breakpoints para 480px e 768px, zero horizontal overflow.
 
+### ⚡ Melhorias de Performance & Produção (Setembro 2026)
+
 | Métrica | Antes | Depois | Redução |
 |---|---|---|---|
 | Initial Load | ~90 KB | ~30 KB | **66%** ⬇️ |
-| Bundle Chunks | 1 monolítico | 13 chunks | Code-splitting ✅ |
+| Bundle Chunks | 1 monolítico | 16 chunks | Code-splitting ✅ |
 | Compressão API | Nenhuma | Gzip 65-75% | **Performance+** |
 | Imagens Hero | PNG 20KB | WebP 6KB | **70%** ⬇️ |
 
 - ✅ **14/14 Tarefas de Deployment** completadas (AWS Academy + Visual Identity + Performance)
-- ✅ **Code-splitting** com React.lazy() para 7 componentes de página
+- ✅ **Code-splitting** com React.lazy() para 8 componentes de página
 - ✅ **Compression middleware** no backend reduz payload em 65-75%
 - ✅ **Tema Light completo** com 400+ overrides CSS
 - ✅ **Lazy loading components** sem double-flash
 - ✅ **WebP images** para otimização visual
 - ✅ **Mobile responsive** sem overflow horizontal
 - ✅ **Production-ready** com documentação AWS Academy
-
----
 
 ## 🏗️ Arquitetura & Tecnologias
 
@@ -100,8 +112,6 @@ O **Nexus Control App** é uma plataforma completa de controle e gerenciamento c
 ### Banco de Dados
 - **MySQL 8+** com tabelas: `usuarios`, `itens`, `pedidos`, `negociacoes`, `usuario_permissoes`, `password_resets`
 
----
-
 ## 📂 Estrutura do Projeto
 
 ```
@@ -122,18 +132,17 @@ nexus-control-app/
     ├── src/
     │   ├── components/
     │   │   ├── admin/       # AdminControlCenter.jsx
+    │   │   ├── about/       # AboutUs.jsx (Quem Somos)
     │   │   ├── auth/        # Login, Register, ForgotPassword
     │   │   ├── cart/        # Cart.jsx, Checkout.jsx
     │   │   ├── dashboard/   # Dashboard, Items, Users, Profile
     │   │   ├── layout/      # Layout.jsx (header + nav + footer)
-    │   │   └── ui/          # LoadingScreen, EmptyState, NotFound
+    │   │   └── ui/          # LoadingScreen, EmptyState, NotFound, OrderStepper, ReceiptPrintable
     │   ├── contexts/        # AuthContext, CartContext, ModalContext, ThemeContext
     │   ├── services/        # services.js (API calls), adminService.js
     │   └── main.jsx
     └── package.json
 ```
-
----
 
 ## 📸 Galeria de Screenshots
 
@@ -152,7 +161,10 @@ nexus-control-app/
 | 🧾 Comprovante PDF | Recibo imprimível com @media print nativo | ✅ |
 | 🎨 Tema Light/Dark | Toggle persistido, 400+ overrides CSS | ✅ |
 
----
+## ⚙️ Instalação e Execução
+
+### Pré-requisitos
+
 - **Node.js** v20+
 - **MySQL** 8+ (rodando localmente ou via RDS)
 - **npm** v10+
@@ -160,7 +172,7 @@ nexus-control-app/
 ### 1. Clone o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nexus-control-app.git
+git clone https://github.com/claytonmarcelo/nexus-control-app.git
 cd nexus-control-app
 ```
 
@@ -230,8 +242,6 @@ npm run dev          # Inicia em http://localhost:5173
 | Funcionário | `funcionario@nexuscontrol.com` | `func123` |
 | Cliente | `cliente@nexuscontrol.com` | `cliente123` |
 
----
-
 ## 📊 Status de Projeto (Setembro 2026)
 
 ### 🎯 Refatoração Completa: 5 Fases Executadas
@@ -259,10 +269,12 @@ npm run dev          # Inicia em http://localhost:5173
 2. aa06cd1 - feat(frontend): add 'Quem Somos' about page
 3. e410996 - feat(frontend): implement 4 executive resources
 4. 29a78de - docs(e2e): complete end-to-end testing report
-5. [FINAL] - chore(release): production-ready v1.1.0 with full documentation
+5. 1a1b869 - chore(release): production-ready v1.1.0 with full documentation
 ```
 
----
+## 🚀 Deployment & Produção
+
+### Status: ✅ PRODUCTION READY
 
 O projeto está completamente preparado para deploy em produção no AWS Academy. Todas as 14 tarefas de deployment foram concluídas:
 
@@ -300,42 +312,6 @@ npm run build
 
 Consulte [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) para instruções detalhadas de produção.
 
----
-
-## 📦 Commits do Deployment (Setembro 2026)
-
-Todos os 14 tasks foram organizados em **6 commits humanizados** com histórico limpo no GitHub:
-
-```
-ca5941a (HEAD -> main, origin/main)
-├─ docs(root): complete AWS Academy infrastructure & deployment documentation
-│  └─ AWS_ACADEMY_INFRASTRUCTURE.md | DEPLOYMENT_SUMMARY.md | CHANGES_LOG.md | PRODUCTION_READY.md
-│
-da6784f
-├─ docs(frontend): add comprehensive optimization and verification guides
-│  └─ OPTIMIZATION.md | LOADING_VERIFICATION.md | MOBILE_OVERFLOW_AUDIT.md
-│
-260c312
-├─ feat(frontend): add image optimization and build utilities
-│  └─ hero.webp | convert-images.js | package.json (sharp)
-│
-ee42bf6
-├─ feat(frontend): complete visual identity with light theme and meta tags
-│  └─ Light theme (400+ CSS overrides) | Meta tags | .env.production.example
-│
-ba66db2
-├─ feat(frontend): implement code-splitting and enhance UI components
-│  └─ React.lazy (7 components) | Spinner.jsx | LoadingScreen | EmptyState | NotFound
-│
-d4f1acb
-└─ feat(backend): add compression middleware and production validation
-   └─ Compression (65-75%) | FRONTEND_URL validation | .env.example
-```
-
-**Repositório:** https://github.com/claytonmarcelo/nexus-control-app
-
----
-
 ## 📄 API Endpoints
 
 | Método | Rota | Descrição | Requer Login? | Status |
@@ -349,8 +325,6 @@ d4f1acb
 | GET | `/api/pedidos/me` | Pedidos do usuário logado | Sim (JWT) | 🟢 100% Ativo |
 | GET | `/api/admin/overview` | Métricas gerais do sistema | Sim (Admin) | 🟢 100% Ativo |
 | GET | `/api/usuarios` | Listagem e gestão de usuários | Sim (Admin) | 🟢 100% Ativo |
-
----
 
 ## 👨‍💻 Desenvolvedor
 
@@ -380,7 +354,7 @@ d4f1acb
 
 <a name="english-version"></a>
 
-# 🛡️ Nexus Control App (English Version)
+# 🇺🇸 English Version
 
 <div align="center">
 
@@ -388,29 +362,11 @@ d4f1acb
 
 Complete system for catalog management, e-commerce with multiple access profiles, real-time checkout (Pix/Card) and admin dashboard with granular permission control.
 
-[🇧🇷 Português](#-nexus-control-app) | 🇺🇸 **English**
-
----
-
-[![Production Ready](https://img.shields.io/badge/Status-✅%20PRODUCTION%20READY-green?style=flat-square)](./PRODUCTION_READY.md)
-[![Deployment Summary](https://img.shields.io/badge/Docs-AWS%20Academy-orange?style=flat-square)](./DEPLOYMENT_SUMMARY.md)
-
-![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.1.0-blue?style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square)
-![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-brightgreen?style=flat-square)
-![React](https://img.shields.io/badge/React-18-cyan?style=flat-square)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-orange?style=flat-square)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3-38B2AC?style=flat-square)
-![Vite](https://img.shields.io/badge/Vite-5-purple?style=flat-square)
-
 </div>
-
-## Overview
 
 **Nexus Control App** is a complete corporate management and control platform. The system offers authentication with multiple access profiles (Admin, Employee, and Client), interactive product and technology/infrastructure service catalog, complete e-commerce flow with real-time checkout (Pix and Credit Card), plus an administrative dashboard with granular user, permission, and order control.
 
-### 🎯 Key Features
+## 🎯 Key Features
 
 - **🔐 Multi-Profile Authentication**: Secure login with JWT + Refresh Token. Profiles: Admin, Employee, and Client with granular page-level permissions.
 - **📦 Product and Services Catalog**: Responsive grid with category filters, real-time search, images, manufacturer, purchase price and monthly rental. Real products: Dell, Cisco, Ubiquiti, Intelbras, APC.
@@ -425,12 +381,12 @@ Complete system for catalog management, e-commerce with multiple access profiles
 | Metric | Before | After | Reduction |
 |---|---|---|---|
 | Initial Load | ~90 KB | ~30 KB | **66%** ⬇️ |
-| Bundle Chunks | 1 monolithic | 13 chunks | Code-splitting ✅ |
+| Bundle Chunks | 1 monolithic | 16 chunks | Code-splitting ✅ |
 | API Compression | None | Gzip 65-75% | **Performance+** |
 | Hero Images | PNG 20KB | WebP 6KB | **70%** ⬇️ |
 
 - ✅ **14/14 Deployment Tasks** completed (AWS Academy + Visual Identity + Performance)
-- ✅ **Code-splitting** with React.lazy() for 7 page components
+- ✅ **Code-splitting** with React.lazy() for 8 page components
 - ✅ **Compression middleware** on backend reduces payload 65-75%
 - ✅ **Complete Light theme** with 400+ CSS overrides
 - ✅ **Lazy loading components** without double-flash
@@ -562,6 +518,7 @@ The project is fully prepared for production deployment on AWS Academy. All 14 d
 | **DEPLOYMENT_SUMMARY.md** | Summary of 14 completed tasks | [View](./DEPLOYMENT_SUMMARY.md) |
 | **AWS_ACADEMY_INFRASTRUCTURE.md** | Complete AWS guide (800+ lines) | [View](./AWS_ACADEMY_INFRASTRUCTURE.md) |
 | **CHANGES_LOG.md** | Detailed change tracking | [View](./CHANGES_LOG.md) |
+| **E2E_TESTING_REPORT.md** | ⭐ Complete E2E testing suite (10/10 PASS) | [View](./E2E_TESTING_REPORT.md) |
 
 ### Performance & Security (Frontend)
 
@@ -586,22 +543,6 @@ npm run build
 ```
 
 See [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) for detailed production instructions.
-
-## 📦 Deployment Commits (September 2026)
-
-All 14 tasks organized in **7 humanized commits** with clean history on GitHub:
-
-```
-12941a2 - docs(readme): update with production-ready status
-ca5941a - docs(root): complete AWS Academy infrastructure
-da6784f - docs(frontend): add optimization verification guides
-260c312 - feat(frontend): add image optimization
-ee42bf6 - feat(frontend): complete visual identity + light theme
-ba66db2 - feat(frontend): implement code-splitting
-d4f1acb - feat(backend): add compression middleware
-```
-
-**Repository:** https://github.com/claytonmarcelo/nexus-control-app
 
 ## 📄 API Endpoints
 
@@ -640,4 +581,3 @@ d4f1acb - feat(backend): add compression middleware
 ---
 
 © 2026 Nexus Control App. All rights reserved.
-
