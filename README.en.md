@@ -27,6 +27,22 @@
 
 <hr />
 
+## 📖 About Us Page
+
+The application includes a complete institutional page (`/sobre`) accessible within the web app, featuring:
+
+- **Project Vision:** Nexus Control presented as a corporate full-stack solution
+- **Professional Trajectory:** 8+ years journey (Retail → Logistics → Technology)
+  - Strategic background: business vision, operational discipline, clear communication
+  - Practical application in software development
+- **Academic Background:** Systems Analysis and Development (UNISUAM, Rio de Janeiro)
+- **Professional Objective:** Junior Developer/Intern → Senior → Architect/CTO
+- **Contact:** Direct links to GitHub, LinkedIn, Email, Portfolio
+
+**How to access:** In the web application, click "About Us" in the navigation menu or footer after logging in with any profile (Admin, Employee, or Client).
+
+---
+
 ## 🎯 Key Features
 
 **Nexus Control App** is a complete corporate management and control platform. The system offers authentication with multiple access profiles (Admin, Employee, and Client), interactive product and technology/infrastructure service catalog, complete e-commerce flow with real-time checkout (Pix and Credit Card), plus an administrative dashboard with granular user, permission, and order control.

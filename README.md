@@ -29,7 +29,7 @@
 
 ## 📖 Página "Quem Somos"
 
-A aplicação inclui uma página institucional completa (`/sobre`) com:
+A aplicação inclui uma página institucional completa (`/sobre`) acessível após fazer login, com:
 
 - **Visão do Projeto:** Apresentação do Nexus Control como solução full-stack corporativa
 - **Trajetória Profissional:** Jornada de 8+ anos (Varejo → Logística → Tecnologia)
@@ -39,7 +39,7 @@ A aplicação inclui uma página institucional completa (`/sobre`) com:
 - **Objetivo Profissional:** Desenvolvedor Júnior/Estagiário → Sênior → Architect/CTO
 - **Contato:** Links diretos para GitHub, LinkedIn, Email, Portfolio
 
-Acesse via menu ou rodapé: [Quem Somos](/sobre)
+**Como acessar:** Na aplicação web, clique em "Quem Somos" no menu de navegação ou rodapé após fazer login com qualquer perfil (Admin, Funcionário ou Cliente).
 
 ---
 
