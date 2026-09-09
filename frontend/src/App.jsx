@@ -66,48 +66,41 @@ function App() {
           
           <Route element={<Layout />}>
             <Route path="/sobre" element={<AboutUs />} />
-            
-            <Route element={
-              <PrivateRoute>
-                <div />
+            <Route path="/dashboard" element={
+              <PrivateRoute requiredPermission="dashboard">
+                <Dashboard />
               </PrivateRoute>
-            }>
-              <Route path="/dashboard" element={
-                <PrivateRoute requiredPermission="dashboard">
-                  <Dashboard />
-                </PrivateRoute>
-              } />
-              <Route path="/itens" element={
-                <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
-                  <Items />
-                </PrivateRoute>
-              } />
-              <Route path="/carrinho" element={
-                <PrivateRoute requiredPermission="carrinho">
-                  <Cart />
-                </PrivateRoute>
-              } />
-              <Route path="/checkout" element={
-                <PrivateRoute requiredPermission="checkout">
-                  <Checkout />
-                </PrivateRoute>
-              } />
-              <Route path="/usuarios" element={
-                <PrivateRoute allowedRoles={['admin']} requiredPermission="usuarios">
-                  <Users />
-                </PrivateRoute>
-              } />
-              <Route path="/admin" element={
-                <PrivateRoute allowedRoles={['admin']} requiredPermission="admin">
-                  <AdminControlCenter />
-                </PrivateRoute>
-              } />
-              <Route path="/perfil" element={
-                <PrivateRoute requiredPermission="perfil">
-                  <Profile />
-                </PrivateRoute>
-              } />
-            </Route>
+            } />
+            <Route path="/itens" element={
+              <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
+                <Items />
+              </PrivateRoute>
+            } />
+            <Route path="/carrinho" element={
+              <PrivateRoute requiredPermission="carrinho">
+                <Cart />
+              </PrivateRoute>
+            } />
+            <Route path="/checkout" element={
+              <PrivateRoute requiredPermission="checkout">
+                <Checkout />
+              </PrivateRoute>
+            } />
+            <Route path="/usuarios" element={
+              <PrivateRoute allowedRoles={['admin']} requiredPermission="usuarios">
+                <Users />
+              </PrivateRoute>
+            } />
+            <Route path="/admin" element={
+              <PrivateRoute allowedRoles={['admin']} requiredPermission="admin">
+                <AdminControlCenter />
+              </PrivateRoute>
+            } />
+            <Route path="/perfil" element={
+              <PrivateRoute requiredPermission="perfil">
+                <Profile />
+              </PrivateRoute>
+            } />
           </Route>
           
           <Route path="/" element={<Navigate to="/login" replace />} />
