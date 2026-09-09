@@ -127,6 +127,7 @@ export default function Layout() {
               <span className="font-medium text-white">Nexus Control</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-nexus-400">
+              <a href="/sobre" className="hover:text-nexus-300 transition-colors">Quem Somos</a>
               <span>Desenvolvido por <strong className="text-white">Clayton Marcelo</strong></span>
               <a
                 href="https://github.com/claytonmarcelo"

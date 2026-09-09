@@ -16,6 +16,7 @@ const Profile = lazy(() => import('./components/dashboard/Profile'));
 const Cart = lazy(() => import('./components/cart/Cart'));
 const Checkout = lazy(() => import('./components/cart/Checkout'));
 const AdminControlCenter = lazy(() => import('./components/admin/AdminControlCenter'));
+const AboutUs = lazy(() => import('./components/about/AboutUs'));
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -103,6 +104,7 @@ function App() {
                 <Profile />
               </PrivateRoute>
             } />
+            <Route path="/sobre" element={<AboutUs />} />
           </Route>
           
           <Route path="/" element={<Navigate to="/login" replace />} />
