@@ -118,6 +118,7 @@ export const update = async (req, res) => {
       nome: nome ?? targetUser.nome,
       email: email ?? targetUser.email,
       nivel_acesso: nivel_acesso ?? targetUser.nivel_acesso,
+      ativo: targetUser.ativo
     });
     if (!updated) {
       return sendError(res, 'Usuário não encontrado', 404);

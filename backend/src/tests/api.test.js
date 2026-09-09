@@ -20,7 +20,7 @@ describe('Authentication', () => {
     // Login as admin
     const adminLogin = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@nexuscontrol.com', senha: 'admin123' });
+      .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
     adminToken = adminLogin.body.data.accessToken;
 
     // Login as regular user
@@ -34,13 +34,13 @@ describe('Authentication', () => {
     it('should login with valid credentials', async () => {
       const response = await request(app)
         .post('/api/auth/login')
-        .send({ email: 'admin@nexuscontrol.com', senha: 'admin123' });
+        .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
       
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.accessToken).toBeDefined();
       expect(response.body.data.refreshToken).toBeDefined();
-      expect(response.body.data.user.email).toBe('admin@nexuscontrol.com');
+      expect(response.body.data.user.email).toBe('marcelo10@gmail.com');
     });
 
     it('should reject invalid credentials', async () => {
@@ -84,7 +84,7 @@ describe('Authentication', () => {
         .post('/api/auth/register')
         .send({
           nome: 'Test User',
-          email: 'admin@nexuscontrol.com',
+          email: 'marcelo10@gmail.com',
           senha: 'password123'
         });
       
@@ -108,7 +108,7 @@ describe('Authentication', () => {
       
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user.email).toBe('admin@nexuscontrol.com');
+      expect(response.body.data.user.email).toBe('marcelo10@gmail.com');
     });
 
     it('should reject without token', async () => {
@@ -131,7 +131,7 @@ describe('Authentication', () => {
     it('should refresh access token', async () => {
       const loginResponse = await request(app)
         .post('/api/auth/login')
-        .send({ email: 'admin@nexuscontrol.com', senha: 'admin123' });
+        .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
       
       const response = await request(app)
         .post('/api/auth/refresh')
@@ -153,7 +153,7 @@ describe('Items API', () => {
   beforeAll(async () => {
     const adminLogin = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@nexuscontrol.com', senha: 'admin123' });
+      .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
     adminToken = adminLogin.body.data.accessToken;
 
     const userLogin = await request(app)
@@ -314,7 +314,7 @@ describe('Users API (Admin Only)', () => {
   beforeAll(async () => {
     const adminLogin = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'admin@nexuscontrol.com', senha: 'admin123' });
+      .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
     adminToken = adminLogin.body.data.accessToken;
   });
 
