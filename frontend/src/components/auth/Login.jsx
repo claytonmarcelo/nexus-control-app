@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Login() {
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [activeTab, setActiveTab] = useState('login'); // 'login', 'register', 'forgot'
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -11,30 +12,64 @@ function Login() {
     if (isAuthenticated) navigate('/dashboard');
   }, [isAuthenticated, navigate]);
 
+  // Se vir de /register, muda pra aba de registro
+  useEffect(() => {
+    if (searchParams.get('register') === 'true') {
+      setActiveTab('register');
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-bg p-4">
-      <div className="w-full max-w-md perspective">
-        <div
-          className={`relative w-full transition-transform duration-700 transform-gpu ${
-            isFlipped ? 'rotateY-180' : ''
-          }`}
-          style={{
-            transformStyle: 'preserve-3d',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          }}
-        >
-          {!isFlipped ? (
-            <LoginForm onFlip={() => setIsFlipped(true)} />
-          ) : (
-            <RegisterForm onFlip={() => setIsFlipped(false)} />
-          )}
+      <div className="w-full max-w-md">
+        <div className="glass rounded-3xl border border-dark-border overflow-hidden">
+          {/* Tab Buttons */}
+          <div className="flex border-b border-dark-border">
+            <button
+              onClick={() => setActiveTab('login')}
+              className={`flex-1 py-3 px-4 font-semibold transition-colors ${
+                activeTab === 'login'
+                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
+                  : 'text-nexus-300 hover:text-white'
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setActiveTab('register')}
+              className={`flex-1 py-3 px-4 font-semibold transition-colors ${
+                activeTab === 'register'
+                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
+                  : 'text-nexus-300 hover:text-white'
+              }`}
+            >
+              Cadastro
+            </button>
+            <button
+              onClick={() => setActiveTab('forgot')}
+              className={`flex-1 py-3 px-4 font-semibold transition-colors text-sm ${
+                activeTab === 'forgot'
+                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
+                  : 'text-nexus-300 hover:text-white'
+              }`}
+            >
+              Recuperar
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-8">
+            {activeTab === 'login' && <LoginForm />}
+            {activeTab === 'register' && <RegisterForm />}
+            {activeTab === 'forgot' && <ForgotForm />}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function LoginForm({ onFlip }) {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -81,20 +116,13 @@ function LoginForm({ onFlip }) {
   };
 
   return (
-    <div
-      className="glass rounded-3xl p-8 border border-dark-border"
-      style={{ backfaceVisibility: 'hidden' }}
-    >
-      <div className="flex items-center justify-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
-          <span className="text-3xl">🛡️</span>
-        </div>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">Nexus Control</h1>
+        <p className="text-nexus-400">Faça login para acessar</p>
       </div>
 
-      <h1 className="text-3xl font-bold text-center text-white mb-2">Nexus Control</h1>
-      <p className="text-center text-nexus-400 mb-8">Faça login para acessar</p>
-
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
             {error}
@@ -110,6 +138,7 @@ function LoginForm({ onFlip }) {
             placeholder="seu@email.com"
             className="input"
             disabled={loading}
+            required
           />
         </div>
 
@@ -123,6 +152,7 @@ function LoginForm({ onFlip }) {
               placeholder="••••••••"
               className="input"
               disabled={loading}
+              required
             />
             <button
               type="button"
@@ -140,14 +170,9 @@ function LoginForm({ onFlip }) {
         </button>
       </form>
 
-      {/* Demo Login Section */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex-1 h-px bg-dark-border"></div>
-          <span className="text-xs text-nexus-400 font-medium">ACESSO DEMO</span>
-          <div className="flex-1 h-px bg-dark-border"></div>
-        </div>
-
+      {/* Demo Buttons */}
+      <div className="pt-4 border-t border-dark-border">
+        <p className="text-center text-xs text-nexus-400 font-medium mb-3">ACESSO DEMO</p>
         <div className="space-y-2">
           <button
             type="button"
@@ -175,19 +200,11 @@ function LoginForm({ onFlip }) {
           </button>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={onFlip}
-        className="w-full text-center text-sm text-nexus-400 hover:text-nexus-300 transition-colors"
-      >
-        Não tem conta? <strong>Criar nova</strong>
-      </button>
     </div>
   );
 }
 
-function RegisterForm({ onFlip }) {
+function RegisterForm() {
   const [formData, setFormData] = useState({ nome: '', email: '', senha: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -225,20 +242,13 @@ function RegisterForm({ onFlip }) {
   };
 
   return (
-    <div
-      className="glass rounded-3xl p-8 border border-dark-border"
-      style={{ backfaceVisibility: 'hidden' }}
-    >
-      <div className="flex items-center justify-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
-          <span className="text-3xl">✨</span>
-        </div>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">Criar Conta</h1>
+        <p className="text-nexus-400">Junte-se ao Nexus Control</p>
       </div>
 
-      <h1 className="text-3xl font-bold text-center text-white mb-2">Criar Conta</h1>
-      <p className="text-center text-nexus-400 mb-8">Junte-se ao Nexus Control</p>
-
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
             {error}
@@ -255,6 +265,7 @@ function RegisterForm({ onFlip }) {
             placeholder="Seu nome"
             className="input"
             disabled={loading}
+            required
           />
         </div>
 
@@ -268,6 +279,7 @@ function RegisterForm({ onFlip }) {
             placeholder="seu@email.com"
             className="input"
             disabled={loading}
+            required
           />
         </div>
 
@@ -282,6 +294,7 @@ function RegisterForm({ onFlip }) {
               placeholder="••••••••"
               className="input"
               disabled={loading}
+              required
             />
             <button
               type="button"
@@ -304,6 +317,7 @@ function RegisterForm({ onFlip }) {
             placeholder="••••••••"
             className="input"
             disabled={loading}
+            required
           />
         </div>
 
@@ -311,14 +325,165 @@ function RegisterForm({ onFlip }) {
           {loading ? 'Criando...' : 'Criar Conta'}
         </button>
       </form>
+    </div>
+  );
+}
 
-      <button
-        type="button"
-        onClick={onFlip}
-        className="w-full text-center text-sm text-nexus-400 hover:text-nexus-300 transition-colors"
-      >
-        Já tem conta? <strong>Fazer login</strong>
-      </button>
+function ForgotForm() {
+  const [step, setStep] = useState('request'); // 'request', 'reset', 'success'
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleRequest = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      // TODO: Chamar endpoint de recuperação
+      // const response = await authService.forgotPassword(email);
+      setMessage('Se este email estiver cadastrado, as instruções foram enviadas.');
+      setStep('reset');
+    } catch (err) {
+      setError('Erro ao processar solicitação');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (senha !== confirm) {
+      setError('As senhas não coincidem');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // TODO: Chamar endpoint de reset
+      // await authService.resetPassword(token, senha);
+      setMessage('Senha redefinida com sucesso!');
+      setStep('success');
+    } catch (err) {
+      setError('Erro ao redefinir senha');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          {step === 'request' ? 'Recuperar Acesso' : step === 'reset' ? 'Nova Senha' : 'Sucesso!'}
+        </h1>
+        <p className="text-nexus-400 text-sm">
+          {step === 'request' && 'Informe seu email para recuperar sua senha'}
+          {step === 'reset' && 'Crie uma nova senha segura'}
+          {step === 'success' && 'Sua senha foi redefinida com sucesso'}
+        </p>
+      </div>
+
+      {step === 'request' && (
+        <form onSubmit={handleRequest} className="space-y-4">
+          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
+          {message && <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">{message}</div>}
+
+          <div>
+            <label className="label">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              className="input"
+              disabled={loading}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            {loading ? 'Processando...' : 'Continuar'}
+          </button>
+        </form>
+      )}
+
+      {step === 'reset' && (
+        <form onSubmit={handleReset} className="space-y-4">
+          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
+
+          <div>
+            <label className="label">Nova Senha</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="••••••••"
+                className="input"
+                disabled={loading}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
+              >
+                <EyeIcon visible={showPassword} />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Confirmar Senha</label>
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="••••••••"
+                className="input"
+                disabled={loading}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
+              >
+                <EyeIcon visible={showConfirm} />
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            {loading ? 'Redefinindo...' : 'Redefinir Senha'}
+          </button>
+        </form>
+      )}
+
+      {step === 'success' && (
+        <div className="text-center space-y-4">
+          <p className="text-nexus-400">Sua senha foi alterada com sucesso.</p>
+          <button
+            onClick={() => { setStep('request'); setEmail(''); setSenha(''); setConfirm(''); }}
+            className="btn btn-primary w-full"
+          >
+            Voltar para Login
+          </button>
+        </div>
+      )}
     </div>
   );
 }
