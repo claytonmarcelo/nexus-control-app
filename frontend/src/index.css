@@ -1404,3 +1404,271 @@ html[data-theme='light'] .modal-content {
   background-color: rgba(255, 253, 247, 0.95);
   border-color: rgba(184, 150, 46, 0.2);
 }
+
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN CONTROL CENTER — Dark Gourmet Premium Theme
+   ═══════════════════════════════════════════════════════ */
+
+/* Force dark theme on admin page - override all light theme rules */
+html[data-theme='dark'] {
+  --admin-bg: #121212;
+  --admin-card: #1a1a1a;
+  --admin-card-lighter: #242424;
+  --admin-border: rgba(212, 175, 55, 0.15);
+  --admin-text: #ffffff;
+  --admin-text-secondary: #d4af37;
+  --admin-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Admin container - ensure dark background */
+.admin-container,
+[class*="AdminControl"] {
+  background: #121212 !important;
+  color: #ffffff !important;
+}
+
+/* Card elements in admin */
+.card {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.card:hover {
+  border-color: rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Glass effect for admin panels */
+.glass,
+[class*="glass"] {
+  background: rgba(26, 26, 26, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Input fields in admin */
+.input {
+  background: #242424 !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.input::placeholder {
+  color: rgba(212, 175, 55, 0.5) !important;
+}
+
+.input:focus {
+  border-color: rgba(212, 175, 55, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Buttons in admin */
+.btn-secondary {
+  background: #242424 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+}
+
+.btn-secondary:hover {
+  background: #2a2a2a !important;
+  border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Text colors */
+.text-white {
+  color: #ffffff !important;
+}
+
+.text-nexus-300,
+.text-nexus-400 {
+  color: #d4af37 !important;
+}
+
+/* Modal in admin */
+.modal-content {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  color: #ffffff !important;
+}
+
+/* Sections and panels */
+section {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+section:hover {
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.05) !important;
+}
+
+/* Tabs and navigation */
+nav {
+  background: rgba(26, 26, 26, 0.5) !important;
+  border-color: rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Metric cards and shortcuts */
+[class*="metric"],
+[class*="shortcut"],
+[class*="action"] {
+  background: #242424 !important;
+  border: 1px solid rgba(212, 175, 55, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Tables in admin */
+table,
+tbody,
+thead {
+  color: #ffffff !important;
+}
+
+thead {
+  background: #242424 !important;
+  border-color: rgba(212, 175, 55, 0.12) !important;
+}
+
+tbody tr {
+  border-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+tbody tr:hover {
+  background: #2a2a2a !important;
+}
+
+/* Scrollbars in admin */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.2) !important;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.4) !important;
+}
+
+/* Ensure overrides for light theme rules don't leak into admin */
+html[data-theme='light'] .admin-container,
+html[data-theme='light'] [class*="AdminControl"] {
+  background: #121212 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='light'] .admin-container .card,
+html[data-theme='light'] [class*="AdminControl"] .card {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='light'] .admin-container .glass,
+html[data-theme='light'] [class*="AdminControl"] .glass {
+  background: rgba(26, 26, 26, 0.6) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='light'] .admin-container .input,
+html[data-theme='light'] [class*="AdminControl"] .input {
+  background: #242424 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+}
+
+html[data-theme='light'] .admin-container .input::placeholder,
+html[data-theme='light'] [class*="AdminControl"] .input::placeholder {
+  color: rgba(212, 175, 55, 0.5) !important;
+}
+
+html[data-theme='light'] .admin-container .text-white,
+html[data-theme='light'] [class*="AdminControl"] .text-white {
+  color: #ffffff !important;
+}
+
+/* Admin-specific heading styles */
+.admin-container h1,
+.admin-container h2,
+.admin-container h3,
+.admin-container h4,
+.admin-container h5,
+.admin-container h6,
+[class*="AdminControl"] h1,
+[class*="AdminControl"] h2,
+[class*="AdminControl"] h3,
+[class*="AdminControl"] h4,
+[class*="AdminControl"] h5,
+[class*="AdminControl"] h6 {
+  color: #ffffff !important;
+}
+
+/* Admin page wrapper - ensure dark background fills entire viewport */
+#admin-page,
+.admin-page,
+.admin-wrapper {
+  background: #121212 !important;
+  min-height: 100vh;
+}
+
+/* Force dark theme on admin sections */
+section.relative {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(212, 175, 55, 0.12) !important;
+}
+
+/* Ensure Glassmorphism effect in dark mode */
+.glass-lg,
+[class*="glass-lg"],
+[class*="shadow-glass"] {
+  background: rgba(26, 26, 26, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.1) !important;
+}
+
+/* Admin status indicators and badges */
+[class*="status"],
+[class*="badge"],
+[class*="pill"] {
+  background: rgba(212, 175, 55, 0.1) !important;
+  color: #d4af37 !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+}
+
+/* Admin form elements */
+label {
+  color: #d4af37 !important;
+}
+
+/* Dropdowns and selects in admin */
+select,
+[class*="dropdown"],
+[class*="select"] {
+  background: #242424 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(212, 175, 55, 0.15) !important;
+}
+
+select:focus,
+[class*="dropdown"]:focus,
+[class*="select"]:focus {
+  border-color: rgba(212, 175, 55, 0.4) !important;
+  outline: none;
+}
+
+/* Admin empty states */
+[class*="empty"],
+[class*="no-data"],
+[class*="placeholder"] {
+  background: rgba(26, 26, 26, 0.5) !important;
+  border: 1px dashed rgba(212, 175, 55, 0.1) !important;
+  color: #d4af37 !important;
+}

@@ -360,7 +360,7 @@ export default function AdminControlCenter() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-4">
+    <div className="admin-container space-y-6 animate-fade-in pb-4">
       <section className="relative overflow-hidden rounded-3xl border border-nexus-500/25 bg-dark-card p-6 shadow-glass-lg sm:p-8">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-nexus-500/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
