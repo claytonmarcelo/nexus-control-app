@@ -49,6 +49,94 @@
   html[data-theme='light'] .text-text-secondary { color: #5b554b; }
   html[data-theme='light'] .glass { background-color: rgba(255, 253, 247, 0.82); }
   html[data-theme='light'] .neumorphic-inner { background-color: #fffdf7; box-shadow: inset 8px 8px 16px rgba(145, 133, 109, 0.16), inset -8px -8px 16px rgba(255, 255, 255, 0.8); }
+  
+  /* Admin Control Center - Light Theme Overrides */
+  html[data-theme='light'] [class*="border-nexus-500"] { border-color: rgba(212, 175, 55, 0.25); }
+  html[data-theme='light'] [class*="bg-nexus-500"] { background-color: rgba(212, 175, 55, 0.1); }
+  html[data-theme='light'] .bg-nexus-600 { background-color: #B8962E; }
+  html[data-theme='light'] .text-nexus-200 { color: #8F7423; }
+  html[data-theme='light'] .text-nexus-500 { color: #4A3C12; }
+  html[data-theme='light'] [class*="bg-nexus-400"] { background-color: rgba(229, 193, 88, 0.1); }
+  html[data-theme='light'] [class*="border-nexus-400"] { border-color: rgba(229, 193, 88, 0.3); }
+  html[data-theme='light'] .text-nexus-300 { color: #755d17; }
+  html[data-theme='light'] .text-nexus-400 { color: #806618; }
+  html[data-theme='light'] [class*="border-emerald-400"] { border-color: rgba(52, 211, 153, 0.3); }
+  html[data-theme='light'] [class*="bg-emerald-400"] { background-color: rgba(52, 211, 153, 0.1); }
+  html[data-theme='light'] .text-emerald-200 { color: #059669; }
+  html[data-theme='light'] .text-emerald-300 { color: #047857; }
+  html[data-theme='light'] .text-emerald-400 { color: #10b981; }
+  html[data-theme='light'] [class*="border-red-400"] { border-color: rgba(248, 113, 113, 0.3); }
+  html[data-theme='light'] [class*="bg-red-400"] { background-color: rgba(248, 113, 113, 0.1); }
+  html[data-theme='light'] .text-red-200 { color: #dc2626; }
+  html[data-theme='light'] .text-red-300 { color: #b91c1c; }
+  html[data-theme='light'] .text-red-400 { color: #f87171; }
+  html[data-theme='light'] [class*="border-sky-400"] { border-color: rgba(56, 189, 248, 0.3); }
+  html[data-theme='light'] [class*="bg-sky-400"] { background-color: rgba(56, 189, 248, 0.1); }
+  html[data-theme='light'] .text-sky-200 { color: #0284c7; }
+  html[data-theme='light'] [class*="border-amber-400"] { border-color: rgba(251, 191, 36, 0.3); }
+  html[data-theme='light'] [class*="bg-amber-400"] { background-color: rgba(251, 191, 36, 0.1); }
+  html[data-theme='light'] .text-amber-300 { color: #d97706; }
+  html[data-theme='light'] .shadow-champagne { box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3), 0 8px 32px rgba(212, 175, 55, 0.15); }
+  html[data-theme='light'] .shadow-glass-lg { box-shadow: 0 8px 48px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(212, 175, 55, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
+  html[data-theme='light'] [class*="bg-dark-bg"] { background-color: rgba(245, 242, 234, 0.6); }
+  html[data-theme='light'] [class*="bg-dark-card"] { background-color: rgba(255, 253, 247, 0.8); }
+  html[data-theme='light'] .bg-dark-card { background-color: #fffdf7; }
+  html[data-theme='light'] .bg-dark-hover { background-color: #eee8dc; }
+  html[data-theme='light'] [class*="bg-dark-hover"] { background-color: rgba(238, 232, 220, 0.6); }
+  html[data-theme='light'] [class*="border-dark-border"] { border-color: rgba(212, 175, 55, 0.2); }
+  html[data-theme='light'] [class*="divide-dark-border"] > * + * { border-color: rgba(212, 175, 55, 0.2); }
+  html[data-theme='light'] .bg-red-600 { background-color: #dc2626; }
+  html[data-theme='light'] .bg-red-500 { background-color: #ef4444; }
+  html[data-theme='light'] .hover\:bg-red-500:hover { background-color: #ef4444; }
+  html[data-theme='light'] .hover\:bg-nexus-500:hover { background-color: #D4AF37; }
+  html[data-theme='light'] .hover\:bg-dark-hover:hover { background-color: #e8e0d0; }
+  html[data-theme='light'] .hover\:text-white:hover { color: #211f1a; }
+  html[data-theme='light'] [class*="hover:bg-nexus-500"]:hover { background-color: rgba(212, 175, 55, 0.1); }
+  html[data-theme='light'] .accent-nexus-500 { accent-color: #D4AF37; }
+  
+  /* Cart Remove Modal - Light Theme Overrides */
+  html[data-theme='light'] .text-nexus-300 { color: #6b5a12; }
+  html[data-theme='light'] .bg-dark-hover\/50 { background-color: rgba(238, 232, 220, 0.5); }
+  html[data-theme='light'] .bg-nexus-600\/15 { background-color: rgba(184, 150, 46, 0.15); }
+  html[data-theme='light'] .bg-red-500\/10 { background-color: rgba(239, 68, 68, 0.1); }
+  html[data-theme='light'] .bg-red-500\/5 { background-color: rgba(239, 68, 68, 0.05); }
+  html[data-theme='light'] .border-red-500\/30 { border-color: rgba(239, 68, 68, 0.3); }
+  html[data-theme='light'] .border-red-500\/20 { border-color: rgba(239, 68, 68, 0.2); }
+  html[data-theme='light'] .bg-amber-500\/5 { background-color: rgba(245, 158, 11, 0.05); }
+  html[data-theme='light'] .border-amber-500\/20 { border-color: rgba(245, 158, 11, 0.2); }
+  
+  /* Global Modals - Light Theme Overrides */
+  html[data-theme='light'] .from-nexus-500\/10 { --tw-gradient-from: rgba(212, 175, 55, 0.1); }
+  html[data-theme='light'] .via-nexus-500\/5 { --tw-gradient-via: rgba(212, 175, 55, 0.05); }
+  html[data-theme='light'] .from-emerald-500\/10 { --tw-gradient-from: rgba(16, 185, 129, 0.1); }
+  html[data-theme='light'] .via-emerald-500\/5 { --tw-gradient-via: rgba(16, 185, 129, 0.05); }
+  html[data-theme='light'] .from-amber-500\/10 { --tw-gradient-from: rgba(245, 158, 11, 0.1); }
+  html[data-theme='light'] .via-amber-500\/5 { --tw-gradient-via: rgba(245, 158, 11, 0.05); }
+  html[data-theme='light'] .from-red-500\/10 { --tw-gradient-from: rgba(239, 68, 68, 0.1); }
+  html[data-theme='light'] .via-red-500\/5 { --tw-gradient-via: rgba(239, 68, 68, 0.05); }
+  html[data-theme='light'] .border-nexus-500\/30 { border-color: rgba(212, 175, 55, 0.3); }
+  html[data-theme='light'] .border-nexus-500\/20 { border-color: rgba(212, 175, 55, 0.2); }
+  html[data-theme='light'] .border-emerald-500\/30 { border-color: rgba(16, 185, 129, 0.3); }
+  html[data-theme='light'] .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
+  html[data-theme='light'] .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.3); }
+  html[data-theme='light'] .border-amber-500\/20 { border-color: rgba(245, 158, 11, 0.2); }
+  html[data-theme='light'] .border-red-500\/30 { border-color: rgba(239, 68, 68, 0.3); }
+  html[data-theme='light'] .border-red-500\/20 { border-color: rgba(239, 68, 68, 0.2); }
+  html[data-theme='light'] .bg-nexus-500\/10 { background-color: rgba(212, 175, 55, 0.1); }
+  html[data-theme='light'] .bg-nexus-500\/5 { background-color: rgba(212, 175, 55, 0.05); }
+  html[data-theme='light'] .bg-emerald-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+  html[data-theme='light'] .bg-emerald-500\/5 { background-color: rgba(16, 185, 129, 0.05); }
+  html[data-theme='light'] .bg-amber-500\/10 { background-color: rgba(245, 158, 11, 0.1); }
+  html[data-theme='light'] .bg-amber-500\/5 { background-color: rgba(245, 158, 11, 0.05); }
+  html[data-theme='light'] .bg-red-500\/10 { background-color: rgba(239, 68, 68, 0.1); }
+  html[data-theme='light'] .bg-red-500\/5 { background-color: rgba(239, 68, 68, 0.05); }
+  html[data-theme='light'] .bg-current\/5 { background-color: currentColor; opacity: 0.05; }
+  html[data-theme='light'] .bg-current\/10 { background-color: currentColor; opacity: 0.1; }
+  html[data-theme='light'] .text-nexus-400 { color: #755d17; }
+  html[data-theme='light'] .text-emerald-400 { color: #059669; }
+  html[data-theme='light'] .text-amber-400 { color: #d97706; }
+  html[data-theme='light'] .text-red-400 { color: #dc2626; }
+  html[data-theme='light'] .text-amber-200 { color: #d97706; }
 
   * {
     @apply border-dark-border;
@@ -157,6 +245,70 @@
       padding-top: 20px;
       padding-bottom: 100px;
     }
+  }
+
+  /* Tablet (768px - 1024px) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .main-content {
+      max-width: 64rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      padding-top: 40px;
+      padding-bottom: 140px;
+    }
+    
+    /* Ajustes moderados para tablet */
+    .btn { min-height: 48px; }
+    .input { min-height: 48px; }
+    .card { border-radius: 1.25rem; }
+  }
+
+  /* Desktop (1024px - 1920px) */
+  @media (min-width: 1024px) and (max-width: 1920px) {
+    .main-content {
+      max-width: 72rem;
+      padding-left: 3rem;
+      padding-right: 3rem;
+      padding-top: 48px;
+      padding-bottom: 160px;
+    }
+    
+    /* Ajustes para desktop padrão */
+    .btn { min-height: 44px; }
+    .input { min-height: 44px; }
+    .card { border-radius: 1.125rem; }
+  }
+
+  /* Smart TV (1920px+) */
+  @media (min-width: 1920px) {
+    .main-content {
+      max-width: 80rem;
+      padding-left: 4rem;
+      padding-right: 4rem;
+      padding-top: 64px;
+      padding-bottom: 180px;
+    }
+    
+    /* Aumentar tamanhos de fonte para Smart TV */
+    h1, .text-3xl { font-size: 2.5rem; }
+    h2, .text-2xl { font-size: 2rem; }
+    h3, .text-xl { font-size: 1.5rem; }
+    p, .text-base { font-size: 1.125rem; }
+    .text-sm { font-size: 1rem; }
+    .text-xs { font-size: 0.875rem; }
+    
+    /* Aumentar tamanhos de botões e inputs para Smart TV */
+    .btn { min-height: 56px; padding: 0 2rem; font-size: 1.125rem; }
+    .input { min-height: 56px; padding: 0 1.5rem; font-size: 1.125rem; }
+    
+    /* Aumentar espaçamentos entre elementos */
+    .space-y-6 > * + * { margin-top: 2rem; }
+    .gap-4 { gap: 1.5rem; }
+    .gap-6 { gap: 2rem; }
+    
+    /* Melhorar contraste e legibilidade */
+    .card { border-radius: 1.5rem; }
+    .glass { backdrop-filter: blur(16px); }
   }
 
   .page-transition {

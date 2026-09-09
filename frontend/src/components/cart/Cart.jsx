@@ -23,98 +23,101 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
   return (
     <div
       className="fixed inset-0 z-[1100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"
-      style={{ background: 'rgba(0,0,0,0.65)' }}
+      style={{ background: 'rgba(0,0,0,0.75)' }}
       onClick={(e) => e.target === e.currentTarget && onCancel()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="remove-modal-title"
     >
       <div
-        className="glass w-full max-w-sm rounded-3xl shadow-glass-lg overflow-hidden animate-scale-in"
+        className="glass w-full max-w-md rounded-3xl shadow-glass-lg overflow-hidden animate-scale-in"
         style={{ animation: 'scale-in 220ms cubic-bezier(0.34,1.56,0.64,1) both' }}
       >
-        {/* Banner com a imagem/gradiente do produto */}
-        <div className="relative h-36 w-full overflow-hidden">
-          {item.imagem_url ? (
-            <img
-              src={item.imagem_url}
-              alt={item.nome}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-900/40 to-dark-card">
-              <BoxIcon className="h-16 w-16 text-white/10" />
-            </div>
-          )}
-          {/* Overlay escuro sobre a imagem */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent" />
-          {/* Ícone de lixeira centralizado */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full border border-red-500/30 bg-red-500/15 shadow-[0_0_28px_rgba(239,68,68,0.25)] backdrop-blur-md">
-              <TrashIcon className="h-7 w-7 text-red-400" />
+        {/* Header com alerta visual */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent border-b border-red-500/20">
+          <div className="absolute inset-0 bg-red-500/5" />
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-red-500/30 bg-red-500/10 shadow-[0_0_24px_rgba(239,68,68,0.2)]">
+                <TrashIcon className="h-6 w-6 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-400">
+                  Confirmação necessária
+                </p>
+                <h2
+                  id="remove-modal-title"
+                  className="mt-2 text-xl font-bold leading-tight text-white"
+                >
+                  Remover item do carrinho?
+                </h2>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Conteúdo */}
-        <div className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
-            Remover item
-          </p>
-          <h2
-            id="remove-modal-title"
-            className="mt-2 text-lg font-semibold leading-snug text-white"
-          >
-            Deseja realmente remover este item?
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-nexus-400">
-            Você está prestes a retirar{' '}
-            <strong className="font-semibold text-nexus-200">"{item.nome}"</strong>{' '}
-            do seu carrinho de compras.
+        <div className="p-6 sm:p-8">
+          <p className="text-base leading-relaxed text-nexus-300">
+            Esta ação removerá <strong className="font-semibold text-white">"{item.nome}"</strong> do seu carrinho de compras.
           </p>
 
-          {/* Card resumo do produto */}
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border border-dark-border bg-dark-hover px-4 py-3">
-            <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-dark-border">
-              {item.imagem_url ? (
-                <img src={item.imagem_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-nexus-600/20 text-nexus-400">
-                  <BoxIcon className="h-5 w-5" />
+          {/* Card resumo do produto melhorado */}
+          <div className="mt-6 rounded-2xl border border-dark-border bg-dark-hover/50 p-4">
+            <div className="flex items-start gap-4">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-dark-border bg-dark-card">
+                {item.imagem_url ? (
+                  <img src={item.imagem_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-nexus-600/15 text-nexus-400">
+                    <BoxIcon className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-white">{item.nome}</p>
+                {item.fabricante && (
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wider text-nexus-500">{item.fabricante}</p>
+                )}
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm font-bold text-nexus-200">
+                    {formatCurrency(item.preco_unitario)}
+                  </span>
+                  <span className="text-xs text-nexus-500">/ unidade</span>
                 </div>
-              )}
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-white">{item.nome}</p>
-              {item.fabricante && (
-                <p className="text-[11px] uppercase tracking-wider text-nexus-500">{item.fabricante}</p>
-              )}
-            </div>
-            <p className="shrink-0 text-sm font-semibold text-nexus-300">
-              {formatCurrency(item.preco_unitario)}
+          </div>
+
+          {/* Aviso de impacto */}
+          <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+            <svg className="h-5 w-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="text-xs leading-relaxed text-amber-200">
+              Esta ação não pode ser desfeita. Se desejar comprar este produto novamente, você precisará adicioná-lo ao carrinho.
             </p>
           </div>
 
-          {/* Botões Sim / Não */}
+          {/* Botões com melhor hierarquia */}
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onCancel}
               id="remove-modal-cancel"
-              className="btn-secondary w-full gap-2 sm:w-auto"
+              className="btn-secondary w-full gap-2 sm:w-auto px-6 py-3 font-medium"
             >
               <XMarkIcon className="h-4 w-4" />
-              Não, manter no carrinho
+              Cancelar
             </button>
             <button
               type="button"
               onClick={onConfirm}
               id="remove-modal-confirm"
-              className="btn-danger w-full gap-2 sm:w-auto"
-              autoFocus
+              className="btn-danger w-full gap-2 sm:w-auto px-6 py-3 font-medium"
             >
               <TrashIcon className="h-4 w-4" />
-              Sim, remover
+              Remover item
             </button>
           </div>
         </div>

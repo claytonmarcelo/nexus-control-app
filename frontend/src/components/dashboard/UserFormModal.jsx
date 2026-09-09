@@ -65,24 +65,51 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, initialData, 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true" aria-labelledby="user-form-title">
-      <div className="modal-content max-w-lg">
-        <form onSubmit={handleSubmit} className="p-6" noValidate>
-          <div className="flex items-center justify-between mb-6">
-            <h2 id="user-form-title" className="text-xl font-semibold text-white">
-              {initialData ? 'Editar Usuário' : 'Novo Usuário'}
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-lg text-nexus-400 hover:text-white hover:bg-dark-hover transition-colors"
-              aria-label="Fechar"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <div 
+      className="fixed inset-0 z-[1100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"
+      style={{ background: 'rgba(0,0,0,0.75)' }}
+      onClick={(e) => e.target === e.currentTarget && onClose()} 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="user-form-title"
+    >
+      <div className="glass w-full max-w-lg rounded-3xl shadow-glass-lg overflow-hidden animate-scale-in border-b-2 border-nexus-500/30">
+        {/* Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-nexus-500/10 via-nexus-500/5 to-transparent border-b border-nexus-500/20">
+          <div className="absolute inset-0 bg-nexus-500/5" />
+          <div className="relative p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-nexus-500/30 bg-nexus-500/10 shadow-[0_0_24px_rgba(212,175,55,0.1)]">
+                  <svg className="h-6 w-6 text-nexus-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 21a8 8 0 0 0-16 0m12-14a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">
+                    {initialData ? 'Edição' : 'Cadastro'}
+                  </p>
+                  <h2 id="user-form-title" className="mt-2 text-xl font-bold leading-tight text-white">
+                    {initialData ? 'Editar Usuário' : 'Novo Usuário'}
+                  </h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-nexus-400 transition-colors hover:bg-dark-hover hover:text-white"
+                aria-label="Fechar"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
+        </div>
+
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6" noValidate>
 
           <div className="space-y-5">
             <div>
@@ -178,18 +205,18 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, initialData, 
             )}
           </div>
 
-          <div className="mt-8 flex gap-3 justify-end">
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary"
+              className="btn-secondary w-full gap-2 sm:w-auto px-6 py-3 font-medium"
               disabled={isSubmitting}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn-primary w-full gap-2 sm:w-auto px-6 py-3 font-medium"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
