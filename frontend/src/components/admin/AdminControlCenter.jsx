@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModal } from '../../contexts/ModalContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { itemService, userService } from '../../services/services';
 import { adminService } from '../../services/adminService';
 import { isRootAdmin } from '../../utils/access';
@@ -60,6 +61,7 @@ const TABS = [
 export default function AdminControlCenter() {
   const { isAdmin } = useAuth();
   const { toast, confirm } = useModal();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('visao-geral');
   const [previewRole, setPreviewRole] = useState('cliente');
   const [pages, setPages] = useState(FALLBACK_PAGES);
@@ -136,6 +138,13 @@ export default function AdminControlCenter() {
   useEffect(() => {
     if (isAdmin) loadControlData();
   }, [isAdmin, loadControlData]);
+
+  // Force dark theme on admin page
+  useEffect(() => {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('nexus_theme', 'dark');
+  }, []);
 
   useEffect(() => {
     if (!selectedUserId && users.length > 0) {
