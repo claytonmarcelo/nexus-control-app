@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Login() {
-  const [activeTab, setActiveTab] = useState('login'); // 'login', 'register', 'forgot'
+  const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register', 'forgot'
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -12,56 +12,54 @@ function Login() {
     if (isAuthenticated) navigate('/dashboard');
   }, [isAuthenticated, navigate]);
 
-  // Se vir de /register, muda pra aba de registro
+  // Se vir de /register, muda pra step de registro
   useEffect(() => {
     if (searchParams.get('register') === 'true') {
-      setActiveTab('register');
+      setCurrentStep('register');
     }
   }, [searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-bg p-4">
-      <div className="w-full max-w-md">
-        <div className="glass rounded-3xl border border-dark-border overflow-hidden">
-          {/* Tab Buttons */}
-          <div className="flex border-b border-dark-border">
-            <button
-              onClick={() => setActiveTab('login')}
-              className={`flex-1 py-3 px-4 font-semibold transition-colors ${
-                activeTab === 'login'
-                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
-                  : 'text-nexus-300 hover:text-white'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setActiveTab('register')}
-              className={`flex-1 py-3 px-4 font-semibold transition-colors ${
-                activeTab === 'register'
-                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
-                  : 'text-nexus-300 hover:text-white'
-              }`}
-            >
-              Cadastro
-            </button>
-            <button
-              onClick={() => setActiveTab('forgot')}
-              className={`flex-1 py-3 px-4 font-semibold transition-colors text-sm ${
-                activeTab === 'forgot'
-                  ? 'bg-nexus-500/20 text-nexus-400 border-b-2 border-nexus-500'
-                  : 'text-nexus-300 hover:text-white'
-              }`}
-            >
-              Recuperar
-            </button>
+      <div className="auth-circle-container">
+        {/* Animated 3D Flip Container */}
+        <div
+          className="auth-flip-wrapper"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform:
+              currentStep === 'login'
+                ? 'rotateY(0deg)'
+                : currentStep === 'register'
+                ? 'rotateY(240deg)'
+                : 'rotateY(120deg)',
+          }}
+        >
+          {/* Face 1: Login */}
+          <div className="auth-flip-face" style={{ backfaceVisibility: 'hidden' }}>
+            <LoginForm onNavigate={setCurrentStep} />
           </div>
 
-          {/* Content */}
-          <div className="p-8">
-            {activeTab === 'login' && <LoginForm />}
-            {activeTab === 'register' && <RegisterForm />}
-            {activeTab === 'forgot' && <ForgotForm />}
+          {/* Face 2: Forgot Password */}
+          <div
+            className="auth-flip-face"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(120deg)',
+            }}
+          >
+            <ForgotForm onNavigate={setCurrentStep} />
+          </div>
+
+          {/* Face 3: Register */}
+          <div
+            className="auth-flip-face"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(240deg)',
+            }}
+          >
+            <RegisterForm onNavigate={setCurrentStep} />
           </div>
         </div>
       </div>
@@ -69,7 +67,7 @@ function Login() {
   );
 }
 
-function LoginForm() {
+function LoginForm({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -93,118 +91,103 @@ function LoginForm() {
     }
   };
 
-  const handleDemoLogin = async (demoType) => {
-    setError('');
-    setLoading(true);
-
-    const demos = {
-      admin: { email: 'marcelo10@gmail.com', password: '26481#' },
-      funcionario: { email: 'funcionario@nexuscontrol.com', password: 'func123' },
-      cliente: { email: 'cliente@nexuscontrol.com', password: 'cliente123' },
-    };
-
-    const demoUser = demos[demoType];
-
-    try {
-      await login(demoUser.email, demoUser.password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Erro ao fazer demo login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">Nexus Control</h1>
-        <p className="text-nexus-400">Faça login para acessar</p>
+    <div className="fp-content">
+      <div className="auth-logo" style={{ marginBottom: '12px' }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D4AF37' }}>
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none" />
+        </svg>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-            {error}
-          </div>
-        )}
+      <div className="auth-form-header" style={{ marginBottom: '16px' }}>
+        <h1 className="auth-form-title">Nexus Control</h1>
+        <p className="auth-form-subtitle">Faça login para acessar</p>
+      </div>
 
-        <div>
-          <label className="label">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@email.com"
-            className="input"
-            disabled={loading}
-            required
-          />
+      <form onSubmit={handleSubmit} noValidate className="fp-form">
+        {error && <p className="auth-field-error" role="alert">{error}</p>}
+
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M2 7l10 7 10-7" />
+              </svg>
+            </span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="auth-input"
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+              disabled={loading}
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="label">Senha</label>
-          <div className="relative">
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+            </span>
             <input
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="auth-input auth-input--padded"
               placeholder="••••••••"
-              className="input"
-              disabled={loading}
+              autoComplete="current-password"
               required
+              disabled={loading}
             />
             <button
               type="button"
+              className="auth-eye-btn"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
-              disabled={loading}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
               <EyeIcon visible={showPassword} />
             </button>
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-          {loading ? 'Entrando...' : 'Entrar'}
+        <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '12px' }}>
+          {loading ? 'Entrando...' : 'ENTRAR'}
         </button>
       </form>
 
-      {/* Demo Buttons */}
-      <div className="pt-4 border-t border-dark-border">
-        <p className="text-center text-xs text-nexus-400 font-medium mb-3">ACESSO DEMO</p>
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('admin')}
-            disabled={loading}
-            className="w-full btn btn-secondary text-sm bg-nexus-600/20 hover:bg-nexus-600/30 border border-nexus-500/50"
-          >
-            👑 Demo Admin
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('funcionario')}
-            disabled={loading}
-            className="w-full btn btn-secondary text-sm bg-nexus-600/20 hover:bg-nexus-600/30 border border-nexus-500/50"
-          >
-            👔 Demo Funcionário
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('cliente')}
-            disabled={loading}
-            className="w-full btn btn-secondary text-sm bg-nexus-600/20 hover:bg-nexus-600/30 border border-nexus-500/50"
-          >
-            🛍️ Demo Cliente
-          </button>
-        </div>
-      </div>
+
+
+      <button
+        type="button"
+        onClick={() => onNavigate('forgot')}
+        className="auth-link-btn"
+        style={{ marginTop: '12px' }}
+      >
+        Não tem conta? <strong>Criar nova</strong>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onNavigate('register')}
+        className="auth-link-btn"
+        style={{ marginTop: '8px' }}
+      >
+        Esqueci minha <strong>senha</strong>
+      </button>
     </div>
   );
 }
 
-function RegisterForm() {
+function RegisterForm({ onNavigate }) {
   const [formData, setFormData] = useState({ nome: '', email: '', senha: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -242,262 +225,338 @@ function RegisterForm() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">Criar Conta</h1>
-        <p className="text-nexus-400">Junte-se ao Nexus Control</p>
+    <div className="fp-content">
+      <div className="auth-logo" style={{ marginBottom: '12px' }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D4AF37' }}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-            {error}
+      <div className="auth-form-header" style={{ marginBottom: '16px' }}>
+        <h1 className="auth-form-title">Criar Conta</h1>
+        <p className="auth-form-subtitle" style={{ maxWidth: '240px', lineHeight: '1.4' }}>Junte-se ao Nexus Control</p>
+      </div>
+
+      <form onSubmit={handleSubmit} noValidate className="fp-form">
+        {error && <p className="auth-field-error" role="alert">{error}</p>}
+
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              className="auth-input"
+              placeholder="Seu nome"
+              required
+              disabled={loading}
+            />
           </div>
-        )}
-
-        <div>
-          <label className="label">Nome Completo</label>
-          <input
-            type="text"
-            name="nome"
-            value={formData.nome}
-            onChange={handleChange}
-            placeholder="Seu nome"
-            className="input"
-            disabled={loading}
-            required
-          />
         </div>
 
-        <div>
-          <label className="label">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="seu@email.com"
-            className="input"
-            disabled={loading}
-            required
-          />
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M2 7l10 7 10-7" />
+              </svg>
+            </span>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="auth-input"
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+              disabled={loading}
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="label">Senha</label>
-          <div className="relative">
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+            </span>
             <input
               type={showPassword ? 'text' : 'password'}
               name="senha"
               value={formData.senha}
               onChange={handleChange}
+              className="auth-input auth-input--padded"
               placeholder="••••••••"
-              className="input"
-              disabled={loading}
+              autoComplete="new-password"
               required
+              disabled={loading}
             />
             <button
               type="button"
+              className="auth-eye-btn"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
-              disabled={loading}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
               <EyeIcon visible={showPassword} />
             </button>
           </div>
         </div>
 
-        <div>
-          <label className="label">Confirmar Senha</label>
-          <input
-            type="password"
-            name="confirm"
-            value={formData.confirm}
-            onChange={handleChange}
-            placeholder="••••••••"
-            className="input"
-            disabled={loading}
-            required
-          />
+        <div className="auth-field">
+          <div className="auth-input-wrap">
+            <span className="auth-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                <path d="M9 16l2 2 4-4" />
+              </svg>
+            </span>
+            <input
+              type="password"
+              name="confirm"
+              value={formData.confirm}
+              onChange={handleChange}
+              className="auth-input"
+              placeholder="Confirmar senha"
+              autoComplete="new-password"
+              required
+              disabled={loading}
+            />
+          </div>
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-          {loading ? 'Criando...' : 'Criar Conta'}
+        <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '12px' }}>
+          {loading ? 'Criando...' : 'CRIAR CONTA'}
         </button>
       </form>
+
+      <button
+        type="button"
+        onClick={() => onNavigate('login')}
+        className="auth-link-btn"
+        style={{ marginTop: '12px' }}
+      >
+        Já tem conta? <strong>Fazer login</strong>
+      </button>
     </div>
   );
 }
 
-function ForgotForm() {
+function ForgotForm({ onNavigate }) {
   const [step, setStep] = useState('request'); // 'request', 'reset', 'success'
   const [email, setEmail] = useState('');
-  const [token, setToken] = useState('');
   const [senha, setSenha] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const [confirmacao, setConfirmacao] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleRequest = async (e) => {
-    e.preventDefault();
+  const requestReset = async (event) => {
+    event.preventDefault();
     setError('');
     setMessage('');
     setLoading(true);
-
     try {
-      // TODO: Chamar endpoint de recuperação
-      // const response = await authService.forgotPassword(email);
-      setMessage('Se este email estiver cadastrado, as instruções foram enviadas.');
+      // TODO: Chamar endpoint
+      setMessage('Se este email estiver cadastrado, as instruções foram preparadas.');
       setStep('reset');
-    } catch (err) {
-      setError('Erro ao processar solicitação');
+    } catch (requestError) {
+      setError('Não foi possível iniciar a recuperação agora.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleReset = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (senha !== confirm) {
-      setError('As senhas não coincidem');
+  const resetPassword = async (event) => {
+    event.preventDefault();
+    if (senha !== confirmacao) { 
+      setError('As senhas não conferem');
       return;
     }
-
+    setError('');
     setLoading(true);
-
     try {
-      // TODO: Chamar endpoint de reset
-      // await authService.resetPassword(token, senha);
-      setMessage('Senha redefinida com sucesso!');
+      // TODO: Chamar endpoint
+      setMessage('Senha redefinida com sucesso. Agora você já pode acessar o Nexus Control.');
       setStep('success');
-    } catch (err) {
-      setError('Erro ao redefinir senha');
+    } catch (resetError) {
+      setError('Não foi possível redefinir a senha.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const icons = {
+    request: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="15" r="3.5" />
+        <path d="m10.5 12.5 8-8M15 7l2 2m-5 1 2 2" />
+      </svg>
+    ),
+    reset: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="11" width="14" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+    success: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 12l3 3 5-5" />
+      </svg>
+    ),
+  };
+
+  const titles = { request: 'Recupere seu acesso', reset: 'Crie uma nova senha', success: 'Acesso recuperado' };
+  const subtitles = {
+    request: 'Informe seu email cadastrado para iniciar.',
+    reset: 'Defina uma senha segura para voltar.',
+    success: message,
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          {step === 'request' ? 'Recuperar Acesso' : step === 'reset' ? 'Nova Senha' : 'Sucesso!'}
-        </h1>
-        <p className="text-nexus-400 text-sm">
-          {step === 'request' && 'Informe seu email para recuperar sua senha'}
-          {step === 'reset' && 'Crie uma nova senha segura'}
-          {step === 'success' && 'Sua senha foi redefinida com sucesso'}
-        </p>
+    <div className="fp-content">
+      <div className="auth-logo" style={{ marginBottom: '12px', color: '#D4AF37' }}>
+        {icons[step]}
+      </div>
+
+      <div className="auth-form-header" style={{ marginBottom: '16px' }}>
+        <h1 className="auth-form-title">{titles[step]}</h1>
+        <p className="auth-form-subtitle" style={{ maxWidth: '240px', lineHeight: '1.4' }}>{subtitles[step]}</p>
       </div>
 
       {step === 'request' && (
-        <form onSubmit={handleRequest} className="space-y-4">
-          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
-          {message && <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">{message}</div>}
-
-          <div>
-            <label className="label">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="input"
-              disabled={loading}
-              required
-            />
+        <form onSubmit={requestReset} noValidate className="fp-form">
+          <div className="auth-field">
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="M2 7l10 7 10-7" />
+                </svg>
+              </span>
+              <input
+                id="recovery-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth-input"
+                placeholder="seu@email.com"
+                autoComplete="email"
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
-
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? 'Processando...' : 'Continuar'}
+          {message && <p className="auth-field-error" style={{ color: '#D4AF37' }} role="status">{message}</p>}
+          {error && <p className="auth-field-error" role="alert">{error}</p>}
+          <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '12px' }}>
+            {loading ? 'Preparando...' : 'CONTINUAR'}
           </button>
         </form>
       )}
 
       {step === 'reset' && (
-        <form onSubmit={handleReset} className="space-y-4">
-          {error && <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>}
-
-          <div>
-            <label className="label">Nova Senha</label>
-            <div className="relative">
+        <form onSubmit={resetPassword} noValidate className="fp-form">
+          <div className="auth-field">
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+              </span>
               <input
+                id="recovery-password"
                 type={showPassword ? 'text' : 'password'}
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                placeholder="••••••••"
-                className="input"
-                disabled={loading}
+                className="auth-input auth-input--padded"
+                placeholder="Nova senha"
+                autoComplete="new-password"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
-              >
+              <button type="button" className="auth-eye-btn" onClick={() => setShowPassword(p => !p)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
                 <EyeIcon visible={showPassword} />
               </button>
             </div>
           </div>
-
-          <div>
-            <label className="label">Confirmar Senha</label>
-            <div className="relative">
+          <div className="auth-field">
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  <path d="M9 16l2 2 4-4" />
+                </svg>
+              </span>
               <input
-                type={showConfirm ? 'text' : 'password'}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="••••••••"
-                className="input"
-                disabled={loading}
+                id="recovery-confirmation"
+                type={showConfirmation ? 'text' : 'password'}
+                value={confirmacao}
+                onChange={(e) => setConfirmacao(e.target.value)}
+                className="auth-input auth-input--padded"
+                placeholder="Confirmar nova senha"
+                autoComplete="new-password"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-nexus-400 hover:text-nexus-300"
-              >
-                <EyeIcon visible={showConfirm} />
+              <button type="button" className="auth-eye-btn" onClick={() => setShowConfirmation(p => !p)} aria-label={showConfirmation ? 'Ocultar senha' : 'Mostrar senha'}>
+                <EyeIcon visible={showConfirmation} />
               </button>
             </div>
           </div>
-
-          <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-            {loading ? 'Redefinindo...' : 'Redefinir Senha'}
+          {error && <p className="auth-field-error" role="alert">{error}</p>}
+          <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '12px' }}>
+            {loading ? 'Redefinindo...' : 'REDEFINIR SENHA'}
           </button>
         </form>
       )}
 
       {step === 'success' && (
-        <div className="text-center space-y-4">
-          <p className="text-nexus-400">Sua senha foi alterada com sucesso.</p>
-          <button
-            onClick={() => { setStep('request'); setEmail(''); setSenha(''); setConfirm(''); }}
-            className="btn btn-primary w-full"
-          >
-            Voltar para Login
-          </button>
-        </div>
+        <button type="button" className="auth-submit-btn" style={{ width: '80%', marginTop: '16px' }} onClick={() => onNavigate('login')}>
+          VOLTAR PARA O LOGIN
+        </button>
+      )}
+
+      {step !== 'success' && (
+        <button
+          type="button"
+          onClick={() => onNavigate('login')}
+          className="auth-link-btn"
+          style={{ marginTop: '12px' }}
+        >
+          Voltar para o login
+        </button>
       )}
     </div>
   );
 }
 
 function EyeIcon({ visible }) {
-  return visible ? (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-    </svg>
-  ) : (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      {visible ? (
+        <>
+          <path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c5.2 0 8.7 4.4 9.8 7a15.6 15.6 0 0 1-3.1 4.4M6.2 6.2C4.4 7.5 3.2 9.3 2.2 12c1.1 2.6 4.6 7 9.8 7 1 0 2-.2 2.9-.5" />
+        </>
+      ) : (
+        <path d="M2.2 12C3.3 9.4 6.8 5 12 5s8.7 4.4 9.8 7c-1.1 2.6-4.6 7-9.8 7s-8.7-4.4-9.8-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      )}
     </svg>
   );
 }

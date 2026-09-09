@@ -578,6 +578,15 @@ html[data-theme='light'] .glass {
   pointer-events: none;
 }
 
+/* 3D flip wrapper - animates between login, register, forgot */
+.auth-flip-wrapper {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 /* 3D flip scene */
 .auth-flip-scene {
   width: 300px;
