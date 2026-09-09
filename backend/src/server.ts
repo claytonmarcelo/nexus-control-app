@@ -61,12 +61,23 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 
-const limiter = rateLimit({
+// Rate limiters específicos
+const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10000,
-  message: { error: 'Muitas requisições originadas deste IP, tente novamente mais tarde.' }
+  message: { error: 'Muitas requisições originadas deste IP, tente novamente mais tarde.' },
+  skip: (req) => req.path === '/health' || req.path === '/api/status'
 });
-app.use('/api/', limiter);
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50, // 50 tentativas de login a cada 15 minutos
+  message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
+  skipSuccessfulRequests: true // Não conta requisições bem-sucedidas
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/auth/login', loginLimiter);
 
 // Health check routes - sem rate limit para AWS health checks
 app.get('/health', (req, res) => {
