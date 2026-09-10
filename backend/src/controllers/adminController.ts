@@ -4,6 +4,8 @@ import { getUserPermissions, setUserPermissions } from '../models/Permission.js'
 import { findAllOrders } from '../models/Order.js';
 import { findAllItems } from '../models/Item.js';
 import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../config/permissions.js';
+import { isRootAdmin } from '../config/access.js';
+import pool from '../config/database.js';
 
 // Mapeamento de páginas e suas metadatas
 const PAGES_MAP = {
@@ -119,11 +121,11 @@ export const getUserPermissionsById = async (req, res) => {
       [userId]
     );
 
-    if (userRows.length === 0) {
+    if ((userRows as any[]).length === 0) {
       return sendError(res, 'Usuário não encontrado', 404);
     }
 
-    const user = userRows[0];
+    const user = (userRows as any[])[0];
     const permissions = await getUserPermissions(userId, user.nivel_acesso, user.email);
 
     sendSuccess(res, {
@@ -161,19 +163,26 @@ export const updateUserPermissions = async (req, res) => {
       [userId]
     );
 
-    if (userRows.length === 0) {
+    if ((userRows as any[]).length === 0) {
       return sendError(res, 'Usuário não encontrado', 404);
+    }
+
+    const targetUser = (userRows as any[])[0];
+
+    // Proteger root admin: não permitir alteração de permissões
+    if (isRootAdmin(targetUser)) {
+      return sendError(res, 'Não é possível alterar as permissões do administrador principal', 403);
     }
 
     // Atualizar permissões
     await setUserPermissions(userId, permissions);
 
-    const updatedPermissions = await getUserPermissions(userId, userRows[0].nivel_acesso, userRows[0].email);
+    const updatedPermissions = await getUserPermissions(userId, targetUser.nivel_acesso, targetUser.email);
 
     sendSuccess(res, {
       userId,
-      nome: userRows[0].nome,
-      email: userRows[0].email,
+      nome: targetUser.nome,
+      email: targetUser.email,
       permissions: updatedPermissions
     }, 'Permissões atualizadas com sucesso');
   } catch (error) {
@@ -185,13 +194,13 @@ export const updateUserPermissions = async (req, res) => {
 export const getAllUsersWithPermissions = async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const offset = ((page as number) - 1) * (limit as number);
 
-    const users = await findAllUsers();
+    const users = await findAllUsers() as any[];
     const totalUsers = users.length;
 
     // Paginar manualmente
-    const paginatedUsers = users.slice(offset, offset + parseInt(limit));
+    const paginatedUsers = users.slice(offset, offset + parseInt(limit as string));
 
     // Adicionar permissões a cada usuário
     const usersWithPermissions = await Promise.all(
@@ -214,7 +223,7 @@ export const getAllUsersWithPermissions = async (req, res) => {
 export const getDashboardStats = async (req, res) => {
   try {
     // Estatísticas gerais do sistema
-    const users = await findAllUsers();
+    const users = await findAllUsers() as any[];
     const { orders: allOrders } = await findAllOrders({ page: 1, limit: 1 });
     const { items: allItems } = await findAllItems({ page: 1, limit: 1 });
 
@@ -233,13 +242,13 @@ export const getDashboardStats = async (req, res) => {
 
     sendSuccess(res, {
       totalUsers: users.length,
-      usersByRole: userStats.reduce((acc, stat) => {
+      usersByRole: (userStats as any[]).reduce((acc, stat) => {
         acc[stat.nivel_acesso] = stat.count;
         return acc;
       }, {}),
       orderStats: {
         total: allOrders?.length || 0,
-        byStatus: ordersStats.reduce((acc, stat) => {
+        byStatus: (ordersStats as any[]).reduce((acc, stat) => {
           acc[stat.status_pagamento] = {
             count: stat.total,
             revenue: stat.revenue || 0
@@ -254,6 +263,3 @@ export const getDashboardStats = async (req, res) => {
     sendError(res, 'Erro ao obter estatísticas', 500);
   }
 };
-
-// Importar pool para admin controller
-import pool from '../config/database.js';

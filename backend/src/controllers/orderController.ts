@@ -6,27 +6,73 @@ import {
   updateOrderStatus,
   deleteOrder
 } from '../models/Order.js';
+import { findItemsByIds } from '../models/Item.js';
 import { sendSuccess, sendError, sendPaginated } from '../utils/response.js';
 
 export const checkout = async (req, res) => {
   try {
-    const { items, total, metodo_pagamento } = req.body;
+    const { items, metodo_pagamento } = req.body;
     const usuario_id = req.user.id;
 
     if (!items || items.length === 0) {
       return sendError(res, 'Carrinho vazio', 400);
     }
 
-    if (total <= 0) {
+    // Extrair IDs dos itens
+    const itemIds = items.map(item => item.item_id);
+
+    // Buscar itens reais do banco
+    const realItems = (await findItemsByIds(itemIds)) as any[];
+
+    if (realItems.length !== itemIds.length) {
+      return sendError(res, 'Um ou mais itens não foram encontrados no banco', 400);
+    }
+
+    // Criar mapa de preços reais do banco
+    const pricesMap = new Map();
+    realItems.forEach((item: any) => {
+      pricesMap.set(item.id, item.valor_venda);
+    });
+
+    // Validar e recalcular total com preços do banco
+    let calculatedTotal = 0;
+    const validatedItems = [];
+
+    for (const item of items) {
+      const realPrice = pricesMap.get(item.item_id);
+
+      if (!realPrice || realPrice <= 0) {
+        return sendError(res, `Item ${item.item_id} não tem preço válido configurado`, 400);
+      }
+
+      const quantidade = Math.floor(Number(item.quantidade) || 0);
+      if (quantidade <= 0) {
+        return sendError(res, `Quantidade inválida para item ${item.item_id}`, 400);
+      }
+
+      // Usar preço do banco, ignorar preço vindo do body
+      const subtotal = realPrice * quantidade;
+      calculatedTotal += subtotal;
+
+      validatedItems.push({
+        item_id: item.item_id,
+        nome: item.nome || '',
+        quantidade,
+        preco_unitario: realPrice
+      });
+    }
+
+    if (calculatedTotal <= 0) {
       return sendError(res, 'Total deve ser positivo', 400);
     }
 
+    // Usar total calculado no servidor, ignorar total vindo do body
     const order = await createOrder({
       usuario_id,
-      items,
-      total,
+      items: validatedItems,
+      total: calculatedTotal,
       metodo_pagamento,
-      status_pagamento: 'confirmado' // Assumir confirmação imediata para MVP
+      status_pagamento: 'confirmado'
     });
 
     sendSuccess(res, order, 'Pedido criado com sucesso', 201);

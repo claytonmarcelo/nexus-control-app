@@ -16,7 +16,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
     const adminLogin = await request(app)
       .post('/api/auth/login')
       .send({
-        email: 'admin@nexuscontrol.com',
+        email: 'marcelo10@gmail.com',
         senha: '26481#',
       });
 

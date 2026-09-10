@@ -55,6 +55,17 @@ export const deleteItem = async (id) => {
   return result.affectedRows > 0;
 };
 
+export const findItemsByIds = async (ids) => {
+  if (!ids || ids.length === 0) return [];
+  
+  const placeholders = ids.map(() => '?').join(',');
+  const [rows] = await pool.execute(
+    `SELECT id, nome, descricao, categoria, valor_venda, valor_aluguel_mensal, estoque FROM itens WHERE id IN (${placeholders})`,
+    ids
+  );
+  return rows;
+};
+
 export const canUserModifyItem = async (itemId, userId, userRole) => {
   if (userRole === USER_ROLES.ADMIN) return true;
   

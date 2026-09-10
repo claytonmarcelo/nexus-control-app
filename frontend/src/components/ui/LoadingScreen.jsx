@@ -2,32 +2,20 @@ import React from 'react';
 
 export default function LoadingScreen() {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      backgroundColor: '#0f172a',
-      color: '#00f2fe'
-    }}>
-      <div style={{
-        width: '50px',
-        height: '50px',
-        border: '5px solid rgba(255, 255, 255, 0.1)',
-        borderTop: '5px solid #00f2fe',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
-      }} />
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-      <p style={{ marginTop: '20px', fontFamily: 'sans-serif', fontWeight: 'bold' }}>
-        Carregando Nexus Control...
-      </p>
+    <div className="flex flex-col justify-center items-center h-screen bg-dark-bg text-nexus-400">
+      <div className="flex flex-col items-center gap-6">
+        {/* Animated Spinner */}
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 border-4 border-dark-border rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-transparent border-t-nexus-500 rounded-full animate-spin"></div>
+        </div>
+        
+        {/* Loading Text */}
+        <div className="text-center">
+          <p className="text-sm font-semibold text-white">Carregando Nexus Control...</p>
+          <p className="text-xs text-text-secondary mt-2">Por favor, aguarde</p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,22 +1,27 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
-import Dashboard from './components/dashboard/Dashboard';
-import Items from './components/dashboard/Items';
-import Users from './components/dashboard/Users';
-import Profile from './components/dashboard/Profile';
-import Cart from './components/cart/Cart';
-import Checkout from './components/cart/Checkout';
-import AdminControlCenter from './components/admin/AdminControlCenter';
 import NotFound from './components/ui/NotFound';
 import LoadingScreen from './components/ui/LoadingScreen';
+
+// Lazy load page components
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
+const Items = lazy(() => import('./components/dashboard/Items'));
+const Users = lazy(() => import('./components/dashboard/Users'));
+const Profile = lazy(() => import('./components/dashboard/Profile'));
+const Cart = lazy(() => import('./components/cart/Cart'));
+const Checkout = lazy(() => import('./components/cart/Checkout'));
+const AdminControlCenter = lazy(() => import('./components/admin/AdminControlCenter'));
+const AboutUs = lazy(() => import('./components/about/AboutUs'));
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   
+  // Show loading only during auth check, not during module loading
   if (loading) return <LoadingScreen />;
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
   return children;
@@ -25,6 +30,7 @@ function PublicRoute({ children }) {
 function PrivateRoute({ children, allowedRoles, requiredPermission }) {
   const { isAuthenticated, loading, user } = useAuth();
   
+  // Show loading only during auth check, not during module loading
   if (loading) return <LoadingScreen />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   
@@ -44,64 +50,63 @@ function App() {
 
   return (
     <div key={transitionKey} className="page-transition">
-      <Routes>
-        <Route path="/login" element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } />
-        <Route path="/register" element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } />
-        <Route path="/recuperar-senha" element={<ForgotPassword />} />
-        
-        <Route element={
-          <PrivateRoute>
-            <Layout />
-          </PrivateRoute>
-        }>
-          <Route path="/dashboard" element={
-            <PrivateRoute requiredPermission="dashboard">
-              <Dashboard />
-            </PrivateRoute>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/login" element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
           } />
-          <Route path="/itens" element={
-            <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
-              <Items />
-            </PrivateRoute>
+          <Route path="/register" element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
           } />
-          <Route path="/carrinho" element={
-            <PrivateRoute requiredPermission="carrinho">
-              <Cart />
-            </PrivateRoute>
-          } />
-          <Route path="/checkout" element={
-            <PrivateRoute requiredPermission="checkout">
-              <Checkout />
-            </PrivateRoute>
-          } />
-          <Route path="/usuarios" element={
-            <PrivateRoute allowedRoles={['admin']} requiredPermission="usuarios">
-              <Users />
-            </PrivateRoute>
-          } />
-          <Route path="/admin" element={
-            <PrivateRoute allowedRoles={['admin']} requiredPermission="admin">
-              <AdminControlCenter />
-            </PrivateRoute>
-          } />
-          <Route path="/perfil" element={
-            <PrivateRoute requiredPermission="perfil">
-              <Profile />
-            </PrivateRoute>
-          } />
-        </Route>
-        
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="/recuperar-senha" element={<ForgotPassword />} />
+          
+          <Route element={<Layout />}>
+            <Route path="/sobre" element={<AboutUs />} />
+            <Route path="/dashboard" element={
+              <PrivateRoute requiredPermission="dashboard">
+                <Dashboard />
+              </PrivateRoute>
+            } />
+            <Route path="/itens" element={
+              <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
+                <Items />
+              </PrivateRoute>
+            } />
+            <Route path="/carrinho" element={
+              <PrivateRoute requiredPermission="carrinho">
+                <Cart />
+              </PrivateRoute>
+            } />
+            <Route path="/checkout" element={
+              <PrivateRoute requiredPermission="checkout">
+                <Checkout />
+              </PrivateRoute>
+            } />
+            <Route path="/usuarios" element={
+              <PrivateRoute allowedRoles={['admin']} requiredPermission="usuarios">
+                <Users />
+              </PrivateRoute>
+            } />
+            <Route path="/admin" element={
+              <PrivateRoute allowedRoles={['admin']} requiredPermission="admin">
+                <AdminControlCenter />
+              </PrivateRoute>
+            } />
+            <Route path="/perfil" element={
+              <PrivateRoute requiredPermission="perfil">
+                <Profile />
+              </PrivateRoute>
+            } />
+          </Route>
+          
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 }
