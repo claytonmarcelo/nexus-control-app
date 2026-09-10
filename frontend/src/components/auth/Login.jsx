@@ -83,7 +83,9 @@ function LoginForm({ onFlip }) {
     if (!formData.email) newErrors.email = 'Email é obrigatório';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Email inválido';
     if (!formData.senha) newErrors.senha = 'Senha é obrigatória';
-    else if (formData.senha.length < 6) newErrors.senha = 'Senha deve ter no mínimo 6 caracteres';
+    else if (formData.senha.length !== 6) newErrors.senha = 'Senha deve ter exatamente 6 caracteres';
+    else if (!/\d/.test(formData.senha)) newErrors.senha = 'Senha precisa conter dígitos';
+    else if (!/[^A-Za-z0-9]/.test(formData.senha)) newErrors.senha = 'Senha precisa conter caractere especial';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
