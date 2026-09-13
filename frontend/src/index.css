@@ -1,8 +1,8 @@
+@import './styles/variables.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import './styles/variables.css';
 
 @layer base {
   *,
@@ -88,15 +88,59 @@
      CARD COMPONENTS
      ═══════════════════════════════════════════════════════ */
   .card {
-    @apply rounded-lg border p-4;
+    @apply rounded-lg border;
     background: var(--bg-secondary);
     border-color: var(--border-color);
     transition: all var(--transition-base);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .card:hover {
     border-color: var(--accent-gold-border);
     box-shadow: 0 0 16px var(--shadow-gold);
+  }
+
+  .card-compact {
+    @apply rounded-lg border;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    transition: all var(--transition-base);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-compact:hover {
+    border-color: var(--accent-gold-border);
+    box-shadow: 0 0 12px var(--shadow-gold);
+  }
+
+  .card-spacious {
+    @apply rounded-lg border;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    transition: all var(--transition-base);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .card-spacious:hover {
+    border-color: var(--accent-gold-border);
+    box-shadow: 0 0 20px var(--shadow-gold);
+  }
+
+  .card-dense {
+    @apply rounded-lg border;
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    transition: all var(--transition-base);
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-dense:hover {
+    border-color: var(--accent-gold-border);
+    box-shadow: 0 0 8px var(--shadow-gold);
   }
 
   /* ═══════════════════════════════════════════════════════
@@ -191,14 +235,14 @@
      ═══════════════════════════════════════════════════════ */
   .glass {
     @apply rounded-lg border;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-card);
     border-color: var(--border-color);
     backdrop-filter: blur(12px);
   }
 
   .glass-lg {
     @apply rounded-xl border;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-card);
     border-color: var(--border-color-light);
     backdrop-filter: blur(20px);
   }
@@ -250,17 +294,34 @@
   /* ═══════════════════════════════════════════════════════
      AUTHENTICATION PAGES STYLES
      ═══════════════════════════════════════════════════════ */
+
+  /* Auth Page Wrapper */
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    background-image:
+      radial-gradient(circle at 30% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(212, 175, 55, 0.04) 0%, transparent 50%);
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  /* Circle Container – Neumorphic dark with gold ring */
   .auth-circle-container {
     position: relative;
     z-index: 10;
-    width: 520px;
-    height: 520px;
+    width: clamp(320px, 54vw, 560px);
+    height: clamp(320px, 54vw, 560px);
     border-radius: 50%;
     background: var(--bg-secondary);
     box-shadow:
-      16px 16px 48px rgba(0, 0, 0, 0.3),
-      -16px -16px 48px rgba(255, 255, 255, 0.02),
-      0 0 0 1px var(--accent-gold-border);
+      20px 20px 60px rgba(0, 0, 0, 0.55),
+      -12px -12px 40px rgba(255, 255, 255, 0.03),
+      0 0 0 1px var(--accent-gold-border),
+      inset 0 1px 1px rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,16 +332,19 @@
 
   @keyframes float-circle {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-12px); }
   }
 
+  /* Inner ring decorations */
   .auth-circle-container::before {
     content: '';
     position: absolute;
-    inset: 12px;
+    inset: 14px;
     border-radius: 50%;
     border: 1px solid var(--accent-gold-border);
     pointer-events: none;
+    animation: spin-ring 20s linear infinite;
+    background: transparent;
   }
 
   .auth-circle-container::after {
@@ -288,23 +352,33 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 1px solid var(--accent-gold-faint);
+    background: radial-gradient(
+      ellipse at 30% 30%,
+      rgba(212, 175, 55, 0.04) 0%,
+      transparent 60%
+    );
     pointer-events: none;
+  }
+
+  @keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
 
   /* 3D Flip Wrapper */
   .auth-flip-wrapper {
     position: relative;
-    width: 300px;
-    height: 400px;
+    width: clamp(230px, 38vw, 326px);
+    height: clamp(380px, 44vw, 476px);
     transform-style: preserve-3d;
-    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.75s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .auth-flip-face {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -312,17 +386,34 @@
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
+    padding: 0 4px;
   }
 
   .auth-flip-face::-webkit-scrollbar {
     display: none;
   }
 
+  /* fp-content: inner form layout */
+  .fp-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  .fp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+  }
+
   /* Form Styles */
   .auth-logo {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 10px;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 8px;
     color: var(--accent-gold);
     display: flex;
     align-items: center;
@@ -330,66 +421,110 @@
     background: var(--accent-gold-faint);
     border-radius: 14px;
     border: 1px solid var(--accent-gold-border);
-    padding: 8px;
+    padding: 9px;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.1);
   }
 
   .auth-form-header {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    text-align: center;
   }
 
   .auth-form-title {
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: clamp(1.3rem, 2.8vw, 1.75rem);
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   .auth-form-subtitle {
-    font-size: 0.875rem;
+    font-size: clamp(0.78rem, 1.5vw, 0.9rem);
     color: var(--text-secondary);
-    max-width: 240px;
-    line-height: 1.4;
+    max-width: 260px;
+    line-height: 1.5;
+    margin: 0 auto;
   }
 
   .auth-field {
     width: 100%;
   }
 
+  /* Neumorphic input style */
   .auth-input-wrap {
     display: flex;
     align-items: center;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    padding: 10px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 10px 13px;
     transition: all var(--transition-base);
+    box-shadow:
+      inset 4px 4px 10px rgba(0, 0, 0, 0.3),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.03);
   }
 
   .auth-input-wrap:focus-within {
     border-color: var(--accent-gold);
-    box-shadow: 0 0 12px var(--shadow-gold);
+    box-shadow:
+      inset 4px 4px 10px rgba(0, 0, 0, 0.3),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.03),
+      0 0 0 1px var(--accent-gold),
+      0 0 14px rgba(212, 175, 55, 0.15);
+  }
+
+  .auth-input-wrap:focus-within .auth-input {
+    background: transparent !important;
+  }
+
+  .auth-input-wrap input {
+    background: transparent !important;
+  }
+
+  .auth-input-wrap input:focus {
+    background: transparent !important;
+  }
+
+  .auth-input-wrap input:-webkit-autofill,
+  .auth-input-wrap input:-webkit-autofill:hover,
+  .auth-input-wrap input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px var(--bg-tertiary) inset;
+    -webkit-text-fill-color: var(--text-primary);
+    transition: background-color 5000s ease-in-out 0s;
   }
 
   .auth-input {
     flex: 1;
-    background: transparent;
+    background: transparent !important;
     border: none;
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: clamp(0.82rem, 1.5vw, 0.95rem);
     outline: none;
+    font-weight: 400;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  .auth-input:focus {
+    background: transparent !important;
   }
 
   .auth-input::placeholder {
-    color: var(--input-placeholder);
+    color: var(--text-tertiary);
+    opacity: 1;
+    -webkit-text-fill-color: var(--text-tertiary);
   }
 
   .auth-input-icon {
     width: 18px;
     height: 18px;
-    margin-right: 8px;
+    margin-right: 10px;
     color: var(--accent-gold);
     flex-shrink: 0;
+    opacity: 0.85;
   }
 
   .auth-eye-btn {
@@ -400,31 +535,52 @@
     padding: 4px;
     margin-left: 8px;
     transition: color var(--transition-base);
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .auth-eye-btn:hover {
     color: var(--accent-gold-light);
   }
 
+  /* Neumorphic submit button */
   .auth-submit-btn {
     width: 100%;
-    padding: 12px;
-    margin-top: 12px;
-    font-weight: 600;
+    padding: 13px 16px;
+    font-size: clamp(0.75rem, 1.4vw, 0.88rem);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1.2px;
     background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
-    color: #121212;
+    color: #0a0a0a;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all var(--transition-base);
+    box-shadow:
+      6px 6px 14px rgba(0, 0, 0, 0.4),
+      -2px -2px 6px rgba(255, 255, 255, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    margin-top: 4px;
   }
 
   .auth-submit-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px var(--shadow-gold);
+    box-shadow:
+      8px 10px 20px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(212, 175, 55, 0.2);
+  }
+
+  .auth-submit-btn:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow:
+      4px 4px 10px rgba(0, 0, 0, 0.4),
+      0 0 10px rgba(212, 175, 55, 0.1);
   }
 
   .auth-submit-btn:disabled {
@@ -437,23 +593,174 @@
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: clamp(0.78rem, 1.4vw, 0.85rem);
     transition: color var(--transition-base);
+    padding: 4px 0;
+    text-align: center;
+    line-height: 1.5;
   }
 
   .auth-link-btn:hover {
-    color: var(--accent-gold);
+    color: var(--text-primary);
   }
 
   .auth-link-btn strong {
     font-weight: 600;
     color: var(--accent-gold);
+    transition: color var(--transition-base);
+  }
+
+  .auth-link-btn:hover strong {
+    color: var(--accent-gold-light);
   }
 
   .auth-field-error {
     color: #ef4444;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     margin: 4px 0;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     RESPONSIVE — Global Mobile & Tablet
+     ═══════════════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .auth-circle-container {
+      width: 96vw;
+      height: 96vw;
+      max-width: 400px;
+      max-height: 400px;
+      min-width: unset;
+      min-height: unset;
+    }
+
+    .auth-flip-wrapper {
+      width: 74%;
+      height: 85%;
+      min-height: unset;
+      max-width: unset;
+      padding: 0;
+    }
+
+    .auth-logo {
+      width: 32px;
+      height: 32px;
+      padding: 5px;
+      margin-bottom: 4px;
+    }
+
+    .auth-form-title {
+      font-size: 1.15rem;
+      margin-bottom: 2px;
+    }
+
+    .auth-form-subtitle {
+      font-size: 0.75rem;
+      max-width: 95%;
+      margin-bottom: 8px;
+    }
+
+    .fp-form {
+      gap: 6px;
+    }
+
+    .auth-input-wrap {
+      padding: 8px 12px;
+    }
+
+    .auth-submit-btn {
+      padding: 10px 14px;
+      margin-top: 4px;
+      font-size: 0.75rem;
+    }
+    
+    .auth-link-btn {
+      font-size: 0.75rem;
+      padding: 2px 0;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 768px) {
+    .auth-circle-container {
+      width: clamp(380px, 80vw, 460px);
+      height: clamp(380px, 80vw, 460px);
+    }
+
+    .auth-flip-wrapper {
+      width: 75%;
+      height: 82%;
+    }
+    
+    .auth-form-title {
+      font-size: 1.3rem;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .auth-circle-container {
+      width: clamp(480px, 60vw, 560px);
+      height: clamp(480px, 60vw, 560px);
+    }
+
+    .auth-flip-wrapper {
+      width: clamp(300px, 40vw, 326px);
+      height: clamp(420px, 50vw, 476px);
+    }
+  }
+
+  @media (min-width: 1025px) and (max-width: 1919px) {
+    .auth-circle-container {
+      width: 560px;
+      height: 560px;
+    }
+
+    .auth-flip-wrapper {
+      width: 326px;
+      height: 476px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .auth-circle-container {
+      width: clamp(640px, 36vw, 800px);
+      height: clamp(640px, 36vw, 800px);
+    }
+
+    .auth-flip-wrapper {
+      width: clamp(380px, 23vw, 500px);
+      height: clamp(520px, 30vw, 660px);
+    }
+
+    .auth-form-title {
+      font-size: 2.25rem;
+    }
+
+    .auth-form-subtitle {
+      font-size: 1.05rem;
+    }
+
+    .auth-input {
+      font-size: 1.05rem;
+    }
+
+    .auth-input-wrap {
+      padding: 15px 18px;
+    }
+
+    .auth-submit-btn {
+      padding: 17px 20px;
+      font-size: 1rem;
+    }
+
+    .auth-link-btn {
+      font-size: 1rem;
+    }
+
+    .auth-logo {
+      width: 58px;
+      height: 58px;
+    }
   }
 
   /* ═══════════════════════════════════════════════════════
@@ -461,62 +768,496 @@
      ═══════════════════════════════════════════════════════ */
   .modal-overlay {
     background: var(--bg-overlay);
+    backdrop-filter: blur(8px);
   }
 
   .modal-content {
     background: var(--bg-secondary);
     border-color: var(--border-color);
     color: var(--text-primary);
-    border-radius: 12px;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 28rem;
+    width: 100%;
+    padding: 1.5rem;
   }
 
-  /* ═══════════════════════════════════════════════════════
-     RESPONSIVE DESIGN
-     ═══════════════════════════════════════════════════════ */
-  @media (max-width: 768px) {
-    .auth-circle-container {
-      width: min(90vw, 400px);
-      height: min(90vw, 400px);
-    }
-
-    .auth-flip-wrapper {
-      width: min(70vw, 240px);
-      height: min(85vw, 280px);
-    }
-
-    .auth-form-title {
-      font-size: 1.25rem;
-    }
+  .modal-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
   }
 
-  @media (max-width: 480px) {
-    .auth-circle-container {
-      width: min(92vw, 320px);
-      height: min(92vw, 320px);
-    }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
 
-    .auth-flip-wrapper {
-      width: min(68vw, 215px);
-      height: min(78vw, 260px);
-    }
+  .modal-body {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
 
-    .auth-form-title {
-      font-size: 1rem;
-    }
-
-    .auth-form-subtitle {
-      font-size: 0.75rem;
-    }
+  .modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
   }
 }
 
 /* ═══════════════════════════════════════════════════════
-   THEME PERSISTENCE & INITIALIZATION
+   THEME PERSISTENCE & GLOBAL COHERENCE
    ═══════════════════════════════════════════════════════ */
-html[data-theme='dark'] {
+html[data-theme='dark'],
+html.dark {
   color-scheme: dark;
 }
 
-html[data-theme='light'] {
+html[data-theme='light'],
+html.light {
   color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT THEME — Complete Override System
+   Every hardcoded dark Tailwind class is remapped here.
+   ═══════════════════════════════════════════════════════ */
+
+/* --- Background Overrides: bg-dark-* → Light equivalents --- */
+html.light .bg-dark-bg,
+html[data-theme='light'] .bg-dark-bg {
+  background-color: var(--bg-primary) !important;
+}
+
+html.light .bg-dark-card,
+html[data-theme='light'] .bg-dark-card {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-dark-card\/50,
+html[data-theme='light'] .bg-dark-card\/50 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html.light .bg-dark-card\/40,
+html[data-theme='light'] .bg-dark-card\/40 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.light .bg-dark-hover,
+html[data-theme='light'] .bg-dark-hover {
+  background-color: #f0f1f3 !important;
+}
+
+html.light .bg-dark-hover\/50,
+html[data-theme='light'] .bg-dark-hover\/50 {
+  background-color: rgba(240, 241, 243, 0.5) !important;
+}
+
+html.light .bg-dark-border,
+html[data-theme='light'] .bg-dark-border {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .bg-dark-bg\/70,
+html[data-theme='light'] .bg-dark-bg\/70 {
+  background-color: rgba(244, 245, 247, 0.85) !important;
+}
+
+html.light .bg-dark-bg\/80,
+html[data-theme='light'] .bg-dark-bg\/80 {
+  background-color: rgba(244, 245, 247, 0.9) !important;
+}
+
+/* Hover states */
+html.light .hover\:bg-dark-hover:hover,
+html[data-theme='light'] .hover\:bg-dark-hover:hover {
+  background-color: #e4e5e8 !important;
+}
+
+html.light .hover\:bg-dark-border:hover,
+html[data-theme='light'] .hover\:bg-dark-border:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .hover\:bg-dark-bg:hover,
+html[data-theme='light'] .hover\:bg-dark-bg:hover {
+  background-color: var(--bg-primary) !important;
+}
+
+/* --- Border Overrides: border-dark-* → Light equivalents --- */
+html.light .border-dark-border,
+html[data-theme='light'] .border-dark-border {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light .hover\:border-dark-border:hover,
+html[data-theme='light'] .hover\:border-dark-border:hover {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+html.light .divide-dark-border > :not([hidden]) ~ :not([hidden]),
+html[data-theme='light'] .divide-dark-border > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- Text Overrides: text-white → dark text for light theme --- */
+html.light .text-white,
+html[data-theme='light'] .text-white {
+  color: #1a1a1a !important;
+}
+
+/* Preserve white text inside colored badge/button backgrounds */
+html.light .bg-nexus-500 .text-white,
+html.light .bg-nexus-600 .text-white,
+html.light .bg-nexus-700 .text-white,
+html.light .bg-gradient-to-br .text-white,
+html.light .bg-gradient-to-r .text-white,
+html.light [class*='from-nexus'] .text-white,
+html.light [class*='bg-emerald'] .text-white,
+html.light [class*='bg-red'] .text-white,
+html.light [class*='bg-sky'] .text-white,
+html.light [class*='bg-blue'] .text-white,
+html.light [class*='bg-purple'] .text-white,
+html.light [class*='bg-green'] .text-white,
+html.light .btn-primary .text-white,
+html.light .auth-submit-btn .text-white,
+html[data-theme='light'] .bg-nexus-500 .text-white,
+html[data-theme='light'] .bg-nexus-600 .text-white,
+html[data-theme='light'] .bg-nexus-700 .text-white,
+html[data-theme='light'] .bg-gradient-to-br .text-white,
+html[data-theme='light'] .bg-gradient-to-r .text-white,
+html[data-theme='light'] [class*='from-nexus'] .text-white,
+html[data-theme='light'] [class*='bg-emerald'] .text-white,
+html[data-theme='light'] [class*='bg-red'] .text-white,
+html[data-theme='light'] [class*='bg-sky'] .text-white,
+html[data-theme='light'] [class*='bg-blue'] .text-white,
+html[data-theme='light'] [class*='bg-purple'] .text-white,
+html[data-theme='light'] [class*='bg-green'] .text-white,
+html[data-theme='light'] .btn-primary .text-white,
+html[data-theme='light'] .auth-submit-btn .text-white {
+  color: #ffffff !important;
+}
+
+/* Direct text-white on gradient/colored containers themselves */
+html.light .bg-gradient-to-br.text-white,
+html.light .bg-gradient-to-r.text-white,
+html.light [class*='from-nexus'].text-white,
+html[data-theme='light'] .bg-gradient-to-br.text-white,
+html[data-theme='light'] .bg-gradient-to-r.text-white,
+html[data-theme='light'] [class*='from-nexus'].text-white {
+  color: #ffffff !important;
+}
+
+/* Text on gradient backgrounds like avatar circles */
+html.light .bg-gradient-to-br > .text-white,
+html.light .bg-gradient-to-br > span.text-white,
+html[data-theme='light'] .bg-gradient-to-br > .text-white,
+html[data-theme='light'] .bg-gradient-to-br > span.text-white {
+  color: #ffffff !important;
+}
+
+/* White text inside small rounded badges (cart count, etc.) */
+html.light .bg-nexus-500.text-white,
+html[data-theme='light'] .bg-nexus-500.text-white {
+  color: #ffffff !important;
+}
+
+html.light .text-white\/80,
+html.light .text-white\/70,
+html.light .text-white\/60,
+html[data-theme='light'] .text-white\/80,
+html[data-theme='light'] .text-white\/70,
+html[data-theme='light'] .text-white\/60 {
+  color: var(--text-secondary) !important;
+}
+
+/* --- Text Overrides: text-nexus-* → readable on light bg --- */
+html.light .text-nexus-200,
+html[data-theme='light'] .text-nexus-200 {
+  color: #555555 !important;
+}
+
+html.light .text-nexus-300,
+html[data-theme='light'] .text-nexus-300 {
+  color: #555555 !important;
+}
+
+html.light .text-nexus-400,
+html[data-theme='light'] .text-nexus-400 {
+  color: #7a6520 !important;
+}
+
+html.light .text-nexus-500,
+html[data-theme='light'] .text-nexus-500 {
+  color: #8b6408 !important;
+}
+
+html.light .hover\:text-nexus-300:hover,
+html[data-theme='light'] .hover\:text-nexus-300:hover {
+  color: #444444 !important;
+}
+
+html.light .hover\:text-nexus-400:hover,
+html[data-theme='light'] .hover\:text-nexus-400:hover {
+  color: #665018 !important;
+}
+
+/* hover:text-white → dark text on hover for light theme */
+html.light .hover\:text-white:hover,
+html[data-theme='light'] .hover\:text-white:hover {
+  color: #1a1a1a !important;
+}
+
+html.light .hover\:text-primary:hover,
+html[data-theme='light'] .hover\:text-primary:hover {
+  color: #1a1a1a !important;
+}
+
+/* --- Surface Overrides --- */
+html.light .bg-surface-100,
+html[data-theme='light'] .bg-surface-100 {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+html.light .bg-surface-200,
+html[data-theme='light'] .bg-surface-200 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light .bg-surface-300,
+html[data-theme='light'] .bg-surface-300 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- Glass & Card Overrides --- */
+html.light .glass,
+html[data-theme='light'] .glass {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .glass-lg,
+html[data-theme='light'] .glass-lg {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light .neumorphic,
+html[data-theme='light'] .neumorphic {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow:
+    6px 6px 16px rgba(0, 0, 0, 0.06),
+    -4px -4px 12px rgba(255, 255, 255, 0.9) !important;
+}
+
+html.light .card,
+html.light .card-compact,
+html.light .card-spacious,
+html.light .card-dense,
+html[data-theme='light'] .card,
+html[data-theme='light'] .card-compact,
+html[data-theme='light'] .card-spacious,
+html[data-theme='light'] .card-dense {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- Shadow Overrides --- */
+html.light .shadow-glass,
+html[data-theme='light'] .shadow-glass {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .shadow-glass-lg,
+html[data-theme='light'] .shadow-glass-lg {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* --- Auth page light overrides --- */
+html.light .auth-circle-container,
+html[data-theme='light'] .auth-circle-container {
+  background: #ffffff !important;
+  box-shadow:
+    20px 20px 50px rgba(0, 0, 0, 0.08),
+    -14px -14px 40px rgba(255, 255, 255, 0.95),
+    0 0 0 1px var(--accent-gold-border),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+html.light .auth-input-wrap,
+html[data-theme='light'] .auth-input-wrap {
+  background: #f0f1f4 !important;
+  box-shadow:
+    inset 2px 2px 5px rgba(0, 0, 0, 0.06),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.85) !important;
+}
+
+html.light .auth-input-wrap input:-webkit-autofill,
+html.light .auth-input-wrap input:-webkit-autofill:hover,
+html.light .auth-input-wrap input:-webkit-autofill:focus,
+html[data-theme='light'] .auth-input-wrap input:-webkit-autofill,
+html[data-theme='light'] .auth-input-wrap input:-webkit-autofill:hover,
+html[data-theme='light'] .auth-input-wrap input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #f0f1f4 inset !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+/* --- Gourmet colors → light-safe variants --- */
+html.light .bg-gourmet-charcoal,
+html[data-theme='light'] .bg-gourmet-charcoal {
+  background-color: var(--bg-primary) !important;
+}
+
+html.light .bg-gourmet-charcoalLight,
+html[data-theme='light'] .bg-gourmet-charcoalLight {
+  background-color: #ffffff !important;
+}
+
+html.light .bg-gourmet-glass,
+html[data-theme='light'] .bg-gourmet-glass {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+html.light .text-gourmet-champagne,
+html[data-theme='light'] .text-gourmet-champagne {
+  color: #8b6408 !important;
+}
+
+html.light .border-gourmet-glassBorder,
+html[data-theme='light'] .border-gourmet-glassBorder {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- Nexus background colors opacity fix --- */
+html.light .bg-nexus-600\/15,
+html[data-theme='light'] .bg-nexus-600\/15 {
+  background-color: rgba(184, 134, 11, 0.12) !important;
+}
+
+html.light .bg-nexus-600\/20,
+html[data-theme='light'] .bg-nexus-600\/20 {
+  background-color: rgba(184, 134, 11, 0.12) !important;
+}
+
+html.light .bg-nexus-600\/30,
+html[data-theme='light'] .bg-nexus-600\/30 {
+  background-color: rgba(184, 134, 11, 0.15) !important;
+}
+
+html.light .bg-nexus-500\/30,
+html[data-theme='light'] .bg-nexus-500\/30 {
+  background-color: rgba(184, 134, 11, 0.15) !important;
+}
+
+/* --- Red accent overrides for remove modals --- */
+html.light .text-red-400,
+html[data-theme='light'] .text-red-400 {
+  color: #dc2626 !important;
+}
+
+html.light .text-red-300,
+html[data-theme='light'] .text-red-300 {
+  color: #b91c1c !important;
+}
+
+html.light .text-amber-200,
+html[data-theme='light'] .text-amber-200 {
+  color: #92400e !important;
+}
+
+html.light .text-amber-400,
+html[data-theme='light'] .text-amber-400 {
+  color: #b45309 !important;
+}
+
+/* --- Page container and main content --- */
+html.light .page-container,
+html[data-theme='light'] .page-container {
+  background: var(--bg-primary) !important;
+}
+
+/* --- LoadingScreen --- */
+html.light .bg-dark-bg.text-nexus-400,
+html[data-theme='light'] .bg-dark-bg.text-nexus-400 {
+  background-color: var(--bg-primary) !important;
+  color: #7a6520 !important;
+}
+
+/* Auth Floating Theme Toggle Button */
+.auth-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 9999px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent-gold-border);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-theme-toggle:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-gold);
+}
+
+.auth-theme-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--accent-gold);
+}
+
+.auth-theme-text {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+/* --- Page container layout --- */
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  transition: background-color var(--transition-base);
+}
+
+.main-content {
+  flex: 1;
+  max-width: 80rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .main-content {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    padding: 2.5rem 2rem;
+  }
 }

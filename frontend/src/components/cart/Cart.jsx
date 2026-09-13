@@ -63,9 +63,9 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
           </p>
 
           {/* Card resumo do produto melhorado */}
-          <div className="mt-6 rounded-2xl border border-dark-border bg-dark-hover/50 p-4">
+          <div className="mt-6 rounded-2xl border border-border-color bg-card p-4">
             <div className="flex items-start gap-4">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-dark-border bg-dark-card">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-border-color bg-card">
                 {item.imagem_url ? (
                   <img src={item.imagem_url} alt="" className="h-full w-full object-cover" />
                 ) : (
@@ -251,7 +251,7 @@ export default function Cart() {
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.id, item.quantidade - 1)}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-nexus-300 transition-colors hover:bg-dark-hover hover:text-white"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
                             aria-label={`Diminuir quantidade de ${item.nome}`}
                           >
                             <MinusIcon className="h-4 w-4" />
@@ -268,7 +268,7 @@ export default function Cart() {
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.id, item.quantidade + 1)}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-nexus-300 transition-colors hover:bg-dark-hover hover:text-white"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
                             aria-label={`Aumentar quantidade de ${item.nome}`}
                           >
                             <PlusIcon className="h-4 w-4" />

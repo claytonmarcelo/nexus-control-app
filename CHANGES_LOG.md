@@ -76,7 +76,8 @@
   - Modal: `.modal-overlay`, `.modal-content`
 - ✅ Added scrollbar styling for light theme
 - ✅ Added auth screen light theme overrides
-
+- ✅ Refined mobile responsiveness for auth screens to perfectly fit within the circular design
+- ✅ Restored original responsive text sizing for inputs and placeholders on mobile
 #### `frontend/src/components/ui/LoadingScreen.jsx`
 - ✅ Replaced inline styles with Tailwind classes
 - ✅ New spinner: `border-4` + `border-t-nexus-500 animate-spin`

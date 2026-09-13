@@ -220,11 +220,9 @@ describe('CartContext - Segurança', () => {
             Adicionar
           </button>
           {items.length > 0 && (
-            <>
-              <button onClick={() => updateQuantity(items[0].id, 0)}>Remover via Quantidade</button>
-              <div data-testid="item-count">{items.length}</div>
-            </>
+            <button onClick={() => updateQuantity(items[0].id, 0)}>Remover via Quantidade</button>
           )}
+          <div data-testid="item-count">{items.length}</div>
         </>
       );
     };

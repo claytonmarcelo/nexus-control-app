@@ -18,10 +18,10 @@ export default {
     extend: {
       colors: {
         dark: {
-          bg: '#121212',
-          card: '#1A1A1A',
-          hover: '#242424',
-          border: 'rgba(212, 175, 55, 0.15)',
+          bg: 'var(--bg-primary)',
+          card: 'var(--bg-secondary)',
+          hover: 'var(--bg-hover)',
+          border: 'var(--border-color)',
         },
         nexus: {
           300: '#F0D98A',
@@ -42,6 +42,7 @@ export default {
           glass: 'rgba(255, 255, 255, 0.05)',
           glassBorder: 'rgba(212, 175, 55, 0.2)',
           glassHover: 'rgba(212, 175, 55, 0.08)',
+          // Light theme glass overrides will be handled via CSS variables
         },
         surface: {
           100: 'rgba(255, 255, 255, 0.03)',
@@ -49,10 +50,10 @@ export default {
           300: 'rgba(255, 255, 255, 0.08)',
         },
         text: {
-          primary: '#FFFFFF',
-          secondary: 'rgba(255, 255, 255, 0.7)',
-          muted: 'rgba(255, 255, 255, 0.5)',
-          champagne: '#D4AF37',
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+          champagne: 'var(--accent-gold)',
         }
       },
       fontFamily: {

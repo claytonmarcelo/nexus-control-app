@@ -7,7 +7,8 @@
    DARK THEME (Default - Gourmet Premium)
    ───────────────────────────────────────────────────────────────────────── */
 :root,
-html[data-theme='dark'] {
+html[data-theme='dark'],
+html.dark {
   /* Background Colors */
   --bg-primary: #121212;
   --bg-secondary: #1a1a1a;
@@ -52,7 +53,7 @@ html[data-theme='dark'] {
   /* Component Specific */
   --input-bg: #242424;
   --input-border: rgba(212, 175, 55, 0.15);
-  --input-placeholder: rgba(212, 175, 55, 0.5);
+  --input-placeholder: rgba(212, 175, 55, 0.7);
   --button-bg: #1a1a1a;
   --button-border: rgba(212, 175, 55, 0.2);
   --scrollbar-thumb: rgba(212, 175, 55, 0.2);
@@ -62,12 +63,13 @@ html[data-theme='dark'] {
 /* ─────────────────────────────────────────────────────────────────────────
    LIGHT THEME
    ───────────────────────────────────────────────────────────────────────── */
-html[data-theme='light'] {
+html[data-theme='light'],
+html.light {
   /* Background Colors */
   --bg-primary: #f4f5f7;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f0f1f3;
-  --bg-card: rgba(0, 0, 0, 0.02);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --bg-hover: #e8eaed;
   --bg-overlay: rgba(0, 0, 0, 0.3);
 
@@ -107,7 +109,7 @@ html[data-theme='light'] {
   /* Component Specific */
   --input-bg: #ffffff;
   --input-border: rgba(0, 0, 0, 0.1);
-  --input-placeholder: rgba(0, 0, 0, 0.5);
+  --input-placeholder: rgba(184, 134, 11, 0.6);
   --button-bg: #f9fafb;
   --button-border: rgba(0, 0, 0, 0.1);
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);

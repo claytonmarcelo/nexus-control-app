@@ -23,8 +23,10 @@ function getUnitPrice(item) {
 }
 
 function normalizeItem(item, quantidade = 1) {
+  if (!item || (!item.id && !item.item_id)) return null;
+  const id = String(item.id || item.item_id);
   return {
-    id: String(item.id),
+    id,
     item_id: item.item_id || item.id,
     nome: item.nome || item.name || 'Produto sem nome',
     descricao: item.descricao || item.description || '',
@@ -46,6 +48,7 @@ export function CartProvider({ children }) {
 
   const addItem = useCallback((item, quantidade = 1) => {
     const product = normalizeItem(item, quantidade);
+    if (!product) return;
 
     setItems((currentItems) => {
       const existingItem = currentItems.find((currentItem) => String(currentItem.id) === product.id);

@@ -42,7 +42,7 @@ export default function Layout() {
 
   return (
     <div className="page-container">
-      <header className="glass border-b border-dark-border sticky top-0 z-[1000]">
+      <header className="glass border-b border-border sticky top-0 z-[1000]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -50,7 +50,7 @@ export default function Layout() {
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
                   <NexusLogo className="w-6 h-6 text-white" />
                 </div>
-                <span className="font-bold text-xl text-white hidden sm:block">Nexus Control</span>
+                <span className="font-bold text-xl text-primary hidden sm:block">Nexus Control</span>
               </NavLink>
               
               <nav className="hidden md:flex items-center gap-1">
@@ -61,8 +61,8 @@ export default function Layout() {
                     className={({ isActive }) =>
                       `relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                         isActive
-                          ? 'bg-nexus-600/30 text-white'
-                          : 'text-nexus-300 hover:text-white hover:bg-dark-hover'
+                          ? 'bg-nexus-600/20 text-nexus-400 font-semibold'
+                          : 'text-nexus-400 hover:text-primary hover:bg-hover'
                       }`
                     }
                   >
@@ -85,7 +85,7 @@ export default function Layout() {
               </button>
               <div className="hidden sm:block relative">
                 <button
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-dark-hover hover:bg-dark-border transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-hover hover:border-border transition-colors"
                   onClick={() => navigate('/perfil')}
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
@@ -93,7 +93,7 @@ export default function Layout() {
                       {user?.nome?.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-sm font-medium text-white">{user?.nome}</span>
+                  <span className="text-sm font-medium text-primary">{user?.nome}</span>
                   <svg className="w-4 h-4 text-nexus-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -119,16 +119,16 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="glass border-t border-dark-border mt-auto sticky bottom-0 z-[1000]">
+      <footer className="glass border-t border-border mt-auto sticky bottom-0 z-[1000]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="flex items-center gap-2 text-nexus-400 text-sm">
               <NexusLogo className="w-5 h-5" />
-              <span className="font-medium text-white">Nexus Control</span>
+              <span className="font-medium text-primary">Nexus Control</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-nexus-400">
               <a href="/sobre" className="hover:text-nexus-300 transition-colors">Quem Somos</a>
-              <span>Desenvolvido por <strong className="text-white">Clayton Marcelo</strong></span>
+              <span>Desenvolvido por <strong className="text-primary">Clayton Marcelo</strong></span>
               <a
                 href="https://github.com/claytonmarcelo"
                 target="_blank"

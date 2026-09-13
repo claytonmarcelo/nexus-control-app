@@ -1,6 +1,7 @@
 import pool from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import type { ResultSetHeader } from 'mysql2';
 import { ROOT_ADMIN_EMAIL } from '../config/access.js';
 
 dotenv.config();
@@ -10,7 +11,7 @@ const resetAdminPassword = async () => {
     const newPassword = process.env.ROOT_ADMIN_PASSWORD || '26481#';
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     
-    const [result] = await pool.execute(
+    const [result] = await pool.execute<ResultSetHeader>(
       'UPDATE usuarios SET senha = ? WHERE email = ?',
       [hashedPassword, ROOT_ADMIN_EMAIL]
     );
