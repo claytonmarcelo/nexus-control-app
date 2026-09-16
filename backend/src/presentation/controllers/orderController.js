@@ -5,9 +5,9 @@ import {
   findAllOrders,
   updateOrderStatus,
   deleteOrder
-} from '../models/Order.js';
-import { findItemsByIds } from '../models/Item.js';
-import { sendSuccess, sendError, sendPaginated } from '../utils/response.js';
+} from '../../infrastructure/Order.js';
+import { findItemsByIds } from '../../infrastructure/Item.js';
+import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
 
 export const checkout = async (req, res) => {
   try {
@@ -22,7 +22,7 @@ export const checkout = async (req, res) => {
     const itemIds = items.map(item => item.item_id);
 
     // Buscar itens reais do banco
-    const realItems = (await findItemsByIds(itemIds)) as any[];
+    const realItems = await findItemsByIds(itemIds);
 
     if (realItems.length !== itemIds.length) {
       return sendError(res, 'Um ou mais itens não foram encontrados no banco', 400);
@@ -30,7 +30,7 @@ export const checkout = async (req, res) => {
 
     // Criar mapa de preços reais do banco
     const pricesMap = new Map();
-    realItems.forEach((item: any) => {
+    realItems.forEach((item) => {
       pricesMap.set(item.id, item.valor_venda);
     });
 

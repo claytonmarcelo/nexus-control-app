@@ -39,10 +39,22 @@ export const findItemsByUser = async (userId) => {
   return rows;
 };
 
-export const updateItem = async (id, { nome, descricao, categoria, fabricante, imagem_url, valor_venda, valor_aluguel_mensal, estoque }) => {
+export const updateItem = async (id, data = {}) => {
+  const current = await findItemById(id);
+  if (!current) return false;
   const [result] = await pool.execute(
     `UPDATE itens SET nome = ?, descricao = ?, categoria = ?, fabricante = ?, imagem_url = ?, valor_venda = ?, valor_aluguel_mensal = ?, estoque = ? WHERE id = ?`,
-    [nome, descricao, categoria || 'Informática', fabricante || null, imagem_url || null, valor_venda || null, valor_aluguel_mensal || null, estoque ?? 1, id]
+    [
+      data.nome ?? current.nome ?? '',
+      data.descricao ?? current.descricao ?? null,
+      data.categoria ?? current.categoria ?? 'Informática',
+      data.fabricante ?? current.fabricante ?? null,
+      data.imagem_url ?? current.imagem_url ?? null,
+      data.valor_venda ?? current.valor_venda ?? null,
+      data.valor_aluguel_mensal ?? current.valor_aluguel_mensal ?? null,
+      data.estoque ?? current.estoque ?? 1,
+      id
+    ]
   );
   return result.affectedRows > 0;
 };

@@ -27,6 +27,15 @@
 
 <hr />
 
+## 🚀 Como Iniciar o Projeto (Solução Completa)
+
+Para garantir que **tanto o Banco de Dados (API/Backend) quanto a Interface (Frontend)** iniciem juntos sem erros de conexão (Network Error) ou de acesso, siga um destes passos:
+
+1. Dê um duplo clique no arquivo **`INICIAR_PROJETO.bat`** (localizado na raiz do projeto). Ele limpará processos travados, iniciará o backend e o frontend simultaneamente, e abrirá o navegador automaticamente. Mantenha a janela do terminal aberta.
+2. Alternativamente, abra o terminal na raiz do projeto e execute: `npm run dev`.
+
+---
+
 ## 📖 Página "Quem Somos"
 
 A aplicação inclui uma página institucional completa (`/sobre`) acessível após fazer login, com:

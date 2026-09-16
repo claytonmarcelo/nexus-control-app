@@ -6,9 +6,9 @@ import {
   updateItem,
   deleteItem,
   canUserModifyItem,
-} from '../models/Item.js';
-import { sendSuccess, sendError, sendPaginated } from '../utils/response.js';
-import { createNegotiation, findNegotiationsByUser } from '../models/Negotiation.js';
+} from '../../infrastructure/Item.js';
+import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
+import { createNegotiation, findNegotiationsByUser } from '../../infrastructure/Negotiation.js';
 
 export const create = async (req, res) => {
   try {

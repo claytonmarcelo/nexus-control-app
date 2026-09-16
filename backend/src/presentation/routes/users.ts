@@ -18,7 +18,7 @@ import {
   validatePermissions,
 } from '../middleware/validation.js';
 import { authenticate, authorize, authorizePage } from '../middleware/auth.js';
-import { USER_ROLES } from '../models/User.js';
+import { USER_ROLES } from '../../infrastructure/User.js';
 
 const router = Router();
 

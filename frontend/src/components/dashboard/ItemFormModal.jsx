@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useModal } from '../../contexts/ModalContext';
 
 export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, loading }) {
-  const [formData, setFormData] = useState({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10 });
+  const [formData, setFormData] = useState({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useModal();
@@ -10,9 +10,9 @@ export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setFormData({ nome: initialData.nome, descricao: initialData.descricao || '', categoria: initialData.categoria || 'Informática', valor_venda: initialData.valor_venda || '', valor_aluguel_mensal: initialData.valor_aluguel_mensal || '', estoque: initialData.estoque ?? 10 });
+        setFormData({ nome: initialData.nome, descricao: initialData.descricao || '', categoria: initialData.categoria || 'Informática', valor_venda: initialData.valor_venda || '', valor_aluguel_mensal: initialData.valor_aluguel_mensal || '', estoque: initialData.estoque ?? 10, imagem_url: initialData.imagem_url || '' });
       } else {
-        setFormData({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10 });
+        setFormData({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
       }
       setErrors({});
     }
@@ -31,6 +31,7 @@ export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, 
     if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório';
     else if (formData.nome.length > 200) newErrors.nome = 'Nome deve ter no máximo 200 caracteres';
     if (formData.descricao && formData.descricao.length > 1000) newErrors.descricao = 'Descrição deve ter no máximo 1000 caracteres';
+    if (formData.imagem_url && !formData.imagem_url.match(/^https?:\/\/.+/)) newErrors.imagem_url = 'A URL da imagem deve ser válida (http:// ou https://)';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -117,6 +118,25 @@ export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, 
                 autoFocus
               />
               {errors.nome && <p id="nome-error" className="mt-1 text-sm text-red-400" role="alert">{errors.nome}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="imagem_url" className="label">URL da Imagem (Externa)</label>
+              <input
+                id="imagem_url"
+                name="imagem_url"
+                type="url"
+                value={formData.imagem_url}
+                onChange={handleChange}
+                className={`input ${errors.imagem_url ? 'border-red-500 focus:ring-red-500' : ''}`}
+                placeholder="https://images.unsplash.com/photo-..."
+                disabled={isSubmitting || loading}
+                aria-invalid={!!errors.imagem_url}
+              />
+              {errors.imagem_url && <p className="mt-1 text-sm text-red-400" role="alert">{errors.imagem_url}</p>}
+              <p className="mt-1 text-xs text-nexus-500">
+                Insira uma URL de imagem externa real para representar o item. Evite imagens fictícias geradas por IA.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

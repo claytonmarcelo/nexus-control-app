@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { itemService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
@@ -42,16 +43,19 @@ function ProductCard({ item, user, isAdmin, isFuncionario, isCliente, onEdit, on
           <img
             src={item.imagem_url}
             alt={item.nome}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             onError={() => setImgError(true)}
             loading="lazy"
           />
         ) : (
-          <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${catStyle.split(' ').slice(0, 2).join(' ')}`}>
-            <BoxIcon className="h-16 w-16 text-white/20" />
-          </div>
+          <img
+            src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80"
+            alt="Imagem não disponível"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 opacity-80"
+            loading="lazy"
+          />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-card/90 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/50 to-transparent opacity-90" />
         {/* Category badge */}
         <span className={`absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider backdrop-blur-sm bg-dark-bg/70 ${catStyle.split(' ').slice(-1)}`}>
           {item.categoria}
@@ -116,30 +120,28 @@ function ProductCard({ item, user, isAdmin, isFuncionario, isCliente, onEdit, on
         </div>
 
         {/* Client CTA buttons */}
-        {isCliente && (
-          <div className="flex flex-col gap-2 pt-1">
-            {item.valor_venda > 0 && (
-              <button
-                id={`add-to-cart-${item.id}`}
-                className="btn-primary w-full gap-2 py-2.5 text-xs"
-                onClick={() => onAddToCart(item, 'compra')}
-              >
-                <CartPlusIcon className="h-4 w-4" />
-                Adicionar ao carrinho
-              </button>
-            )}
-            {item.valor_aluguel_mensal > 0 && (
-              <button
-                id={`rent-${item.id}`}
-                className="btn-secondary w-full gap-2 py-2.5 text-xs"
-                onClick={() => onAddToCart(item, 'aluguel')}
-              >
-                <ClockIcon className="h-4 w-4" />
-                Alugar por mês
-              </button>
-            )}
-          </div>
-        )}
+        <div className="flex flex-col gap-2 pt-1">
+          {item.valor_venda > 0 && (
+            <button
+              id={`add-to-cart-${item.id}`}
+              className="btn-primary w-full gap-2 py-2.5 text-xs"
+              onClick={() => onAddToCart(item, 'compra')}
+            >
+              <CartPlusIcon className="h-4 w-4" />
+              Adicionar ao carrinho
+            </button>
+          )}
+          {item.valor_aluguel_mensal > 0 && (
+            <button
+              id={`rent-${item.id}`}
+              className="btn-secondary w-full gap-2 py-2.5 text-xs"
+              onClick={() => onAddToCart(item, 'aluguel')}
+            >
+              <ClockIcon className="h-4 w-4" />
+              Alugar por mês
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -154,15 +156,19 @@ export default function Items() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
-  const [search, setSearch] = useState('');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const [search, setSearch] = useState(queryParams.get('search') || '');
   const [activeCategory, setActiveCategory] = useState('Todos');
 
   const loadItems = useCallback(async () => {
     setLoading(true);
     try {
       const response = await itemService.getAll({ limit: 100 });
-      setItems(response.items || []);
-    } catch {
+      // itemService retorna response.data do Axios
+      const itemsData = response?.data?.items || [];
+      setItems(Array.isArray(itemsData) ? itemsData : []);
+    } catch (error) {
       toast({ message: 'Erro ao carregar catálogo', variant: 'danger' });
     } finally {
       setLoading(false);
@@ -267,6 +273,30 @@ export default function Items() {
             <PlusIcon className="h-5 w-5 mr-2" /> Novo Item
           </button>
         )}
+      </div>
+
+      {/* KPIs Section */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Total de Produtos</span>
+          <span className="mt-1 text-3xl font-bold text-white">{items.length}</span>
+        </div>
+        <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Categorias</span>
+          <span className="mt-1 text-3xl font-bold text-white">{categories.length > 1 ? categories.length - 1 : 0}</span>
+        </div>
+        <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Itens em Estoque</span>
+          <span className="mt-1 text-3xl font-bold text-white">
+            {items.reduce((acc, item) => acc + (item.estoque || 0), 0)}
+          </span>
+        </div>
+        <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Valor do Estoque</span>
+          <span className="mt-1 text-xl sm:text-2xl font-bold text-gourmet-champagne">
+            {formatCurrency(items.reduce((acc, item) => acc + ((item.estoque || 0) * (item.valor_venda || 0)), 0))}
+          </span>
+        </div>
       </div>
 
       {/* Search + Filter */}

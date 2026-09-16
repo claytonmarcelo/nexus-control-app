@@ -6,11 +6,11 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 
-import authRoutes from './routes/auth.js';
-import itemsRoutes from './routes/items.js';
-import usersRoutes from './routes/users.js';
-import ordersRoutes from './routes/orders.js';
-import adminRoutes from './routes/admin.js';
+import authRoutes from './presentation/routes/auth.js';
+import itemsRoutes from './presentation/routes/items.js';
+import usersRoutes from './presentation/routes/users.js';
+import ordersRoutes from './presentation/routes/orders.js';
+import adminRoutes from './presentation/routes/admin.js';
 
 dotenv.config();
 
@@ -27,7 +27,7 @@ if (isProduction && !frontendUrl) {
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = (frontendUrl || 'http://localhost:5173').split(',').map((origin) => origin.trim());
+const allowedOrigins = (frontendUrl || 'http://localhost:5173,http://localhost:5174,http://localhost:5175').split(',').map((origin) => origin.trim());
 
 // Configurar helmet com CSP explícita para Google Fonts e recursos necessários
 app.use(helmet({

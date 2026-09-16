@@ -1,11 +1,11 @@
-import { sendSuccess, sendError, sendPaginated } from '../utils/response.js';
-import { findAllUsers } from '../models/User.js';
-import { getUserPermissions, setUserPermissions } from '../models/Permission.js';
-import { findAllOrders } from '../models/Order.js';
-import { findAllItems } from '../models/Item.js';
-import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../config/permissions.js';
-import { isRootAdmin } from '../config/access.js';
-import pool from '../config/database.js';
+import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
+import { findAllUsers } from '../../infrastructure/User.js';
+import { getUserPermissions, setUserPermissions } from '../../infrastructure/Permission.js';
+import { findAllOrders } from '../../infrastructure/Order.js';
+import { findAllItems } from '../../infrastructure/Item.js';
+import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../../config/permissions.js';
+import { isRootAdmin } from '../../config/access.js';
+import pool from '../../config/database.js';
 
 // Mapeamento de páginas e suas metadatas
 const PAGES_MAP = {
@@ -180,7 +180,7 @@ export const updateUserPermissions = async (req, res) => {
     const updatedPermissions = await getUserPermissions(userId, targetUser.nivel_acesso, targetUser.email);
 
     sendSuccess(res, {
-      userId,
+      userId: Number(userId),
       nome: targetUser.nome,
       email: targetUser.email,
       permissions: updatedPermissions

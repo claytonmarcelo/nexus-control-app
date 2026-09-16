@@ -16,17 +16,24 @@ export default function Dashboard() {
   const loadDashboardData = useCallback(async () => {
     try {
       const [itemsRes, healthRes] = await Promise.all([
-        itemService.getAll(),
+        itemService.getAll({ limit: 100 }),
         healthService.check()
       ]);
 
-      const allItems = itemsRes.items || [];
-      const meusItens = allItems.filter(item => item.criado_por === user.id).length;
+      const allItems = Array.isArray(itemsRes?.data?.items)
+        ? itemsRes.data.items
+        : Array.isArray(itemsRes?.data)
+        ? itemsRes.data
+        : Array.isArray(itemsRes?.items)
+        ? itemsRes.items
+        : [];
+
+      const meusItens = allItems.filter(item => item.criado_por === user?.id).length;
 
       setStats({
         totalItens: allItems.length,
         meusItens,
-        totalUsuarios: isAdmin ? healthRes.data?.users || 0 : 0
+        totalUsuarios: isAdmin ? (healthRes?.data?.users || healthRes?.data?.totalUsers || 0) : 0
       });
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);

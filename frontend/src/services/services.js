@@ -39,7 +39,7 @@ export const authService = {
 export const itemService = {
   async getAll(params = {}) {
     const response = await api.get('/itens', { params });
-    return response.data.data;
+    return response.data;
   },
 
   async getMyItems() {
@@ -49,16 +49,6 @@ export const itemService = {
 
   async getById(id) {
     const response = await api.get(`/itens/${id}`);
-    return response.data.data;
-  },
-
-  async getPermissions(id) {
-    const response = await api.get(`/usuarios/${id}/permissions`);
-    return response.data.data;
-  },
-
-  async updatePermissions(id, permissions) {
-    const response = await api.put(`/usuarios/${id}/permissions`, { permissions });
     return response.data.data;
   },
 
@@ -115,6 +105,16 @@ export const userService = {
   async changePassword(id, data) {
     const response = await api.put(`/usuarios/${id}/password`, data);
     return response.data;
+  },
+
+  async getPermissions(id) {
+    const response = await api.get(`/usuarios/${id}/permissions`);
+    return response.data.data;
+  },
+
+  async updatePermissions(id, permissions) {
+    const response = await api.put(`/usuarios/${id}/permissions`, { permissions });
+    return response.data.data;
   },
 };
 

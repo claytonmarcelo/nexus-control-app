@@ -172,7 +172,7 @@ export default function Cart() {
           <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-nexus-400">
             Explore o catálogo e adicione os produtos e serviços que deseja.
           </p>
-          <Link to="/itens" className="btn-primary mt-8 gap-2">
+          <Link to="/itens" className="btn-primary mt-8">
             <BoxIcon className="h-5 w-5" />
             Ver catálogo
           </Link>

@@ -11,14 +11,14 @@ import {
 } from '../controllers/itemController.js';
 import { validateItem, validateIdParam, validatePagination } from '../middleware/validation.js';
 import { authenticate, authorize, authorizePage } from '../middleware/auth.js';
-import { USER_ROLES } from '../models/User.js';
+import { USER_ROLES } from '../../infrastructure/User.js';
 
 const router = Router();
 
 router.use(authenticate);
 router.use(authorizePage('itens'));
 
-router.post('/', validateItem, authorize(USER_ROLES.ADMIN, USER_ROLES.FUNCIONARIO), create);
+router.post('/', validateItem, create);
 router.get('/', validatePagination, getAll);
 router.get('/my-items', getMyItems);
 router.get('/my-negotiations', getMyNegotiations);

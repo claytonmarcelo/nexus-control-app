@@ -1,10 +1,10 @@
-import { createUser, findUserByEmail, verifyPassword, findUserById } from '../models/User.js';
-import { USER_ROLES } from '../models/User.js';
-import { generateToken, generateRefreshToken, verifyToken } from '../utils/jwt.js';
-import { sendSuccess, sendError } from '../utils/response.js';
-import { createPasswordResetToken, resetPasswordWithToken } from '../models/PasswordReset.js';
-import { sendPasswordResetEmail } from '../utils/email.js';
-import { getUserPermissions } from '../models/Permission.js';
+import { createUser, findUserByEmail, verifyPassword, findUserById } from '../../infrastructure/User.js';
+import { USER_ROLES } from '../../infrastructure/User.js';
+import { generateToken, generateRefreshToken, verifyToken } from '../../utils/jwt.js';
+import { sendSuccess, sendError } from '../../utils/response.js';
+import { createPasswordResetToken, resetPasswordWithToken } from '../../infrastructure/PasswordReset.js';
+import { sendPasswordResetEmail } from '../../utils/email.js';
+import { getUserPermissions } from '../../infrastructure/Permission.js';
 
 const publicUser = async (user) => ({
   id: user.id,

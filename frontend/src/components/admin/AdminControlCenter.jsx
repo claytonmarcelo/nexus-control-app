@@ -352,29 +352,32 @@ export default function AdminControlCenter() {
 
   return (
     <div className="space-y-6 animate-fade-in pb-4">
-      <section className="relative overflow-hidden rounded-3xl border border-nexus-500/25 bg-dark-card p-6 shadow-glass-lg sm:p-8">
+      <section className="relative overflow-hidden rounded-3xl border border-nexus-500/25 bg-gradient-to-br from-dark-card via-dark-card to-nexus-900/20 p-6 shadow-glass-lg sm:p-8">
         <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-nexus-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-nexus-400/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-nexus-400/30 bg-nexus-500/10">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-nexus-400/30 bg-nexus-500/10 shadow-gold">
                 <ControlIcon kind="shield" className="h-4 w-4" />
               </span>
               Operação protegida
             </div>
-            <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">Admin Control Center</h1>
+            <h1 className="font-display text-3xl font-bold text-white sm:text-4xl bg-gradient-to-r from-white via-nexus-200 to-nexus-300 bg-clip-text text-transparent">
+              Admin Control Center
+            </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-nexus-300 sm:text-base">
               Controle os acessos, catálogo e pedidos do Nexus com uma visão única da operação.
             </p>
           </div>
-          <button type="button" onClick={() => loadControlData(true)} className="btn-secondary self-start xl:self-auto">
+          <button type="button" onClick={() => loadControlData(true)} className="btn-secondary self-start xl:self-auto shadow-gold">
             <ControlIcon kind="refresh" className="mr-2 h-5 w-5" />
             Atualizar dados
           </button>
         </div>
       </section>
 
-      <nav className="glass flex max-w-full gap-1 overflow-x-auto rounded-2xl p-2" aria-label="Seções administrativas" role="tablist">
+      <nav className="glass flex max-w-full gap-1 overflow-x-auto rounded-2xl p-2 shadow-glass-lg" aria-label="Seções administrativas" role="tablist">
         {TABS.map((tab) => {
           const active = activeTab === tab.key;
           return (
@@ -384,10 +387,10 @@ export default function AdminControlCenter() {
               role="tab"
               aria-selected={active}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
                 active
-                  ? 'bg-nexus-600 text-white shadow-champagne'
-                  : 'text-nexus-300 hover:bg-dark-hover hover:text-white'
+                  ? 'bg-gradient-to-r from-nexus-600 to-nexus-500 text-white shadow-gold transform scale-105'
+                  : 'text-nexus-300 hover:bg-dark-hover hover:text-white hover:scale-102'
               }`}
             >
               <ControlIcon kind={tab.icon} className="h-4 w-4" />
@@ -535,39 +538,204 @@ function OverviewSection({ users, items, orders, overview, pages, previewRole, r
         </section>
       </div>
 
-      <section className="card overflow-hidden">
-        <div className="flex flex-col gap-2 border-b border-dark-border p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-white">Mapa de rotas do sistema</h2>
-            <p className="mt-1 text-sm text-nexus-400">Fonte de verdade para permissões e navegação.</p>
+      <SystemRouteMap pages={pages} roleViews={roleViews} />
+    </div>
+  );
+}
+
+const PAGE_DESCRIPTIONS = {
+  dashboard: 'Visão geral com indicadores de desempenho e resumo.',
+  itens: 'Catálogo interativo de produtos, serviços e equipamentos.',
+  carrinho: 'Gerenciamento de seleção de itens e cálculo de frete/total.',
+  checkout: 'Processamento de pagamentos automático via Pix e Cartão.',
+  pedidos: 'Acompanhamento do status e histórico de compras efetuadas.',
+  usuarios: 'Gestão de usuários, controle de permissões e privilégios.',
+  admin: 'Painel de controle com matriz de acessos e infraestrutura.',
+  perfil: 'Configurações da conta e preferências pessoais do usuário.',
+};
+
+function SystemRouteMap({ pages, roleViews }) {
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [search, setSearch] = useState('');
+
+  const filteredPages = useMemo(() => {
+    return pages.filter((page) => {
+      const matchesSearch =
+        !search.trim() ||
+        page.label?.toLowerCase().includes(search.toLowerCase()) ||
+        (page.path || `/${page.key}`).toLowerCase().includes(search.toLowerCase());
+
+      if (!matchesSearch) return false;
+      if (roleFilter === 'all') return true;
+
+      return pageIsVisibleForRole(page, roleFilter, roleViews);
+    });
+  }, [pages, roleFilter, roleViews, search]);
+
+  return (
+    <section className="glass relative overflow-hidden rounded-3xl border border-nexus-500/20 bg-dark-card/90 p-6 sm:p-8 shadow-glass-xl hover:border-nexus-500/30 transition-all duration-300">
+      {/* Background Subtle Glow Accent */}
+      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-nexus-500/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-nexus-600/5 blur-3xl" />
+
+      {/* Header Container */}
+      <div className="relative z-10 flex flex-col gap-5 border-b border-dark-border/80 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-nexus-500/25 via-nexus-500/10 to-transparent border border-nexus-500/30 text-nexus-300 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+            <ControlIcon kind="map" className="h-6 w-6" />
           </div>
-          <span className="text-sm text-nexus-400">{pages.length} rotas mapeadas</span>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+              Mapa de Rotas do Sistema
+            </h2>
+            <p className="mt-1 text-xs text-nexus-400 sm:text-sm">
+              Fonte de verdade para matriz de permissões, controle de acesso (RBAC) e navegação.
+            </p>
+          </div>
         </div>
-        <div className="grid grid-cols-1 divide-y divide-dark-border md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
-          {pages.map((page) => (
-            <div key={page.key} className="p-5">
-              <div className="flex items-start justify-between gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-nexus-500/10 text-nexus-300">
+
+        {/* Counter Badge with Pulse Indicator */}
+        <div className="flex items-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-xl border border-nexus-500/30 bg-nexus-500/10 px-3.5 py-1.5 text-xs font-medium text-nexus-300 backdrop-blur-md">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            {filteredPages.length} {filteredPages.length === 1 ? 'rota visível' : 'rotas mapeadas'}
+          </span>
+        </div>
+      </div>
+
+      {/* Filters & Search Toolbar */}
+      <div className="relative z-10 mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        {/* Role Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-nexus-500">Filtrar por:</span>
+          <button
+            type="button"
+            onClick={() => setRoleFilter('all')}
+            className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+              roleFilter === 'all'
+                ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
+                : 'border border-dark-border bg-dark-bg/60 text-nexus-300 hover:border-nexus-500/30 hover:bg-dark-hover'
+            }`}
+          >
+            Todas ({pages.length})
+          </button>
+          {Object.entries(ROLE_META).map(([role, meta]) => {
+            const count = pages.filter((p) => pageIsVisibleForRole(p, role, roleViews)).length;
+            const active = roleFilter === role;
+            return (
+              <button
+                key={role}
+                type="button"
+                onClick={() => setRoleFilter(role)}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                  active
+                    ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
+                    : 'border border-dark-border bg-dark-bg/60 text-nexus-300 hover:border-nexus-500/30 hover:bg-dark-hover'
+                }`}
+              >
+                {meta.label} ({count})
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Real-time Search Input */}
+        <div className="relative min-w-[220px] lg:w-64">
+          <ControlIcon kind="search" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-500" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por rota ou caminho..."
+            className="input w-full pl-9 py-1.5 text-xs bg-dark-bg/80 border-dark-border focus:border-nexus-500/50"
+          />
+        </div>
+      </div>
+
+      {/* Route Cards Grid */}
+      <div className="relative z-10 mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {filteredPages.map((page) => {
+          const allowedRolesCount = Object.keys(ROLE_META).filter((role) =>
+            pageIsVisibleForRole(page, role, roleViews)
+          ).length;
+
+          return (
+            <article
+              key={page.key}
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-dark-border/80 bg-gradient-to-b from-dark-card to-dark-bg/70 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-nexus-500/40 hover:shadow-[0_8px_30px_rgba(212,175,55,0.12)]"
+            >
+              {/* Header: Icon + Path Badge */}
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-nexus-500/10 border border-nexus-500/20 text-nexus-300 group-hover:scale-105 group-hover:bg-nexus-500/20 group-hover:border-nexus-500/40 transition-all duration-300">
                   <ControlIcon kind={getPageIcon(page.key)} className="h-5 w-5" />
                 </span>
-                <span className="rounded-full border border-dark-border bg-dark-hover px-2 py-1 text-[11px] text-nexus-400">{page.path || `/${page.key}`}</span>
+                <code className="rounded-lg border border-nexus-500/20 bg-dark-bg/90 px-2.5 py-1 text-[11px] font-mono font-medium text-nexus-300 shadow-inner group-hover:border-nexus-500/40 transition-colors">
+                  {page.path || `/${page.key}`}
+                </code>
               </div>
-              <p className="mt-4 font-medium text-white">{page.label}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {Object.entries(ROLE_META).map(([role, meta]) => {
-                  const allowed = pageIsVisibleForRole(page, role, roleViews);
-                  return (
-                    <span key={role} className={`rounded-full px-2 py-1 text-[11px] ${allowed ? meta.className : 'bg-dark-hover text-nexus-500'}`}>
-                      {meta.label}
-                    </span>
-                  );
-                })}
+
+              {/* Title & Purpose Description */}
+              <div className="my-4">
+                <h3 className="text-base font-bold text-white group-hover:text-nexus-200 transition-colors">
+                  {page.label}
+                </h3>
+                <p className="mt-1 text-xs text-nexus-400/90 leading-relaxed line-clamp-2">
+                  {PAGE_DESCRIPTIONS[page.key] || 'Página integrada à matriz de navegação do sistema.'}
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
+
+              {/* Matrix Role Badges */}
+              <div className="pt-3 border-t border-dark-border/60">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-nexus-500">
+                    Nível de Acesso
+                  </span>
+                  <span className="text-[10px] font-medium text-nexus-400">
+                    {allowedRolesCount === 3 ? 'Acesso total' : `${allowedRolesCount}/3 perfis`}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(ROLE_META).map(([role, meta]) => {
+                    const allowed = pageIsVisibleForRole(page, role, roleViews);
+                    return (
+                      <span
+                        key={role}
+                        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium transition-all ${
+                          allowed
+                            ? meta.className
+                            : 'border-dark-border/40 bg-dark-bg/40 text-nexus-500/50'
+                        }`}
+                        title={allowed ? `Acesso permitido para ${meta.label}` : `Acesso restrito para ${meta.label}`}
+                      >
+                        {allowed ? (
+                          <ControlIcon kind="check" className="h-3 w-3 text-emerald-400 shrink-0" />
+                        ) : (
+                          <ControlIcon kind="lock" className="h-3 w-3 text-nexus-500/50 shrink-0" />
+                        )}
+                        {meta.label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </article>
+          );
+        })}
+
+        {filteredPages.length === 0 && (
+          <div className="col-span-full rounded-2xl border border-dashed border-dark-border bg-dark-bg/40 p-8 text-center">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-nexus-500/10 text-nexus-400">
+              <ControlIcon kind="search" className="h-6 w-6" />
+            </span>
+            <p className="mt-3 text-sm font-medium text-white">Nenhuma rota encontrada</p>
+            <p className="mt-1 text-xs text-nexus-400">Experimente ajustar o filtro de busca ou perfil selecionado.</p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -941,6 +1109,8 @@ function ControlIcon({ kind, className = '' }) {
     trash: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7h16m-10 4v6m4-6v6M9 7V4h6v3m-9 0 1 14h10l1-14" />,
     cart: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h2l2.4 11.1a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 1.9-1.4L21 8H7m3 12a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />,
     user: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21a8 8 0 0 0-16 0m12-14a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />,
+    map: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.818V8.045a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />,
+    lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />,
   };
   return <svg {...common}>{paths[kind] || paths.chart}</svg>;
 }

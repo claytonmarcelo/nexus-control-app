@@ -152,6 +152,10 @@
     color: #121212;
     border: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   .btn-primary:hover {
@@ -172,6 +176,10 @@
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   .btn-secondary:hover {
@@ -184,12 +192,40 @@
     cursor: not-allowed;
   }
 
+  .btn-danger {
+    @apply px-4 py-2 rounded-lg font-medium transition-all;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .btn-danger:hover {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
   .btn-ghost {
     @apply px-4 py-2 rounded-lg font-medium transition-all;
     background: transparent;
     color: var(--text-primary);
     border: 1px solid transparent;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   .btn-ghost:hover {
