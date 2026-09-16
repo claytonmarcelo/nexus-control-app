@@ -141,6 +141,11 @@ export const checkoutService = {
     return response.data.data;
   },
 
+  async getUserOrdersByAdmin(userId, params = {}) {
+    const response = await api.get(`/pedidos/user/${userId}`, { params });
+    return response.data.data;
+  },
+
   async getAllOrders(params = {}) {
     const response = await api.get('/pedidos', { params });
     return response.data.data;

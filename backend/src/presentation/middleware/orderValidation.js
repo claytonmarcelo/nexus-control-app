@@ -37,7 +37,7 @@ export const validateUpdateOrderStatus = [
     .isInt({ min: 1 }).withMessage('ID do pedido inválido'),
   body('status_pagamento')
     .optional()
-    .isIn(['pendente', 'processando', 'confirmado', 'recusado', 'estornado']).withMessage('Status de pagamento inválido'),
+    .isIn(['pendente', 'processando', 'confirmado', 'recusado', 'estornado', 'aprovado', 'concluido', 'cancelado']).withMessage('Status de pagamento inválido'),
   body('metodo_pagamento')
     .optional()
     .isIn(['cartao', 'pix', 'boleto']).withMessage('Método de pagamento inválido'),

@@ -48,4 +48,5 @@ coverage/
 # Misc
 *.pem
 .vercel
+scratch/
 .netlify

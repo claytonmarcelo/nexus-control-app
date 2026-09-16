@@ -28,10 +28,10 @@ export const checkout = async (req, res) => {
       return sendError(res, 'Um ou mais itens não foram encontrados no banco', 400);
     }
 
-    // Criar mapa de preços reais do banco
-    const pricesMap = new Map();
+    // Criar mapa de itens reais do banco
+    const itemsMap = new Map();
     realItems.forEach((item: any) => {
-      pricesMap.set(item.id, item.valor_venda);
+      itemsMap.set(item.id, item);
     });
 
     // Validar e recalcular total com preços do banco
@@ -39,7 +39,8 @@ export const checkout = async (req, res) => {
     const validatedItems = [];
 
     for (const item of items) {
-      const realPrice = pricesMap.get(item.item_id);
+      const realItem = itemsMap.get(item.item_id);
+      const realPrice = realItem?.valor_venda;
 
       if (!realPrice || realPrice <= 0) {
         return sendError(res, `Item ${item.item_id} não tem preço válido configurado`, 400);
@@ -56,7 +57,7 @@ export const checkout = async (req, res) => {
 
       validatedItems.push({
         item_id: item.item_id,
-        nome: item.nome || '',
+        nome: realItem?.nome || item.nome || `Item #${item.item_id}`,
         quantidade,
         preco_unitario: realPrice
       });
@@ -141,6 +142,28 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
+export const getUserOrdersByAdmin = async (req, res) => {
+  try {
+    // Apenas admin pode consultar histórico de outro usuário
+    if (req.user.nivel_acesso !== 'admin') {
+      return sendError(res, 'Acesso negado', 403);
+    }
+
+    const { userId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+
+    const { orders, total } = await findOrdersByUserId(userId, {
+      page: parseInt(page),
+      limit: parseInt(limit)
+    });
+
+    sendPaginated(res, orders, page, limit, total, `Pedidos do usuário ${userId}`);
+  } catch (error) {
+    console.error('Erro ao buscar pedidos do usuário (admin):', error);
+    sendError(res, 'Erro ao buscar pedidos', 500);
+  }
+};
+
 export const updateOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -177,14 +200,14 @@ export const deleteOrderById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Apenas admin pode deletar pedidos
-    if (req.user.nivel_acesso !== 'admin') {
-      return sendError(res, 'Acesso negado', 403);
-    }
-
     const order = await findOrderById(id);
     if (!order) {
       return sendError(res, 'Pedido não encontrado', 404);
+    }
+
+    // Permitir se for admin OU se for o dono do pedido
+    if (req.user.nivel_acesso !== 'admin' && req.user.id !== order.usuario_id) {
+      return sendError(res, 'Acesso negado. Apenas o proprietário ou um administrador podem deletar este registro.', 403);
     }
 
     const deleted = await deleteOrder(id);

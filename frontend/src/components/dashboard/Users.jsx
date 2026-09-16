@@ -8,6 +8,7 @@ import LoadingScreen from '../ui/LoadingScreen';
 import EmptyState from '../ui/EmptyState';
 import UserFormModal from './UserFormModal';
 import PermissionFormModal from './PermissionFormModal';
+import UserHistoryModal from './UserHistoryModal';
 
 export default function Users() {
   const { user, isAdmin } = useAuth();
@@ -20,6 +21,7 @@ export default function Users() {
   const [search, setSearch] = useState('');
   const [permissionUser, setPermissionUser] = useState(null);
   const [permissionData, setPermissionData] = useState(null);
+  const [historyUser, setHistoryUser] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -189,6 +191,14 @@ export default function Users() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => setHistoryUser(targetUser)}
+                      className="p-2 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-600/10 transition-colors"
+                      aria-label="Histórico de compras"
+                      title="Histórico de Compras"
+                    >
+                      <ShoppingBagIcon className="w-5 h-5" />
+                    </button>
                     {!isRootAdmin(targetUser) && (
                       <button
                         onClick={() => handlePermissionEdit(targetUser)}
@@ -245,6 +255,11 @@ export default function Users() {
         onSubmit={handlePermissionSubmit}
         user={permissionUser}
         initialPermissions={permissionData}
+      />
+      <UserHistoryModal
+        isOpen={historyUser !== null}
+        onClose={() => setHistoryUser(null)}
+        user={historyUser}
       />
     </div>
   );
@@ -307,6 +322,14 @@ function TrashIcon({ className }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  );
+}
+
+function ShoppingBagIcon({ className }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
     </svg>
   );
 }
