@@ -25,7 +25,29 @@
 
 </div>
 
-<hr />
+---
+
+## 📸 Screenshots
+
+Capturas ilustrativas da interface do **Nexus Control App**.
+
+| Dashboard | Catálogo de Produtos |
+| :---: | :---: |
+| <img src="docs/screenshots/dashboard.png" width="100%" alt="Dashboard" /> | <img src="docs/screenshots/catalogo.png" width="100%" alt="Catálogo de Produtos" /> |
+
+| Admin Control Center | Currículo Técnico |
+| :---: | :---: |
+| <img src="docs/screenshots/admin.png" width="100%" alt="Admin Control Center" /> | <img src="docs/screenshots/curriculo.png" width="100%" alt="Currículo Técnico" /> |
+
+| Gestão de Usuários | Carrinho de Compras |
+| :---: | :---: |
+| <img src="docs/screenshots/usuarios.png" width="100%" alt="Gestão de Usuários" /> | <img src="docs/screenshots/carrinho.png" width="100%" alt="Carrinho de Compras" /> |
+
+| Checkout & Pagamentos | Quem Somos |
+| :---: | :---: |
+| <img src="docs/screenshots/checkout.png" width="100%" alt="Checkout & Pagamentos" /> | <img src="docs/screenshots/sobre.png" width="100%" alt="Quem Somos" /> |
+
+---
 
 ## 🚀 Como Iniciar o Projeto (Solução Completa)
 

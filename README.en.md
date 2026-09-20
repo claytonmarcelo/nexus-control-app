@@ -25,7 +25,29 @@
 
 </div>
 
-<hr />
+---
+
+## 📸 Screenshots
+
+Illustrative screenshots of the **Nexus Control App** interface.
+
+| Dashboard | Product Catalog |
+| :---: | :---: |
+| <img src="docs/screenshots/dashboard.png" width="100%" alt="Dashboard" /> | <img src="docs/screenshots/catalogo.png" width="100%" alt="Product Catalog" /> |
+
+| Admin Control Center | Technical Resume |
+| :---: | :---: |
+| <img src="docs/screenshots/admin.png" width="100%" alt="Admin Control Center" /> | <img src="docs/screenshots/curriculo.png" width="100%" alt="Technical Resume" /> |
+
+| User & Access Management | Shopping Cart |
+| :---: | :---: |
+| <img src="docs/screenshots/usuarios.png" width="100%" alt="User & Access Management" /> | <img src="docs/screenshots/carrinho.png" width="100%" alt="Shopping Cart" /> |
+
+| Checkout & Payments | About Us |
+| :---: | :---: |
+| <img src="docs/screenshots/checkout.png" width="100%" alt="Checkout & Payments" /> | <img src="docs/screenshots/sobre.png" width="100%" alt="About Us" /> |
+
+---
 
 ## 📖 About Us Page
 
