@@ -13,6 +13,7 @@ export default function Layout() {
   const { theme, toggleTheme } = useTheme();
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState('desktop');
 
   // Fecha menu mobile em troca de rota
   useEffect(() => {
