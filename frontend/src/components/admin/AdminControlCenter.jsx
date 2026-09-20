@@ -5,6 +5,7 @@ import { itemService, userService } from '../../services/services';
 import { adminService } from '../../services/adminService';
 import { isRootAdmin } from '../../utils/access';
 import ItemFormModal from '../dashboard/ItemFormModal';
+import CurriculoTab from './CurriculoTab';
 
 const ROLE_META = {
   cliente: {
@@ -55,6 +56,7 @@ const TABS = [
   { key: 'acessos', label: 'Acessos', icon: 'shield' },
   { key: 'produtos', label: 'Produtos', icon: 'box' },
   { key: 'pedidos', label: 'Pedidos', icon: 'receipt' },
+  { key: 'curriculo', label: 'Currículo', icon: 'user' },
 ];
 
 export default function AdminControlCenter() {
@@ -452,6 +454,10 @@ export default function AdminControlCenter() {
           onSave={saveOrderStatus}
           onExpandedChange={setExpandedOrderId}
         />
+      )}
+
+      {activeTab === 'curriculo' && (
+        <CurriculoTab />
       )}
 
       <ItemFormModal

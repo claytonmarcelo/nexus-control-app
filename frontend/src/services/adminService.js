@@ -32,6 +32,14 @@ export const adminService = {
       status_pedido,
     }));
   },
+
+  async getCurriculo() {
+    return unpack(await api.get('/curriculo'));
+  },
+
+  async updateCurriculo(curriculo) {
+    return unpack(await api.put('/curriculo', { curriculo }));
+  },
 };
 
 export default adminService;

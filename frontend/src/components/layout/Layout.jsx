@@ -1,4 +1,5 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModal } from '../../contexts/ModalContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -8,8 +9,26 @@ export default function Layout() {
   const { user, logout, isAdmin, canAccess } = useAuth();
   const { confirm } = useModal();
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { totalItems } = useCart();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fecha menu mobile em troca de rota
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Fecha menu mobile com tecla ESC
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     const confirmed = await confirm({
@@ -43,9 +62,26 @@ export default function Layout() {
   return (
     <div className="page-container">
       <header className="glass border-b border-border sticky top-0 z-[1000]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl 3xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 sm:gap-8">
+              {/* Botão Hambúrguer para Mobile e Tablet (< 768px) */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                className="md:hidden p-2 rounded-xl text-nexus-400 hover:text-primary hover:bg-hover transition-colors focus-visible:ring-2 focus-visible:ring-nexus-500"
+                aria-label={mobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+                aria-expanded={mobileMenuOpen}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+
               <NavLink to="/dashboard" className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
                   <NexusLogo className="w-6 h-6 text-white" />
@@ -53,6 +89,7 @@ export default function Layout() {
                 <span className="font-bold text-xl text-primary hidden sm:block">Nexus Control</span>
               </NavLink>
               
+              {/* Navegação Desktop e Tablet Horizontal (>= 768px) */}
               <nav className="hidden md:flex items-center gap-1">
                 {navItems.map((item) => (
                   <NavLink
@@ -78,15 +115,17 @@ export default function Layout() {
               </nav>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button onClick={toggleTheme} className="btn-ghost p-2 sm:px-4" aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'} title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}>
                 <span aria-hidden="true" className="text-lg">{theme === 'dark' ? '☼' : '☾'}</span>
                 <span className="hidden sm:inline">{theme === 'dark' ? 'Claro' : 'Escuro'}</span>
               </button>
+              
               <div className="hidden sm:block relative">
                 <button
                   className="flex items-center gap-2 px-3 py-2 rounded-xl bg-hover hover:border-border transition-colors"
                   onClick={() => navigate('/perfil')}
+                  aria-label="Meu perfil"
                 >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
@@ -113,21 +152,107 @@ export default function Layout() {
             </div>
           </div>
         </div>
+
+        {/* Drawer Retrátil para Tablet Retrato e Mobile (< 768px) */}
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 top-16 z-[999] bg-black/60 backdrop-blur-md md:hidden animate-fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div
+              className="glass border-b border-border p-5 space-y-4 shadow-2xl animate-slide-down"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 pb-3 border-b border-border">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                  {user?.nome?.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-primary truncate">{user?.nome}</p>
+                  <p className="text-xs text-nexus-400 truncate">{user?.email}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate('/perfil');
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-lg border border-border text-nexus-400 hover:text-primary hover:bg-hover transition-colors"
+                >
+                  Perfil
+                </button>
+              </div>
+
+              <nav className="flex flex-col gap-1.5">
+                {navItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                        isActive
+                          ? 'bg-nexus-600/20 text-nexus-300 font-semibold border border-nexus-500/30'
+                          : 'text-nexus-400 hover:text-primary hover:bg-hover'
+                      }`
+                    }
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5" />
+                      <span>{item.label}</span>
+                    </div>
+                    {item.path === '/carrinho' && totalItems > 0 && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-nexus-500 text-[10px] font-bold text-white shadow-lg">
+                        {totalItems > 99 ? '99+' : totalItems}
+                      </span>
+                    )}
+                  </NavLink>
+                ))}
+              </nav>
+
+              <div className="pt-2 border-t border-border flex items-center justify-between">
+                <button
+                  onClick={toggleTheme}
+                  className="btn-ghost flex items-center gap-2 text-sm py-2 px-3"
+                >
+                  <span>{theme === 'dark' ? '☼' : '☾'}</span>
+                  <span>{theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="btn-ghost flex items-center gap-2 text-sm text-red-400 hover:text-red-300 py-2 px-3"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sair</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      <main className="main-content">
+      <main className={`main-content pb-24 ${previewMode === 'tv' ? 'smart-tv-preview' : ''}`}>
         <Outlet />
       </main>
 
-      <footer className="glass border-t border-border mt-auto sticky bottom-0 z-[1000]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <footer className="glass border-t border-border mt-auto">
+        <div className="max-w-7xl 3xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="flex items-center gap-2 text-nexus-400 text-sm">
               <NexusLogo className="w-5 h-5" />
               <span className="font-medium text-primary">Nexus Control</span>
             </div>
-            <div className="flex items-center gap-4 text-sm text-nexus-400">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-nexus-400">
               <a href="/sobre" className="hover:text-nexus-300 transition-colors">Quem Somos</a>
+              <Link to="/curriculo" className="hover:text-nexus-300 text-nexus-300 font-semibold transition-colors flex items-center gap-1">
+                <span>📄</span>
+                <span>Currículo</span>
+              </Link>
               <span>Desenvolvido por <strong className="text-primary">Clayton Marcelo</strong></span>
               <a
                 href="https://github.com/claytonmarcelo"
@@ -147,6 +272,58 @@ export default function Layout() {
           </div>
         </div>
       </footer>
+
+      {/* ─────────────────────────────────────────────────────────────
+          Barra Interativa de Teste de Resoluções (Desktop / Tablet / Smart TV)
+          Permite testar e demonstrar cada layout instantaneamente na tela
+         ───────────────────────────────────────────────────────────── */}
+      <aside
+        aria-label="Simulador de resoluções"
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1050] flex items-center gap-1.5 p-1.5 rounded-2xl glass border border-nexus-500/40 shadow-2xl backdrop-blur-xl"
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-nexus-400 px-3 hidden sm:inline">
+          Resolução:
+        </span>
+        <button
+          type="button"
+          onClick={() => setPreviewMode('desktop')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+            previewMode === 'desktop'
+              ? 'bg-nexus-500 text-black font-semibold shadow-md'
+              : 'text-nexus-400 hover:text-white hover:bg-hover'
+          }`}
+          title="Modo Desktop padrão"
+        >
+          <span>🖥️</span>
+          <span>Desktop</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPreviewMode('tablet')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+            previewMode === 'tablet'
+              ? 'bg-nexus-500 text-black font-semibold shadow-md'
+              : 'text-nexus-400 hover:text-white hover:bg-hover'
+          }`}
+          title="Modo Tablet 768px (ativa menu hambúrguer e grid de 2 colunas)"
+        >
+          <span>📱</span>
+          <span>Tablet (768px)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPreviewMode('tv')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+            previewMode === 'tv'
+              ? 'bg-nexus-500 text-black font-semibold shadow-md'
+              : 'text-nexus-400 hover:text-white hover:bg-hover'
+          }`}
+          title="Modo Smart TV (10-foot UI com fontes ampliadas para 3m de distância)"
+        >
+          <span>📺</span>
+          <span>Smart TV (4K)</span>
+        </button>
+      </aside>
     </div>
   );
 }

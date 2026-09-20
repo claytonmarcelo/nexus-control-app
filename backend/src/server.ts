@@ -11,6 +11,7 @@ import itemsRoutes from './presentation/routes/items.js';
 import usersRoutes from './presentation/routes/users.js';
 import ordersRoutes from './presentation/routes/orders.js';
 import adminRoutes from './presentation/routes/admin.js';
+import curriculoRoutes from './presentation/routes/curriculo.js';
 
 dotenv.config();
 
@@ -93,6 +94,7 @@ app.use('/api/itens', itemsRoutes);
 app.use('/api/usuarios', usersRoutes);
 app.use('/api/pedidos', ordersRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/curriculo', curriculoRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Rota não encontrada' });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { itemService, healthService } from '../../services/services';
+import { itemService, healthService, userService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
 import StatCard from '../ui/StatCard';
 import RecentItems from '../dashboard/RecentItems';
@@ -15,10 +15,19 @@ export default function Dashboard() {
 
   const loadDashboardData = useCallback(async () => {
     try {
-      const [itemsRes, healthRes] = await Promise.all([
+      const promises = [
         itemService.getAll({ limit: 100 }),
         healthService.check()
-      ]);
+      ];
+
+      if (isAdmin) {
+        promises.push(userService.getAll({ limit: 100 }));
+      }
+
+      const results = await Promise.all(promises);
+      const itemsRes = results[0];
+      const healthRes = results[1];
+      const usersRes = isAdmin ? results[2] : null;
 
       const allItems = Array.isArray(itemsRes?.data?.items)
         ? itemsRes.data.items
@@ -30,10 +39,18 @@ export default function Dashboard() {
 
       const meusItens = allItems.filter(item => item.criado_por === user?.id).length;
 
+      const totalUsuarios = isAdmin
+        ? (Array.isArray(usersRes?.users)
+            ? usersRes.users.length
+            : Array.isArray(usersRes)
+            ? usersRes.length
+            : usersRes?.total || healthRes?.data?.users || 0)
+        : 0;
+
       setStats({
         totalItens: allItems.length,
         meusItens,
-        totalUsuarios: isAdmin ? (healthRes?.data?.users || healthRes?.data?.totalUsers || 0) : 0
+        totalUsuarios
       });
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);

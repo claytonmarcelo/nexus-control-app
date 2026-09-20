@@ -17,6 +17,7 @@ const Cart = lazy(() => import('./components/cart/Cart'));
 const Checkout = lazy(() => import('./components/cart/Checkout'));
 const AdminControlCenter = lazy(() => import('./components/admin/AdminControlCenter'));
 const AboutUs = lazy(() => import('./components/about/AboutUs'));
+const CurriculoPage = lazy(() => import('./components/curriculo/CurriculoPage'));
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -63,6 +64,7 @@ function App() {
             </PublicRoute>
           } />
           <Route path="/recuperar-senha" element={<ForgotPassword />} />
+          <Route path="/curriculo" element={<CurriculoPage />} />
           
           <Route element={<Layout />}>
             <Route path="/sobre" element={<AboutUs />} />
