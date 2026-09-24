@@ -1,11 +1,11 @@
-import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
+import { sendSuccess, sendError, sendPaginated } from '../../infrastructure/utils/response.js';
 import { findAllUsers } from '../../infrastructure/User.js';
 import { getUserPermissions, setUserPermissions } from '../../infrastructure/Permission.js';
 import { findAllOrders } from '../../infrastructure/Order.js';
 import { findAllItems } from '../../infrastructure/Item.js';
-import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../../config/permissions.js';
-import { isRootAdmin } from '../../config/access.js';
-import pool from '../../config/database.js';
+import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../../infrastructure/config/permissions.js';
+import { isRootAdmin } from '../../infrastructure/config/access.js';
+import pool from '../../infrastructure/config/database.js';
 
 // Mapeamento de páginas e suas metadatas
 const PAGES_MAP = {

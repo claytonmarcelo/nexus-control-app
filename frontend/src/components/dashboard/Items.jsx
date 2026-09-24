@@ -165,8 +165,9 @@ export default function Items() {
     setLoading(true);
     try {
       const response = await itemService.getAll({ limit: 100 });
-      // itemService retorna response.data do Axios
-      const itemsData = response?.data?.items || [];
+      // Backend retorna { success: true, data: { items: [...] }, pagination: {...} }
+      // itemService retorna response.data.data, então acesso response.data.items
+      const itemsData = response?.data?.items || response?.items || [];
       setItems(Array.isArray(itemsData) ? itemsData : []);
     } catch (error) {
       toast({ message: 'Erro ao carregar catálogo', variant: 'danger' });

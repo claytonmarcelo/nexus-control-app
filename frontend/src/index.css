@@ -1341,30 +1341,35 @@ html[data-theme='light'] .bg-dark-bg.text-nexus-400 {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PREVIEW MODES (Interactive Desktop / Tablet / Smart TV)
+   ENQUADRAMENTO AUTOMÁTICO POR DISPOSITIVO (Smart TV, Ultra-wide, Tablet e Mobile)
+   Adaptação 100% fluída e automática sem necessidade de botões manuais
    ═══════════════════════════════════════════════════════ */
-.smart-tv-preview {
-  font-size: 18.5px !important;
+@media (min-width: 1920px) {
+  .main-content {
+    max-width: 96rem !important;
+    font-size: 1.1rem;
+  }
+
+  :focus-visible, button:focus-visible, a:focus-visible {
+    outline: 3px solid var(--accent-gold) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 16px var(--accent-gold-glow) !important;
+  }
 }
 
-.smart-tv-preview .main-content {
-  max-width: 96rem !important;
+@media (max-width: 1024px) {
+  .main-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
-.smart-tv-preview :focus-visible,
-.smart-tv-preview button:focus,
-.smart-tv-preview a:focus {
-  outline: 3px solid var(--accent-gold) !important;
-  outline-offset: 4px !important;
-  box-shadow: 0 0 16px var(--accent-gold-glow) !important;
-}
-
-.tablet-preview-frame {
-  max-width: 768px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--accent-gold-border) !important;
-  transition: max-width 300ms ease;
+@media (max-width: 767px) {
+  .main-content {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-bottom: 2.5rem;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════

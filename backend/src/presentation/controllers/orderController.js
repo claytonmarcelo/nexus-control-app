@@ -7,7 +7,7 @@ import {
   deleteOrder
 } from '../../infrastructure/Order.js';
 import { findItemsByIds } from '../../infrastructure/Item.js';
-import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
+import { sendSuccess, sendError, sendPaginated } from '../../infrastructure/utils/response.js';
 
 export const checkout = async (req, res) => {
   try {

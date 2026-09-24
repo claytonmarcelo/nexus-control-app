@@ -13,7 +13,6 @@ export default function Layout() {
   const { theme, toggleTheme } = useTheme();
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [previewMode, setPreviewMode] = useState('desktop');
 
   // Fecha menu mobile em troca de rota
   useEffect(() => {
@@ -237,7 +236,7 @@ export default function Layout() {
         )}
       </header>
 
-      <main className={`main-content pb-24 ${previewMode === 'tv' ? 'smart-tv-preview' : ''}`}>
+      <main className="main-content pb-16">
         <Outlet />
       </main>
 
@@ -273,58 +272,6 @@ export default function Layout() {
           </div>
         </div>
       </footer>
-
-      {/* ─────────────────────────────────────────────────────────────
-          Barra Interativa de Teste de Resoluções (Desktop / Tablet / Smart TV)
-          Permite testar e demonstrar cada layout instantaneamente na tela
-         ───────────────────────────────────────────────────────────── */}
-      <aside
-        aria-label="Simulador de resoluções"
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1050] flex items-center gap-1.5 p-1.5 rounded-2xl glass border border-nexus-500/40 shadow-2xl backdrop-blur-xl"
-      >
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-nexus-400 px-3 hidden sm:inline">
-          Resolução:
-        </span>
-        <button
-          type="button"
-          onClick={() => setPreviewMode('desktop')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-            previewMode === 'desktop'
-              ? 'bg-nexus-500 text-black font-semibold shadow-md'
-              : 'text-nexus-400 hover:text-white hover:bg-hover'
-          }`}
-          title="Modo Desktop padrão"
-        >
-          <span>🖥️</span>
-          <span>Desktop</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setPreviewMode('tablet')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-            previewMode === 'tablet'
-              ? 'bg-nexus-500 text-black font-semibold shadow-md'
-              : 'text-nexus-400 hover:text-white hover:bg-hover'
-          }`}
-          title="Modo Tablet 768px (ativa menu hambúrguer e grid de 2 colunas)"
-        >
-          <span>📱</span>
-          <span>Tablet (768px)</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setPreviewMode('tv')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-            previewMode === 'tv'
-              ? 'bg-nexus-500 text-black font-semibold shadow-md'
-              : 'text-nexus-400 hover:text-white hover:bg-hover'
-          }`}
-          title="Modo Smart TV (10-foot UI com fontes ampliadas para 3m de distância)"
-        >
-          <span>📺</span>
-          <span>Smart TV (4K)</span>
-        </button>
-      </aside>
     </div>
   );
 }

@@ -39,7 +39,7 @@ export const authService = {
 export const itemService = {
   async getAll(params = {}) {
     const response = await api.get('/itens', { params });
-    return response.data;
+    return response.data.data;
   },
 
   async getMyItems() {
