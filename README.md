@@ -35,17 +35,13 @@ Capturas ilustrativas da interface do **Nexus Control App**.
 | :---: | :---: |
 | <img src="docs/screenshots/dashboard.png" width="100%" alt="Dashboard" /> | <img src="docs/screenshots/catalogo.png" width="100%" alt="Catálogo de Produtos" /> |
 
-| Admin Control Center | Currículo Técnico |
+| Admin Control Center | Gestão de Usuários |
 | :---: | :---: |
-| <img src="docs/screenshots/admin.png" width="100%" alt="Admin Control Center" /> | <img src="docs/screenshots/curriculo.png" width="100%" alt="Currículo Técnico" /> |
+| <img src="docs/screenshots/admin.png" width="100%" alt="Admin Control Center" /> | <img src="docs/screenshots/usuarios.png" width="100%" alt="Gestão de Usuários" /> |
 
-| Gestão de Usuários | Carrinho de Compras |
+| Carrinho de Compras | Checkout & Pagamentos |
 | :---: | :---: |
-| <img src="docs/screenshots/usuarios.png" width="100%" alt="Gestão de Usuários" /> | <img src="docs/screenshots/carrinho.png" width="100%" alt="Carrinho de Compras" /> |
-
-| Checkout & Pagamentos | Quem Somos |
-| :---: | :---: |
-| <img src="docs/screenshots/checkout.png" width="100%" alt="Checkout & Pagamentos" /> | <img src="docs/screenshots/sobre.png" width="100%" alt="Quem Somos" /> |
+| <img src="docs/screenshots/carrinho.png" width="100%" alt="Carrinho de Compras" /> | <img src="docs/screenshots/checkout.png" width="100%" alt="Checkout & Pagamentos" /> |
 
 ---
 
