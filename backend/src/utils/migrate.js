@@ -40,6 +40,14 @@ const migrations = [
     permitido TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (usuario_id, pagina),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+  `CREATE TABLE IF NOT EXISTS curriculo (
+    id INT PRIMARY KEY DEFAULT 1,
+    dados JSON NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by VARCHAR(100) DEFAULT NULL,
+    CHECK (id = 1)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 ];
 
@@ -75,6 +83,8 @@ const alterStatements = [
     INDEX idx_pedidos_status (status_pagamento)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
   `ALTER TABLE pedidos ADD COLUMN ativo TINYINT(1) NOT NULL DEFAULT 1`,
+  `ALTER TABLE pedidos MODIFY COLUMN status_pagamento ENUM('pendente', 'processando', 'confirmado', 'recusado', 'cancelado', 'falha', 'estornado') NOT NULL DEFAULT 'pendente'`,
+  `ALTER TABLE pedidos ADD COLUMN status_pedido ENUM('novo', 'processando', 'concluido', 'cancelado') NOT NULL DEFAULT 'novo'`,
 ];
 
 // Adicionar coluna ativo na tabela usuarios se não existir
@@ -124,14 +134,17 @@ export const runMigrations = async () => {
   console.log('✅ Todas as migrações concluídas');
 };
 
-const run = async () => {
-  try {
-    await runMigrations();
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Falha nas migrações:', error);
-    process.exit(1);
-  }
-};
-
-run();
+// Executar diretamente apenas quando chamado como script (não quando importado pelo servidor)
+const isDirectRun = process.argv[1]?.endsWith('migrate.js');
+if (isDirectRun) {
+  const run = async () => {
+    try {
+      await runMigrations();
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Falha nas migrações:', error);
+      process.exit(1);
+    }
+  };
+  run();
+}

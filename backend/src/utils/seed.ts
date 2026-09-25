@@ -148,14 +148,17 @@ export const seedDatabase = async () => {
   }
 };
 
-const run = async () => {
-  try {
-    await seedDatabase();
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Falha no seed:', error);
-    process.exit(1);
-  }
-};
-
-run();
+// Executar diretamente apenas quando chamado como script (não quando importado pelo servidor)
+const isDirectRun = process.argv[1]?.endsWith('seed.js') || process.argv[1]?.endsWith('seed.ts');
+if (isDirectRun) {
+  const run = async () => {
+    try {
+      await seedDatabase();
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Falha no seed:', error);
+      process.exit(1);
+    }
+  };
+  run();
+}

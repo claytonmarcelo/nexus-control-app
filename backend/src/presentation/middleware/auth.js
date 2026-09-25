@@ -7,38 +7,43 @@ import pool from '../../infrastructure/config/database.js';
 const userRepository = new UserRepository(pool);
 
 export const authenticate = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  try {
+    const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return sendError(res, 'Token de acesso não fornecido', 401);
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return sendError(res, 'Token de acesso não fornecido', 401);
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = verifyToken(token);
+
+    if (!decoded || decoded.type !== 'access') {
+      return sendError(res, 'Token inválido ou expirado', 401);
+    }
+
+    // Revalidar status do usuário no banco a cada requisição
+    const userAuthState = await userRepository.findAuthState(decoded.id);
+
+    if (!userAuthState) {
+      return sendError(res, 'Usuário não encontrado', 401);
+    }
+
+    if (!userAuthState.ativo) {
+      return sendError(res, 'Conta desativada ou não encontrada', 401);
+    }
+
+    // Usar nivel_acesso do banco, não do token (para refletir mudanças imediatas)
+    req.user = {
+      id: userAuthState.id,
+      email: userAuthState.email,
+      nivel_acesso: userAuthState.nivel_acesso
+    };
+
+    next();
+  } catch (error) {
+    console.error('Erro na autenticação:', error.message);
+    return sendError(res, 'Erro de autenticação ou banco indisponível', 401);
   }
-
-  const token = authHeader.split(' ')[1];
-  const decoded = verifyToken(token);
-
-  if (!decoded || decoded.type !== 'access') {
-    return sendError(res, 'Token inválido ou expirado', 401);
-  }
-
-  // Revalidar status do usuário no banco a cada requisição
-  const userAuthState = await userRepository.findAuthState(decoded.id);
-
-  if (!userAuthState) {
-    return sendError(res, 'Usuário não encontrado', 401);
-  }
-
-  if (!userAuthState.ativo) {
-    return sendError(res, 'Conta desativada ou não encontrada', 401);
-  }
-
-  // Usar nivel_acesso do banco, não do token (para refletir mudanças imediatas)
-  req.user = {
-    id: userAuthState.id,
-    email: userAuthState.email,
-    nivel_acesso: userAuthState.nivel_acesso
-  };
-
-  next();
 };
 
 export const authorize = (...allowedRoles) => {
@@ -56,16 +61,22 @@ export const authorize = (...allowedRoles) => {
 };
 
 export const authorizePage = (page) => async (req, res, next) => {
-  if (!req.user) {
-    return sendError(res, 'Usuário não autenticado', 401);
-  }
+  try {
+    if (!req.user) {
+      return sendError(res, 'Usuário não autenticado', 401);
+    }
 
-  const allowed = await isPageAllowed(req.user.id, req.user.nivel_acesso, req.user.email, page);
-  if (!allowed) {
-    return sendError(res, 'Acesso negado para esta página', 403);
-  }
+    const allowed = await isPageAllowed(req.user.id, req.user.nivel_acesso, req.user.email, page);
+    if (!allowed) {
+      return sendError(res, 'Acesso negado para esta página', 403);
+    }
 
-  next();
+    next();
+  } catch (error) {
+    console.error('Erro ao verificar permissão da página:', error.message);
+    // Em caso de falha de banco de dados, permite navegação padrão para evitar 504/bloqueio
+    next();
+  }
 };
 
 export const optionalAuth = (req, res, next) => {

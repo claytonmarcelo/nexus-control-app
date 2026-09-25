@@ -140,6 +140,20 @@ const initDatabase = async () => {
       await seedDatabase();
       console.log('✅ Catálogo inicializado com sucesso no banco de dados!');
     }
+
+    // Seed do currículo se não existir
+    try {
+      const [curriculoRows]: any = await pool.execute('SELECT COUNT(*) as total FROM curriculo');
+      const curriculoTotal = curriculoRows?.[0]?.total || 0;
+      if (curriculoTotal === 0) {
+        console.log('🌱 Tabela curriculo vazia. Executando seed inicial do currículo...');
+        const { migrateCurriculoSeed } = await import('./utils/migrate_curriculo_seed.js');
+        await migrateCurriculoSeed(pool);
+        console.log('✅ Currículo inicializado com sucesso!');
+      }
+    } catch (e: any) {
+      console.warn('⚠️ Seed do currículo:', e.message);
+    }
   } catch (error: any) {
     console.warn('⚠️ Inicialização do banco de dados:', error.message);
   }
