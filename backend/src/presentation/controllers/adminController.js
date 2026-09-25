@@ -263,3 +263,14 @@ export const getDashboardStats = async (req, res) => {
     sendError(res, 'Erro ao obter estatísticas', 500);
   }
 };
+
+export const seedCatalog = async (req, res) => {
+  try {
+    const { seedDatabase } = await import('../../utils/seed.js');
+    await seedDatabase();
+    sendSuccess(res, null, 'Catálogo semeado com sucesso');
+  } catch (error) {
+    console.error('Erro ao semear catálogo:', error);
+    sendError(res, error?.message || 'Erro ao semear catálogo', 500);
+  }
+};

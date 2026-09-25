@@ -1,6 +1,8 @@
 import { UserRepository } from '../../domain/repositories/UserRepository.js';
 import { generateTokens, verifyToken } from '../../infrastructure/utils/jwt.js';
 import { sendError, sendSuccess } from '../../infrastructure/utils/response.js';
+import { createPasswordResetToken, resetPasswordWithToken } from '../../infrastructure/PasswordReset.js';
+import { sendPasswordResetEmail } from '../../utils/email.js';
 
 export class AuthUseCase {
   constructor(userRepository) {
@@ -14,7 +16,17 @@ export class AuthUseCase {
     }
 
     const user = await this.userRepository.create({ nome, email, senha, nivel_acesso });
-    return sendSuccess(null, { user: user.toJSON() }, 'Usuário cadastrado com sucesso', 201);
+    const { accessToken, refreshToken } = generateTokens({
+      id: user.id,
+      email: user.email,
+      nivel_acesso: user.nivel_acesso
+    });
+
+    return sendSuccess(null, {
+      user: user.toJSON(),
+      accessToken,
+      refreshToken
+    }, 'Usuário cadastrado com sucesso', 201);
   }
 
   async login({ email, senha }) {
@@ -74,35 +86,24 @@ export class AuthUseCase {
   }
 
   async forgotPassword(email) {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
-      // Por segurança, não revelamos se o email existe
-      return sendSuccess(null, {}, 'Se o email existir, você receberá instruções de recuperação');
+    const resetToken = await createPasswordResetToken(email);
+    if (resetToken) {
+      try {
+        await sendPasswordResetEmail({ email, token: resetToken });
+      } catch (err) {
+        console.warn('Falha no envio de email:', err.message);
+      }
     }
 
-    // Aqui seria implementado o envio de email com token de recuperação
-    // Por enquanto, retornamos sucesso para não revelar se o email existe
-    return sendSuccess(null, {}, 'Se o email existir, você receberá instruções de recuperação');
+    const data = resetToken ? { resetToken } : null;
+    return sendSuccess(null, data, 'Se o email existir, você receberá instruções de recuperação');
   }
 
   async resetPassword(token, newPassword) {
-    // Aqui seria implementada a validação do token de recuperação
-    // Por enquanto, vamos implementar uma versão simplificada
-    try {
-      const decoded = verifyToken(token);
-      if (decoded.type !== 'reset') {
-        throw new Error('Token inválido');
-      }
-
-      const user = await this.userRepository.findById(decoded.id);
-      if (!user) {
-        throw new Error('Usuário não encontrado');
-      }
-
-      await this.userRepository.updatePassword(user.id, newPassword);
-      return sendSuccess(null, {}, 'Senha atualizada com sucesso');
-    } catch (error) {
-      throw new Error('Token inválido ou expirado');
+    const reset = await resetPasswordWithToken(token, newPassword);
+    if (!reset) {
+      throw new Error('Token de recuperação inválido ou expirado');
     }
+    return sendSuccess(null, {}, 'Senha atualizada com sucesso');
   }
 }

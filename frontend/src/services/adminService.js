@@ -40,6 +40,10 @@ export const adminService = {
   async updateCurriculo(curriculo) {
     return unpack(await api.put('/curriculo', { curriculo }));
   },
+
+  async seedCatalog() {
+    return unpack(await api.post('/admin/seed'));
+  },
 };
 
 export default adminService;

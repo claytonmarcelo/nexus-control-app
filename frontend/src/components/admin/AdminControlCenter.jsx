@@ -301,6 +301,30 @@ export default function AdminControlCenter() {
     }
   };
 
+  const [seedingCatalog, setSeedingCatalog] = useState(false);
+
+  const handleSeedCatalog = async () => {
+    const accepted = await confirm({
+      title: 'Popular Catálogo Oficial',
+      message: 'Deseja sincronizar e popular o banco de dados com os 21 produtos padrão do catálogo Nexus Control (servidores, redes, periféricos e serviços de nuvem)?',
+      confirmText: 'Sim, popular catálogo',
+      cancelText: 'Cancelar',
+      variant: 'info',
+    });
+    if (!accepted) return;
+
+    setSeedingCatalog(true);
+    try {
+      await adminService.seedCatalog();
+      toast({ message: 'Catálogo oficial semeado com sucesso!', variant: 'success' });
+      await loadControlData(true);
+    } catch (err) {
+      toast({ message: 'Erro ao popular catálogo: ' + (err.response?.data?.message || err.message), variant: 'danger' });
+    } finally {
+      setSeedingCatalog(false);
+    }
+  };
+
   const updateOrderDraft = (order, key, value) => {
     setOrderDrafts((current) => ({
       ...current,
@@ -438,6 +462,8 @@ export default function AdminControlCenter() {
         <ProductsSection
           items={items}
           deletingProductId={deletingProductId}
+          seedingCatalog={seedingCatalog}
+          onSeed={handleSeedCatalog}
           onCreate={() => { setEditingProduct(null); setProductModalOpen(true); }}
           onEdit={(product) => { setEditingProduct(product); setProductModalOpen(true); }}
           onDelete={handleProductDelete}
@@ -896,7 +922,7 @@ function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPer
   );
 }
 
-function ProductsSection({ items, deletingProductId, onCreate, onEdit, onDelete }) {
+function ProductsSection({ items, deletingProductId, seedingCatalog, onSeed, onCreate, onEdit, onDelete }) {
   return (
     <section className="card" role="tabpanel">
       <div className="flex flex-col gap-4 border-b border-dark-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
@@ -905,7 +931,21 @@ function ProductsSection({ items, deletingProductId, onCreate, onEdit, onDelete 
           <h2 className="mt-2 text-xl font-semibold text-white">Produtos e estoque</h2>
           <p className="mt-1 text-sm text-nexus-400">{items.length} produtos cadastrados para venda.</p>
         </div>
-        <button type="button" onClick={onCreate} className="btn-primary self-start sm:self-auto"><ControlIcon kind="plus" className="mr-2 h-5 w-5" />Novo produto</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onSeed}
+            disabled={seedingCatalog}
+            className="btn-secondary self-start sm:self-auto"
+            title="Sincroniza e adiciona os 21 produtos padrão da loja"
+          >
+            {seedingCatalog ? <Spinner className="mr-2 h-4 w-4" /> : <ControlIcon kind="chart" className="mr-2 h-4 w-4" />}
+            {seedingCatalog ? 'Semeando...' : 'Popular Catálogo Oficial'}
+          </button>
+          <button type="button" onClick={onCreate} className="btn-primary self-start sm:self-auto">
+            <ControlIcon kind="plus" className="mr-2 h-5 w-5" />Novo produto
+          </button>
+        </div>
       </div>
 
       <div className="divide-y divide-dark-border">
@@ -932,7 +972,15 @@ function ProductsSection({ items, deletingProductId, onCreate, onEdit, onDelete 
             </div>
           </article>
         ))}
-        {items.length === 0 && <EmptyPanel icon="box" title="Catálogo vazio" text="Crie o primeiro produto para disponibilizá-lo no carrinho." actionLabel="Novo produto" onAction={onCreate} />}
+        {items.length === 0 && (
+          <EmptyPanel
+            icon="box"
+            title="Catálogo vazio"
+            text="O banco de dados ainda não possui produtos cadastrados. Clique abaixo para popular automaticamente com o catálogo oficial de 21 produtos."
+            actionLabel={seedingCatalog ? "Populando..." : "Popular Catálogo Oficial (21 itens)"}
+            onAction={onSeed}
+          />
+        )}
       </div>
     </section>
   );

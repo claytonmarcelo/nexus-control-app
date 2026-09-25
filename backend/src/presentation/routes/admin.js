@@ -5,7 +5,8 @@ import {
   getUserPermissionsById,
   updateUserPermissions,
   getAllUsersWithPermissions,
-  getDashboardStats
+  getDashboardStats,
+  seedCatalog
 } from '../controllers/adminController.js';
 
 const router = express.Router();
@@ -27,5 +28,8 @@ router.get('/users', getAllUsersWithPermissions);
 
 // Obter estatísticas do dashboard
 router.get('/stats', getDashboardStats);
+
+// Semear / restaurar catálogo de produtos
+router.post('/seed', seedCatalog);
 
 export default router;

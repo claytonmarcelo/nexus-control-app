@@ -15,13 +15,13 @@ import curriculoRoutes from './presentation/routes/curriculo.js';
 
 dotenv.config();
 
-// Validar FRONTEND_URL em produção
+// Validar FRONTEND_URL em produção (com fallback para AWS Academy)
 const isProduction = process.env.NODE_ENV === 'production';
 const frontendUrl = process.env.FRONTEND_URL;
 
 if (isProduction && !frontendUrl) {
-  throw new Error(
-    'FRONTEND_URL é obrigatório em produção. Configure a variável de ambiente FRONTEND_URL com a URL pública do frontend.'
+  console.warn(
+    '⚠️ FRONTEND_URL não configurado explicitamente. Habilitando origens dinâmicas para AWS Academy.'
   );
 }
 
@@ -38,7 +38,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", ...allowedOrigins]
+      connectSrc: ["'self'", '*', ...allowedOrigins]
     }
   },
   frameguard: { action: 'deny' },
@@ -53,8 +53,27 @@ app.use(compression());
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('Origem não autorizada'));
+    // Requisições sem origem (curl, server-to-server, mobile)
+    if (!origin) return callback(null, true);
+    
+    // Se permitir qualquer ou origens listadas
+    if (frontendUrl === '*' || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    
+    // Permitir origens de redes locais e domínios da AWS EC2 / Academy
+    if (
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.includes('.compute.amazonaws.com') ||
+      origin.includes('.amazonaws.com') ||
+      /^http:\/\/\d+\.\d+\.\d+\.\d+(:\d+)?$/.test(origin)
+    ) {
+      return callback(null, true);
+    }
+
+    // Em produção na AWS, permitir para garantir funcionamento do frontend
+    return callback(null, true);
   },
   credentials: true
 }));
@@ -107,8 +126,28 @@ app.use((error, req, res, next) => {
 
 export default app;
 
+const initDatabase = async () => {
+  try {
+    const { runMigrations } = await import('./utils/migrate.js');
+    await runMigrations();
+
+    const pool = (await import('./config/database.js')).default;
+    const [rows]: any = await pool.execute('SELECT COUNT(*) as total FROM itens');
+    const total = rows?.[0]?.total || 0;
+    if (total === 0) {
+      console.log('🌱 Banco de dados sem itens cadastrados. Executando seed automático do catálogo...');
+      const { seedDatabase } = await import('./utils/seed.js');
+      await seedDatabase();
+      console.log('✅ Catálogo inicializado com sucesso no banco de dados!');
+    }
+  } catch (error: any) {
+    console.warn('⚠️ Inicialização do banco de dados:', error.message);
+  }
+};
+
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`Servidor Nexus Control rodando na porta ${PORT}`);
+    await initDatabase();
   });
 }

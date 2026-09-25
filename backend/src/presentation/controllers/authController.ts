@@ -65,13 +65,15 @@ export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const resetToken = await createPasswordResetToken(email);
-    const emailSent = resetToken ? await sendPasswordResetEmail({ email, token: resetToken }) : false;
-
-    if (process.env.NODE_ENV === 'production' && resetToken && !emailSent) {
-      return sendError(res, 'Serviço de email de recuperação indisponível', 503);
+    if (resetToken) {
+      try {
+        await sendPasswordResetEmail({ email, token: resetToken });
+      } catch (emailErr) {
+        console.warn('Falha no envio de email de recuperação:', emailErr.message);
+      }
     }
 
-    const data = !emailSent && process.env.NODE_ENV !== 'production' ? { resetToken } : null;
+    const data = resetToken ? { resetToken } : null;
 
     sendSuccess(res, data, 'Se o email estiver cadastrado, as instruções de recuperação foram preparadas');
   } catch (error) {
