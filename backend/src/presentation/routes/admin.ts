@@ -19,9 +19,12 @@ router.get('/pages', getPages);
 
 // Obter permissões de um usuário específico
 router.get('/users/:userId/permissions', getUserPermissionsById);
+router.get('/permissions/:userId', getUserPermissionsById);
 
 // Atualizar permissões de um usuário
 router.put('/users/:userId/permissions', updateUserPermissions);
+router.put('/permissions/:userId', updateUserPermissions);
+router.put('/permissions', updateUserPermissions);
 
 // Listar todos os usuários com suas permissões
 router.get('/users', getAllUsersWithPermissions);

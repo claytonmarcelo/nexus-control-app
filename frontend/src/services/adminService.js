@@ -14,11 +14,15 @@ export const adminService = {
   },
 
   async getUserPermissions(userId) {
-    return unpack(await api.get(`/usuarios/${userId}/permissions`));
+    try {
+      return unpack(await api.get(`/admin/users/${userId}/permissions`));
+    } catch {
+      return unpack(await api.get(`/usuarios/${userId}/permissions`));
+    }
   },
 
   async updatePermissions({ userId, nivel_acesso, ativo, permissions }) {
-    return unpack(await api.put('/admin/permissions', {
+    return unpack(await api.put(`/admin/users/${userId}/permissions`, {
       userId,
       nivel_acesso,
       ativo,

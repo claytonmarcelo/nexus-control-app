@@ -1,11 +1,11 @@
-import { sendSuccess, sendError, sendPaginated } from '../../infrastructure/utils/response.js';
-import { findAllUsers } from '../../infrastructure/User.js';
+import { sendSuccess, sendError, sendPaginated } from '../../utils/response.js';
+import { findAllUsers, updateUserAccess } from '../../infrastructure/User.js';
 import { getUserPermissions, setUserPermissions } from '../../infrastructure/Permission.js';
 import { findAllOrders } from '../../infrastructure/Order.js';
 import { findAllItems } from '../../infrastructure/Item.js';
-import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../../infrastructure/config/permissions.js';
-import { isRootAdmin } from '../../infrastructure/config/access.js';
-import pool from '../../infrastructure/config/database.js';
+import { PAGE_PERMISSIONS, DEFAULT_PERMISSIONS, PAGE_PERMISSION_KEYS } from '../../config/permissions.js';
+import { isRootAdmin } from '../../config/access.js';
+import pool from '../../config/database.js';
 
 // Mapeamento de páginas e suas metadatas
 const PAGES_MAP = {
@@ -113,11 +113,15 @@ export const getPages = async (req, res) => {
 
 export const getUserPermissionsById = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.params.userId || req.params.id;
+
+    if (!userId) {
+      return sendError(res, 'ID do usuário é obrigatório', 400);
+    }
 
     // Buscar permissões do usuário
     const [userRows] = await pool.execute(
-      'SELECT id, nome, email, nivel_acesso FROM usuarios WHERE id = ?',
+      'SELECT id, nome, email, nivel_acesso, ativo FROM usuarios WHERE id = ?',
       [userId]
     );
 
@@ -129,10 +133,14 @@ export const getUserPermissionsById = async (req, res) => {
     const permissions = await getUserPermissions(userId, user.nivel_acesso, user.email);
 
     sendSuccess(res, {
-      userId: user.id,
-      nome: user.nome,
-      email: user.email,
-      nivel_acesso: user.nivel_acesso,
+      userId: Number(user.id),
+      user: {
+        id: Number(user.id),
+        nome: user.nome,
+        email: user.email,
+        nivel_acesso: user.nivel_acesso,
+        ativo: Boolean(user.ativo),
+      },
       permissions
     }, 'Permissões do usuário');
   } catch (error) {
@@ -143,23 +151,16 @@ export const getUserPermissionsById = async (req, res) => {
 
 export const updateUserPermissions = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const { permissions } = req.body;
+    const userId = req.params.userId || req.params.id || req.body.userId || req.body.id;
+    const { permissions, nivel_acesso, ativo } = req.body;
 
-    if (!permissions || typeof permissions !== 'object') {
-      return sendError(res, 'permissions deve ser um objeto válido', 400);
-    }
-
-    // Validar que todas as páginas têm valores booleanos
-    for (const page of PAGE_PERMISSION_KEYS) {
-      if (permissions[page] !== undefined && typeof permissions[page] !== 'boolean') {
-        return sendError(res, `permission[${page}] deve ser booleano`, 400);
-      }
+    if (!userId) {
+      return sendError(res, 'ID do usuário é obrigatório', 400);
     }
 
     // Verificar se usuário existe
     const [userRows] = await pool.execute(
-      'SELECT id, nome, email FROM usuarios WHERE id = ?',
+      'SELECT id, nome, email, nivel_acesso, ativo FROM usuarios WHERE id = ?',
       [userId]
     );
 
@@ -174,17 +175,40 @@ export const updateUserPermissions = async (req, res) => {
       return sendError(res, 'Não é possível alterar as permissões do administrador principal', 403);
     }
 
-    // Atualizar permissões
-    await setUserPermissions(userId, permissions);
+    // Atualizar nivel_acesso e/ou ativo se fornecidos
+    if (nivel_acesso !== undefined || ativo !== undefined) {
+      await updateUserAccess(userId, { nivel_acesso, ativo });
+    }
 
-    const updatedPermissions = await getUserPermissions(userId, targetUser.nivel_acesso, targetUser.email);
+    // Atualizar permissões se fornecidas
+    if (permissions && typeof permissions === 'object') {
+      // Validar que todas as páginas têm valores booleanos
+      for (const page of PAGE_PERMISSION_KEYS) {
+        if (permissions[page] !== undefined && typeof permissions[page] !== 'boolean') {
+          return sendError(res, `permission[${page}] deve ser booleano`, 400);
+        }
+      }
+      await setUserPermissions(userId, permissions);
+    }
+
+    const [updatedRows] = await pool.execute(
+      'SELECT id, nome, email, nivel_acesso, ativo FROM usuarios WHERE id = ?',
+      [userId]
+    );
+    const updatedUser = updatedRows[0] || targetUser;
+    const updatedPermissions = await getUserPermissions(userId, updatedUser.nivel_acesso, updatedUser.email);
 
     sendSuccess(res, {
-      userId,
-      nome: targetUser.nome,
-      email: targetUser.email,
+      userId: Number(userId),
+      user: {
+        id: Number(userId),
+        nome: updatedUser.nome,
+        email: updatedUser.email,
+        nivel_acesso: updatedUser.nivel_acesso,
+        ativo: Boolean(updatedUser.ativo),
+      },
       permissions: updatedPermissions
-    }, 'Permissões atualizadas com sucesso');
+    }, 'Permissões e acessos atualizados com sucesso');
   } catch (error) {
     console.error('Erro ao atualizar permissões:', error);
     sendError(res, 'Erro ao atualizar permissões', 500);
