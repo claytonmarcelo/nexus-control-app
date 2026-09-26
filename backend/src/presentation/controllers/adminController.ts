@@ -113,10 +113,10 @@ export const getPages = async (req, res) => {
 
 export const getUserPermissionsById = async (req, res) => {
   try {
-    const userId = req.params.userId || req.params.id;
+    const userId = req.params.userId || req.params.id || req.query.userId || req.query.id;
 
     if (!userId) {
-      return sendError(res, 'ID do usuário é obrigatório', 400);
+      return getPages(req, res);
     }
 
     // Buscar permissões do usuário
@@ -149,9 +149,13 @@ export const getUserPermissionsById = async (req, res) => {
   }
 };
 
+export const getPermissionsHandler = async (req, res) => {
+  return getUserPermissionsById(req, res);
+};
+
 export const updateUserPermissions = async (req, res) => {
   try {
-    const userId = req.params.userId || req.params.id || req.body.userId || req.body.id;
+    const userId = req.params.userId || req.params.id || req.body.userId || req.body.id || req.query.userId || req.query.id;
     const { permissions, nivel_acesso, ativo } = req.body;
 
     if (!userId) {

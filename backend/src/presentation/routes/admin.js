@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import {
   getPages,
   getUserPermissionsById,
+  getPermissionsHandler,
   updateUserPermissions,
   getAllUsersWithPermissions,
   getDashboardStats,
@@ -17,14 +18,22 @@ router.use(authenticate, authorize('admin'));
 // Obter mapeamento de páginas, views e roles
 router.get('/pages', getPages);
 
-// Obter permissões de um usuário específico
-router.get('/users/:userId/permissions', getUserPermissionsById);
+// Obter permissões (suporte a /permissions, /permissions/:userId, /users/:userId/permissions)
+router.get('/permissions', getPermissionsHandler);
 router.get('/permissions/:userId', getUserPermissionsById);
+router.get('/users/:userId/permissions', getUserPermissionsById);
+router.get('/users/permissions', getPermissionsHandler);
 
-// Atualizar permissões de um usuário
-router.put('/users/:userId/permissions', updateUserPermissions);
-router.put('/permissions/:userId', updateUserPermissions);
+// Atualizar permissões (PUT e POST para todas as variantes)
 router.put('/permissions', updateUserPermissions);
+router.put('/permissions/:userId', updateUserPermissions);
+router.put('/users/:userId/permissions', updateUserPermissions);
+router.put('/users/permissions', updateUserPermissions);
+
+router.post('/permissions', updateUserPermissions);
+router.post('/permissions/:userId', updateUserPermissions);
+router.post('/users/:userId/permissions', updateUserPermissions);
+router.post('/users/permissions', updateUserPermissions);
 
 // Listar todos os usuários com suas permissões
 router.get('/users', getAllUsersWithPermissions);

@@ -115,6 +115,14 @@ app.use('/api/pedidos', ordersRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/curriculo', curriculoRoutes);
 
+// Fallback sem prefixo /api para compatibilidade com proxies reversos Nginx/ALB
+app.use('/auth', authRoutes);
+app.use('/itens', itemsRoutes);
+app.use('/usuarios', usersRoutes);
+app.use('/pedidos', ordersRoutes);
+app.use('/admin', adminRoutes);
+app.use('/curriculo', curriculoRoutes);
+
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Rota não encontrada' });
 });
