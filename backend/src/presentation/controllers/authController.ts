@@ -1,6 +1,6 @@
 import { createUser, findUserByEmail, verifyPassword, findUserById } from '../../infrastructure/User.js';
 import { USER_ROLES } from '../../infrastructure/User.js';
-import { generateToken, generateRefreshToken, verifyToken } from '../../utils/jwt.js';
+import { generateToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import { createPasswordResetToken, resetPasswordWithToken } from '../../infrastructure/PasswordReset.js';
 import { sendPasswordResetEmail } from '../../utils/email.js';
@@ -101,7 +101,7 @@ export const resetPassword = async (req, res) => {
 export const refresh = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    const decoded = verifyToken(refreshToken);
+    const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded || decoded.type !== 'refresh') {
       return sendError(res, 'Refresh token inválido', 401);

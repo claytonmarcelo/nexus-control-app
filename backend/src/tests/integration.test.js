@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../server.js';
 import pool from '../config/database.js';
+import { createTestClient, deleteTestClient } from './helpers/testClient.js';
 
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
 const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
@@ -11,6 +12,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
   let adminId = '';
   let clienteId = '';
   let itemId = '';
+  let testOrderId = '';
 
   beforeAll(async () => {
     console.log('\n🧪 Iniciando testes de integração...\n');
@@ -27,16 +29,9 @@ describe('Integration Tests - Carrinho e Checkout', () => {
     adminId = adminLogin.body.data.user.id;
     console.log(`✅ Admin autenticado: ${adminId}`);
 
-    // Login como cliente
-    const clienteLogin = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'cliente@nexuscontrol.com',
-        senha: '123456#',
-      });
-
-    clienteToken = clienteLogin.body.data.accessToken;
-    clienteId = clienteLogin.body.data.user.id;
+    const testClient = await createTestClient();
+    clienteToken = testClient.token;
+    clienteId = testClient.id;
     console.log(`✅ Cliente autenticado: ${clienteId}`);
 
     // Obter um item para teste
@@ -52,6 +47,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
   });
 
   afterAll(async () => {
+    await deleteTestClient(clienteId);
     await pool.end();
     console.log('\n✅ Testes de integração concluídos\n');
   });
@@ -112,6 +108,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
       expect(response.body.data).toHaveProperty('usuario_id', clienteId);
       expect(response.body.data).toHaveProperty('metodo_pagamento', 'pix');
       expect(response.body.data).toHaveProperty('status_pagamento', 'confirmado');
+      testOrderId = response.body.data.id;
       console.log(`  ✓ Pedido criado: #${response.body.data.id} - Total: R$ ${response.body.data.total}`);
     });
 
@@ -241,19 +238,10 @@ describe('Integration Tests - Carrinho e Checkout', () => {
     });
 
     test('✅ Admin deve atualizar status de pedido', async () => {
-      const pedidosResponse = await request(app)
-        .get('/api/pedidos')
-        .set('Authorization', `Bearer ${adminToken}`);
-
-      if (pedidosResponse.body.data.length === 0) {
-        console.log('  ⏭️ Nenhum pedido disponível, pulando teste');
-        return;
-      }
-
-      const pedidoId = pedidosResponse.body.data[0].id;
+      expect(testOrderId).toBeDefined();
 
       const response = await request(app)
-        .put(`/api/pedidos/${pedidoId}`)
+        .put(`/api/pedidos/${testOrderId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           status_pagamento: 'confirmado',
@@ -261,7 +249,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
         });
 
       expect(response.status).toBe(200);
-      console.log(`  ✓ Status de pedido #${pedidoId} atualizado`);
+      console.log(`  ✓ Status de pedido #${testOrderId} atualizado`);
     });
 
     test('❌ Cliente não deve atualizar pedidos', async () => {

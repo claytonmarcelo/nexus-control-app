@@ -3,6 +3,7 @@ import request from 'supertest';
 import bcrypt from 'bcryptjs';
 import app from '../server.js';
 import pool from '../config/database.js';
+import { createTestClient, deleteTestClient } from './helpers/testClient.js';
 
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
 const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
@@ -19,6 +20,7 @@ describe('API Health Check', () => {
 describe('Authentication', () => {
   let adminToken = '';
   let userToken = '';
+  let testClientId;
 
   beforeAll(async () => {
     // Login as admin
@@ -27,11 +29,13 @@ describe('Authentication', () => {
       .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
     adminToken = adminLogin.body.data.accessToken;
 
-    // Login as regular user
-    const userLogin = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
-    userToken = userLogin.body.data.accessToken;
+    const testClient = await createTestClient();
+    userToken = testClient.token;
+    testClientId = testClient.id;
+  });
+
+  afterAll(async () => {
+    await deleteTestClient(testClientId);
   });
 
   describe('POST /api/auth/login', () => {
@@ -190,6 +194,7 @@ describe('Items API', () => {
   let adminToken = '';
   let userToken = '';
   let createdItemId = '';
+  let testClientId;
 
   beforeAll(async () => {
     const adminLogin = await request(app)
@@ -197,10 +202,16 @@ describe('Items API', () => {
       .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
     adminToken = adminLogin.body.data.accessToken;
 
-    const userLogin = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
-    userToken = userLogin.body.data.accessToken;
+    const testClient = await createTestClient();
+    userToken = testClient.token;
+    testClientId = testClient.id;
+  });
+
+  afterAll(async () => {
+    if (createdItemId) {
+      await pool.execute('DELETE FROM itens WHERE id = ?', [createdItemId]);
+    }
+    await deleteTestClient(testClientId);
   });
 
   describe('POST /api/itens', () => {
@@ -351,12 +362,22 @@ describe('Items API', () => {
 
 describe('Users API (Admin Only)', () => {
   let adminToken = '';
+  let userToken = '';
+  let testClientId;
 
   beforeAll(async () => {
     const adminLogin = await request(app)
       .post('/api/auth/login')
       .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
     adminToken = adminLogin.body.data.accessToken;
+
+    const testClient = await createTestClient();
+    userToken = testClient.token;
+    testClientId = testClient.id;
+  });
+
+  afterAll(async () => {
+    await deleteTestClient(testClientId);
   });
 
   describe('GET /api/usuarios', () => {
@@ -371,13 +392,9 @@ describe('Users API (Admin Only)', () => {
     });
 
     it('should reject non-admin', async () => {
-      const userLogin = await request(app)
-        .post('/api/auth/login')
-        .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
-      
       const response = await request(app)
         .get('/api/usuarios')
-        .set('Authorization', `Bearer ${userLogin.body.data.accessToken}`);
+        .set('Authorization', `Bearer ${userToken}`);
       
       expect(response.status).toBe(403);
     });
