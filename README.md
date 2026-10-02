@@ -229,7 +229,7 @@ ROOT_ADMIN_NAME=Administrador
 ROOT_ADMIN_PASSWORD=SuaSenhaSegura123!
 ```
 
-Novas senhas devem ter pelo menos 8 caracteres e incluir letras, números e símbolos.
+Novas senhas de usuários devem ter pelo menos 8 caracteres e incluir letras, números e símbolos. Para o administrador raiz, `ROOT_ADMIN_PASSWORD` também pode ser definido manualmente com exatamente 6 dígitos seguidos de 1 símbolo; essa exceção não altera as regras para outros usuários. O seed preserva o hash da senha do administrador já existente no banco, e contas e senhas cadastradas anteriormente continuam válidas.
 
 Instale as dependências e prepare o banco:
 

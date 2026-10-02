@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { ROOT_ADMIN_EMAIL, ROOT_ADMIN_NAME } from '../config/access.js';
-import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
+import { validateRootAdminPassword } from '../infrastructure/utils/passwordPolicy.js';
 
 dotenv.config();
 
@@ -58,7 +58,7 @@ const seedItems = [
 ];
 
 export const seedDatabase = async () => {
-  if (isProduction && validatePassword(rootAdminPassword) !== true) {
+  if (isProduction && validateRootAdminPassword(rootAdminPassword) !== true) {
     throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
   }
 
@@ -82,10 +82,10 @@ export const seedDatabase = async () => {
         userIds.set(user.email, existing[0].id);
         if (user.email === ROOT_ADMIN_EMAIL) {
           await pool.execute(
-            'UPDATE usuarios SET nome = ?, senha = ?, nivel_acesso = ? WHERE id = ?',
-            [user.nome, hashedPassword, user.nivel_acesso, existing[0].id]
+            'UPDATE usuarios SET nome = ?, nivel_acesso = ? WHERE id = ?',
+            [user.nome, user.nivel_acesso, existing[0].id]
           );
-          console.log(`🔒 Administrador raiz garantido: ${user.email}`);
+          console.log(`🔒 Administrador raiz garantido sem alterar a senha existente: ${user.email}`);
         }
         console.log(`⏭️ Usuário já existe: ${user.email}`);
       }

@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../server.js';
 import pool from '../config/database.js';
 import { generateTokens, verifyRefreshToken, verifyToken } from '../infrastructure/utils/jwt.js';
-import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
+import { validatePassword, validateRootAdminPassword } from '../infrastructure/utils/passwordPolicy.js';
 
 describe('Security and readiness checks', () => {
   afterAll(async () => {
@@ -23,6 +23,14 @@ describe('Security and readiness checks', () => {
     expect(validatePassword('abc123!')).not.toBe(true);
     expect(validatePassword('Abcde1!x')).toBe(true);
     expect(validatePassword('LongEnoughPassword123!')).toBe(true);
+  });
+
+  it('allows the short numeric-and-symbol format only for the root admin', () => {
+    expect(validateRootAdminPassword('123456#')).toBe(true);
+    expect(validateRootAdminPassword('1234567')).not.toBe(true);
+    expect(validateRootAdminPassword('12345#')).not.toBe(true);
+    expect(validateRootAdminPassword('123456##')).not.toBe(true);
+    expect(validatePassword('123456#')).not.toBe(true);
   });
 
   it('does not grant CORS access to an unlisted origin', async () => {

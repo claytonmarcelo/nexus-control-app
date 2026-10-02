@@ -12,3 +12,10 @@ export const validatePassword = (password) => {
   }
   return true;
 };
+
+export const validateRootAdminPassword = (password) => {
+  if (typeof password === 'string' && /^\d{6}[^A-Za-z0-9\s]$/.test(password)) {
+    return true;
+  }
+  return validatePassword(password);
+};
