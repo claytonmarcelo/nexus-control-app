@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/services';
 import { useTheme } from '../../contexts/ThemeContext';
-import { validatePassword } from '../../utils/password';
+import { PASSWORD_POLICY_MESSAGE, validatePassword } from '../../utils/password';
 
 export default function ForgotPassword() {
   const { theme, toggleTheme } = useTheme();
@@ -165,12 +165,14 @@ export default function ForgotPassword() {
                     className="auth-input auth-input--padded"
                     placeholder="Nova senha"
                     autoComplete="new-password"
+                    maxLength={7}
                     required
                   />
                   <button type="button" className="auth-eye-btn" onClick={() => setShowPassword(p => !p)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
                     <EyeIcon visible={showPassword} />
                   </button>
                 </div>
+                <p className="auth-password-hint">{PASSWORD_POLICY_MESSAGE}</p>
               </div>
               <div className="auth-field">
                 <div className="auth-input-wrap">
@@ -189,6 +191,7 @@ export default function ForgotPassword() {
                     className="auth-input auth-input--padded"
                     placeholder="Confirmar nova senha"
                     autoComplete="new-password"
+                    maxLength={7}
                     required
                   />
                   <button type="button" className="auth-eye-btn" onClick={() => setShowConfirmation(p => !p)} aria-label={showConfirmation ? 'Ocultar senha' : 'Mostrar senha'}>

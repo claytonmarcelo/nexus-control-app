@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useModal } from '../../contexts/ModalContext';
 import api from '../../services/api';
+import { PASSWORD_POLICY_MESSAGE, validatePassword } from '../../utils/password';
 
 function Login() {
   const [currentStep, setCurrentStep] = useState('login'); // 'login', 'register', 'forgot'
@@ -261,6 +262,12 @@ function RegisterForm({ onNavigate }) {
       return;
     }
 
+    const passwordError = validatePassword(formData.senha);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -271,7 +278,11 @@ function RegisterForm({ onNavigate }) {
       });
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Erro ao criar conta');
+      const validationErrors = err.response?.data?.errors;
+      const validationMessage = Array.isArray(validationErrors)
+        ? validationErrors.map(({ msg }) => msg).filter(Boolean).join('. ')
+        : '';
+      setError(validationMessage || err.response?.data?.message || err.message || 'Erro ao criar conta');
     } finally {
       setLoading(false);
     }
@@ -359,6 +370,7 @@ function RegisterForm({ onNavigate }) {
               placeholder="Senha"
               aria-label="Senha de cadastro"
               autoComplete="new-password"
+              maxLength={7}
               required
               disabled={loading}
             />
@@ -371,6 +383,7 @@ function RegisterForm({ onNavigate }) {
               <EyeIcon visible={showPassword} />
             </button>
           </div>
+          <p className="auth-password-hint">{PASSWORD_POLICY_MESSAGE}</p>
         </div>
 
         <div className="auth-field">
@@ -392,6 +405,7 @@ function RegisterForm({ onNavigate }) {
               placeholder="Confirmar senha"
               aria-label="Confirmar senha"
               autoComplete="new-password"
+              maxLength={7}
               required
               disabled={loading}
             />
@@ -464,6 +478,11 @@ function ForgotForm({ onNavigate }) {
     event.preventDefault();
     if (senha !== confirmacao) { 
       setError('As senhas não conferem');
+      return;
+    }
+    const passwordError = validatePassword(senha);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
     setError('');
@@ -587,6 +606,7 @@ function ForgotForm({ onNavigate }) {
                   className="auth-input auth-input--padded"
                   placeholder="Nova senha"
                   autoComplete="new-password"
+                  maxLength={7}
                   required
                 />
                 <button type="button" className="auth-eye-btn" onClick={() => setShowPassword(p => !p)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
@@ -611,12 +631,14 @@ function ForgotForm({ onNavigate }) {
                   className="auth-input auth-input--padded"
                   placeholder="Confirmar nova senha"
                   autoComplete="new-password"
+                  maxLength={7}
                   required
                 />
                 <button type="button" className="auth-eye-btn" onClick={() => setShowConfirmation(p => !p)} aria-label={showConfirmation ? 'Ocultar senha' : 'Mostrar senha'}>
                   <EyeIcon visible={showConfirmation} />
                 </button>
               </div>
+              <p className="auth-password-hint">{PASSWORD_POLICY_MESSAGE}</p>
             </div>
             {error && <p className="auth-field-error" role="alert">{error}</p>}
             <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '12px' }}>

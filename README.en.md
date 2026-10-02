@@ -217,10 +217,10 @@ API_URL=http://localhost:3000
 # Default Admin
 ROOT_ADMIN_EMAIL=admin@yourdomain.com
 ROOT_ADMIN_NAME=Administrator
-ROOT_ADMIN_PASSWORD=YourSecurePassword123!
+ROOT_ADMIN_PASSWORD=123456#
 ```
 
-New passwords must contain at least 8 characters, including letters, numbers, and symbols.
+New passwords for every role must contain exactly 6 digits followed by 1 symbol (7 characters), for registration, password changes, and password recovery. Login continues to accept existing stored passwords, and database seeds preserve existing password hashes.
 
 Install dependencies and setup database:
 
@@ -251,8 +251,8 @@ npm run dev          # Start at http://localhost:5173
 | Profile | Email | Password |
 |---|---|---|
 | Admin | `marcelo10@gmail.com` | (configured in .env) |
-| Employee | `funcionario@nexuscontrol.com` | `func123` |
-| Client | `cliente@nexuscontrol.com` | `cliente123` |
+| Employee (new seed) | `funcionario@nexuscontrol.com` | `123457#` |
+| Client (new seed) | `cliente@nexuscontrol.com` | `123456#` |
 
 ## 📊 Project Status (September 2026)
 

@@ -42,7 +42,7 @@ EMAIL_PASS=sua_senha_app_google
 
 # Admin Root
 ROOT_ADMIN_EMAIL=admin@nexuscontrol.com
-ROOT_ADMIN_PASSWORD=UseUmaSenhaForteCom12Caracteres!
+ROOT_ADMIN_PASSWORD=123456#
 ROOT_ADMIN_NAME=Administrador
 ```
 
@@ -99,10 +99,10 @@ Acesse: **http://localhost:5173**
 | Email | Senha | Role | Descrição |
 |-------|-------|------|-----------|
 | `admin@nexuscontrol.com` | Configure `ROOT_ADMIN_PASSWORD` | admin | Administrador raiz local |
-| `funcionario@nexuscontrol.com` | `func123` | funcionario | Apenas desenvolvimento/testes |
-| `cliente@nexuscontrol.com` | `cliente123` | cliente | Apenas desenvolvimento/testes |
+| `funcionario@nexuscontrol.com` | `123457#` | funcionario | Apenas desenvolvimento/testes |
+| `cliente@nexuscontrol.com` | `123456#` | cliente | Apenas desenvolvimento/testes |
 
-As contas de demonstração nunca devem ser criadas em produção. As senhas padrão do seed são exclusivas de desenvolvimento.
+As contas de demonstração nunca devem ser criadas em produção. As senhas padrão do seed são exclusivas de desenvolvimento. Novas senhas devem seguir o formato global de 6 dígitos seguidos de 1 símbolo; logins já existentes permanecem válidos.
 
 ### Estrutura de Dados
 

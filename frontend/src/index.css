@@ -686,6 +686,13 @@
     text-align: center;
   }
 
+  .auth-password-hint {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    line-height: 1.35;
+    margin: 5px 2px 0;
+  }
+
   /* ═══════════════════════════════════════════════════════
      RESPONSIVE — Global Mobile & Tablet
      ═══════════════════════════════════════════════════════ */

@@ -141,7 +141,8 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, initialData, 
                   value={formData.senha}
                   onChange={handleChange}
                   className={`input pr-14 ${errors.senha ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="6 caracteres, com especial"
+                  placeholder="6 dígitos + 1 símbolo"
+                  maxLength={7}
                   autoComplete="new-password"
                   disabled={isSubmitting}
                   aria-invalid={!!errors.senha}

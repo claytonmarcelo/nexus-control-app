@@ -226,10 +226,10 @@ API_URL=http://localhost:3000
 # Admin padrão
 ROOT_ADMIN_EMAIL=admin@seudominio.com
 ROOT_ADMIN_NAME=Administrador
-ROOT_ADMIN_PASSWORD=SuaSenhaSegura123!
+ROOT_ADMIN_PASSWORD=123456#
 ```
 
-Novas senhas de usuários devem ter pelo menos 8 caracteres e incluir letras, números e símbolos. Para o administrador raiz, `ROOT_ADMIN_PASSWORD` também pode ser definido manualmente com exatamente 6 dígitos seguidos de 1 símbolo; essa exceção não altera as regras para outros usuários. O seed preserva o hash da senha do administrador já existente no banco, e contas e senhas cadastradas anteriormente continuam válidas.
+Novas senhas, em qualquer perfil, devem ter exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres), tanto no cadastro quanto na troca e recuperação de senha. O login continua aceitando as senhas já cadastradas; o seed preserva os hashes existentes no banco.
 
 Instale as dependências e prepare o banco:
 
@@ -260,8 +260,8 @@ npm run dev          # Inicia em http://localhost:5173
 | Perfil | Email | Senha |
 |---|---|---|
 | Admin | `marcelo10@gmail.com` | (configurado no .env) |
-| Funcionário | `funcionario@nexuscontrol.com` | `func123` |
-| Cliente | `cliente@nexuscontrol.com` | `cliente123` |
+| Funcionário (seed novo) | `funcionario@nexuscontrol.com` | `123457#` |
+| Cliente (seed novo) | `cliente@nexuscontrol.com` | `123456#` |
 
 ## 📊 Status de Projeto (Setembro 2026)
 

@@ -3,15 +3,15 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import type { ResultSetHeader } from 'mysql2';
 import { ROOT_ADMIN_EMAIL } from '../config/access.js';
-import { validateRootAdminPassword } from '../infrastructure/utils/passwordPolicy.js';
+import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 
 dotenv.config();
 
 const resetAdminPassword = async () => {
   try {
-    const newPassword = process.env.ROOT_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : '26481#');
-    if (process.env.NODE_ENV === 'production' && validateRootAdminPassword(newPassword) !== true) {
-      throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
+    const newPassword = process.env.ROOT_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : '264810#');
+    if (validatePassword(newPassword) !== true) {
+      throw new Error('ROOT_ADMIN_PASSWORD não atende à política global de senhas.');
     }
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     

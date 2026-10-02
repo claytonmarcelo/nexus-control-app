@@ -1,21 +1,8 @@
-export const PASSWORD_POLICY_MESSAGE = 'A senha deve ter pelo menos 8 caracteres, incluindo letras, números e símbolos.';
+export const PASSWORD_POLICY_MESSAGE = 'Use exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres).';
 
 export const validatePassword = (password) => {
-  if (typeof password !== 'string' || password.length < 8) {
-    return 'A senha deve ter pelo menos 8 caracteres';
-  }
-  if (password.length > 128) {
-    return 'A senha deve ter no máximo 128 caracteres';
-  }
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-    return 'A senha precisa conter letras, números e símbolos';
+  if (typeof password !== 'string' || !/^\d{6}[^A-Za-z0-9\s]$/.test(password)) {
+    return 'A senha deve conter exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres)';
   }
   return true;
-};
-
-export const validateRootAdminPassword = (password) => {
-  if (typeof password === 'string' && /^\d{6}[^A-Za-z0-9\s]$/.test(password)) {
-    return true;
-  }
-  return validatePassword(password);
 };

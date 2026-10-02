@@ -3,7 +3,7 @@ import app from '../server.js';
 import pool from '../config/database.js';
 
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
-const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '26481#';
+const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
 
 describe('Integration Tests - Carrinho e Checkout', () => {
   let adminToken = '';
@@ -32,7 +32,7 @@ describe('Integration Tests - Carrinho e Checkout', () => {
       .post('/api/auth/login')
       .send({
         email: 'cliente@nexuscontrol.com',
-        senha: 'cliente123',
+        senha: '123456#',
       });
 
     clienteToken = clienteLogin.body.data.accessToken;

@@ -300,7 +300,7 @@ http://localhost:5173
 
 ### Fluxo de Compra (Cliente)
 ```
-1. Login: cliente@nexuscontrol.com / cliente123
+1. Login (seed novo): cliente@nexuscontrol.com / 123456#
 2. Navegue para /itens
 3. Clique "Adicionar ao carrinho" (2+ itens)
 4. Vá para /carrinho

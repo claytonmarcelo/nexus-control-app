@@ -132,9 +132,11 @@ Bateria completa de testes E2E validou o Nexus Control App em todas as dimensõe
 
 ### 4.3 Demo Logins (FASE 3)
 
-- ✅ Admin: 1-click `marcelo10@gmail.com` / `26481#`
-- ✅ Funcionário: 1-click `funcionario@nexuscontrol.com` / `func123`
-- ✅ Cliente: 1-click `cliente@nexuscontrol.com` / `cliente123`
+- ✅ Admin: login with the password configured in the backend environment
+- ✅ Funcionário: seed novo usa `123457#`
+- ✅ Cliente: seed novo usa `123456#`
+
+As senhas gravadas em bancos existentes não são alteradas pelo seed; estes valores se aplicam apenas a contas criadas em um banco novo.
 
 **Resultado:** ✅ **PASS** - Autenticação e autorização 100% operacionais
 

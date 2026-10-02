@@ -306,8 +306,9 @@ export default function Profile() {
                     onChange={handlePasswordChange}
                     disabled={rootAdmin || loading}
                     className={`input pr-12 ${errors.nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    placeholder="••••••••"
+                    placeholder="6 dígitos + 1 símbolo"
                     autoComplete="new-password"
+                    maxLength={7}
                     aria-invalid={!!errors.nova_senha}
                     aria-describedby={errors.nova_senha ? 'nova_senha-error' : undefined}
                   />
@@ -331,8 +332,9 @@ export default function Profile() {
                     onChange={handlePasswordChange}
                     disabled={rootAdmin || loading}
                     className={`input pr-12 ${errors.confirmar_nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    placeholder="••••••••"
+                    placeholder="6 dígitos + 1 símbolo"
                     autoComplete="new-password"
+                    maxLength={7}
                     aria-invalid={!!errors.confirmar_nova_senha}
                     aria-describedby={errors.confirmar_nova_senha ? 'confirmar-error' : undefined}
                   />

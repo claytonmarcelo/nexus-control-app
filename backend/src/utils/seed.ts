@@ -3,12 +3,12 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import type { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { ROOT_ADMIN_EMAIL, ROOT_ADMIN_NAME } from '../config/access.js';
-import { validateRootAdminPassword } from '../infrastructure/utils/passwordPolicy.js';
+import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 
 dotenv.config();
 
 const isProduction = process.env.NODE_ENV === 'production';
-const rootAdminPassword = process.env.ROOT_ADMIN_PASSWORD || (isProduction ? '' : '26481#');
+const rootAdminPassword = process.env.ROOT_ADMIN_PASSWORD || (isProduction ? '' : '264810#');
 
 const seedUsers = [
   {
@@ -21,13 +21,13 @@ const seedUsers = [
     {
       nome: 'Funcionário Teste',
       email: 'funcionario@nexuscontrol.com',
-      senha: 'func123',
+      senha: '123457#',
       nivel_acesso: 'funcionario'
     },
     {
       nome: 'Cliente Teste',
       email: 'cliente@nexuscontrol.com',
-      senha: 'cliente123',
+      senha: '123456#',
       nivel_acesso: 'cliente'
     }
   ] : [])
@@ -58,10 +58,6 @@ const seedItems = [
 ];
 
 export const seedDatabase = async () => {
-  if (isProduction && validateRootAdminPassword(rootAdminPassword) !== true) {
-    throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
-  }
-
   console.log('🌱 Iniciando seed do banco de dados...');
 
   try {
@@ -69,9 +65,12 @@ export const seedDatabase = async () => {
 
     for (const user of seedUsers) {
       const [existing] = await pool.execute<RowDataPacket[]>('SELECT id FROM usuarios WHERE email = ?', [user.email]);
-      const hashedPassword = await bcrypt.hash(user.senha, 12);
       
       if (existing.length === 0) {
+        if (validatePassword(user.senha) !== true) {
+          throw new Error(`A senha inicial configurada para ${user.email} não atende à política global.`);
+        }
+        const hashedPassword = await bcrypt.hash(user.senha, 12);
         const [result] = await pool.execute<ResultSetHeader>(
           'INSERT INTO usuarios (nome, email, senha, nivel_acesso, criado_em) VALUES (?, ?, ?, ?, NOW())',
           [user.nome, user.email, hashedPassword, user.nivel_acesso]

@@ -56,7 +56,7 @@ async function capture() {
   // 2. Preenche formulário de login
   await page.waitForSelector('input[type="email"]', { timeout: 10000 });
   await page.type('input[type="email"]', 'marcelo10@gmail.com');
-  await page.type('input[type="password"]', '26481#');
+  await page.type('input[type="password"]', '264810#');
   
   console.log('[capture] Realizando login autenticado...');
   await Promise.all([

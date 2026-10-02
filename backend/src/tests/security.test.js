@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../server.js';
 import pool from '../config/database.js';
 import { generateTokens, verifyRefreshToken, verifyToken } from '../infrastructure/utils/jwt.js';
-import { validatePassword, validateRootAdminPassword } from '../infrastructure/utils/passwordPolicy.js';
+import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 
 describe('Security and readiness checks', () => {
   afterAll(async () => {
@@ -19,18 +19,28 @@ describe('Security and readiness checks', () => {
     expect(verifyRefreshToken(accessToken)).toBeNull();
   });
 
-  it('rejects passwords below the production strength policy', () => {
-    expect(validatePassword('abc123!')).not.toBe(true);
-    expect(validatePassword('Abcde1!x')).toBe(true);
-    expect(validatePassword('LongEnoughPassword123!')).toBe(true);
+  it('accepts exactly six digits followed by one symbol as the global password policy', () => {
+    expect(validatePassword('123456#')).toBe(true);
+    expect(validatePassword('1234567')).not.toBe(true);
+    expect(validatePassword('12345#')).not.toBe(true);
+    expect(validatePassword('123456##')).not.toBe(true);
+    expect(validatePassword('12345a#')).not.toBe(true);
+    expect(validatePassword('Abcde1!x')).not.toBe(true);
   });
 
-  it('allows the short numeric-and-symbol format only for the root admin', () => {
-    expect(validateRootAdminPassword('123456#')).toBe(true);
-    expect(validateRootAdminPassword('1234567')).not.toBe(true);
-    expect(validateRootAdminPassword('12345#')).not.toBe(true);
-    expect(validateRootAdminPassword('123456##')).not.toBe(true);
-    expect(validatePassword('123456#')).not.toBe(true);
+  it('rejects invalid new passwords at registration and recovery endpoints', async () => {
+    const weakPassword = 'Abcde1!x';
+    const registration = await request(app)
+      .post('/api/auth/register')
+      .send({ nome: 'Test User', email: 'password-policy@example.test', senha: weakPassword });
+    const recovery = await request(app)
+      .post('/api/auth/reset-password')
+      .send({ token: 'test-token', senha: weakPassword });
+
+    expect(registration.status).toBe(400);
+    expect(registration.body.errors[0].msg).toMatch(/6 dígitos seguidos de 1 símbolo/);
+    expect(recovery.status).toBe(400);
+    expect(recovery.body.errors[0].msg).toMatch(/6 dígitos seguidos de 1 símbolo/);
   });
 
   it('does not grant CORS access to an unlisted origin', async () => {

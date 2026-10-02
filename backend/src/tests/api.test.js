@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
+import bcrypt from 'bcryptjs';
 import app from '../server.js';
 import pool from '../config/database.js';
 
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
-const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '26481#';
+const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
 
 describe('API Health Check', () => {
   it('GET /api/status should return 200', async () => {
@@ -29,7 +30,7 @@ describe('Authentication', () => {
     // Login as regular user
     const userLogin = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
+      .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
     userToken = userLogin.body.data.accessToken;
   });
 
@@ -67,19 +68,43 @@ describe('Authentication', () => {
   describe('POST /api/auth/register', () => {
     it('should register new user', async () => {
       const uniqueEmail = `test${Date.now()}@test.com`;
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          nome: 'Test User',
-          email: uniqueEmail,
-          senha: 'StrongTestPass123!',
-          nivel_acesso: 'cliente'
-        });
-      
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.user.email).toBe(uniqueEmail);
-      expect(response.body.data.accessToken).toBeDefined();
+      const password = '654321#';
+      let userId;
+
+      try {
+        const response = await request(app)
+          .post('/api/auth/register')
+          .send({
+            nome: 'Test User',
+            email: uniqueEmail,
+            senha: password,
+            nivel_acesso: 'cliente'
+          });
+
+        expect(response.status).toBe(201);
+        expect(response.body.success).toBe(true);
+        expect(response.body.data.user.email).toBe(uniqueEmail);
+        expect(response.body.data.accessToken).toBeDefined();
+        userId = response.body.data.user.id;
+
+        const [users] = await pool.execute(
+          'SELECT senha FROM usuarios WHERE id = ?',
+          [userId]
+        );
+        expect(users).toHaveLength(1);
+        expect(users[0].senha).not.toBe(password);
+        expect(await bcrypt.compare(password, users[0].senha)).toBe(true);
+
+        const loginResponse = await request(app)
+          .post('/api/auth/login')
+          .send({ email: uniqueEmail, senha: password });
+        expect(loginResponse.status).toBe(200);
+        expect(loginResponse.body.data.user.email).toBe(uniqueEmail);
+      } finally {
+        if (userId) {
+          await pool.execute('DELETE FROM usuarios WHERE id = ?', [userId]);
+        }
+      }
     });
 
     it('should reject duplicate email', async () => {
@@ -88,7 +113,7 @@ describe('Authentication', () => {
         .send({
           nome: 'Test User',
           email: ADMIN_EMAIL,
-          senha: 'StrongTestPass123!'
+          senha: '654321#'
         });
       
       expect(response.status).toBe(409);
@@ -100,6 +125,19 @@ describe('Authentication', () => {
         .send({});
       
       expect(response.status).toBe(400);
+    });
+
+    it('should reject passwords outside the global format', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          nome: 'Test User',
+          email: `weak-password-${Date.now()}@test.com`,
+          senha: 'StrongTestPass123!'
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors[0].msg).toMatch(/6 dígitos seguidos de 1 símbolo/);
     });
   });
 
@@ -161,7 +199,7 @@ describe('Items API', () => {
 
     const userLogin = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
+      .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
     userToken = userLogin.body.data.accessToken;
   });
 
@@ -335,7 +373,7 @@ describe('Users API (Admin Only)', () => {
     it('should reject non-admin', async () => {
       const userLogin = await request(app)
         .post('/api/auth/login')
-        .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
+        .send({ email: 'cliente@nexuscontrol.com', senha: '123456#' });
       
       const response = await request(app)
         .get('/api/usuarios')

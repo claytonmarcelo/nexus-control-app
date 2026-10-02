@@ -43,7 +43,7 @@ async function testNavigation() {
 
     await page.waitForSelector('#email');
     await page.type('#email', 'cliente@nexuscontrol.com');
-    await page.type('#senha', 'cliente123');
+    await page.type('#senha', '123456#');
 
     // Verificar tipo de input antes do toggle
     let senhaType = await page.$eval('#senha', el => el.getAttribute('type'));
@@ -70,8 +70,8 @@ async function testNavigation() {
     await page.waitForSelector('#register-senha');
     await page.waitForSelector('#register-confirm');
 
-    await page.type('#register-senha', 'MinhaSenha@1');
-    await page.type('#register-confirm', 'MinhaSenha@1');
+    await page.type('#register-senha', '123456#');
+    await page.type('#register-confirm', '123456#');
 
     // Senha principal do cadastro
     let regSenhaType = await page.$eval('#register-senha', el => el.getAttribute('type'));
@@ -109,7 +109,7 @@ async function testNavigation() {
     }
     const senhaVal = await page.$eval('#senha', el => el.value);
     if (!senhaVal) {
-      await page.type('#senha', 'cliente123');
+      await page.type('#senha', '123456#');
     }
     const submitBtn = await page.waitForSelector('button[type="submit"]');
     await submitBtn.click();
@@ -173,7 +173,7 @@ async function testNavigation() {
     await page.waitForSelector('#nova_senha');
     await page.waitForSelector('#confirmar_nova_senha');
 
-    await page.type('#senha_atual', 'cliente123');
+    await page.type('#senha_atual', '123456#');
     await page.type('#nova_senha', '98765@');
     await page.type('#confirmar_nova_senha', '98765@');
 
@@ -252,7 +252,7 @@ async function testNavigation() {
       emailInput.dispatchEvent(new Event('input', { bubbles: true }));
       emailInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-      setter.call(senhaInput, '26481#');
+      setter.call(senhaInput, '264810#');
       senhaInput.dispatchEvent(new Event('input', { bubbles: true }));
       senhaInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
