@@ -1,5 +1,5 @@
 import { UserRepository } from '../../domain/repositories/UserRepository.js';
-import { generateTokens, verifyToken } from '../../infrastructure/utils/jwt.js';
+import { generateTokens, verifyRefreshToken } from '../../infrastructure/utils/jwt.js';
 import { sendError, sendSuccess } from '../../infrastructure/utils/response.js';
 import { createPasswordResetToken, resetPasswordWithToken } from '../../infrastructure/PasswordReset.js';
 import { sendPasswordResetEmail } from '../../utils/email.js';
@@ -59,8 +59,8 @@ export class AuthUseCase {
 
   async refreshToken(refreshToken) {
     try {
-      const decoded = verifyToken(refreshToken);
-      if (decoded.type !== 'refresh') {
+      const decoded = verifyRefreshToken(refreshToken);
+      if (!decoded || decoded.type !== 'refresh') {
         throw new Error('Token inválido');
       }
 
@@ -95,8 +95,7 @@ export class AuthUseCase {
       }
     }
 
-    const data = resetToken ? { resetToken } : null;
-    return sendSuccess(null, data, 'Se o email existir, você receberá instruções de recuperação');
+    return sendSuccess(null, null, 'Se o email existir, você receberá instruções de recuperação');
   }
 
   async resetPassword(token, newPassword) {

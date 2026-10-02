@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../../contexts/CartContext';
+import { useCart, calcDailyRate } from '../../contexts/CartContext';
 import { useModal } from '../../contexts/ModalContext';
+
+const MIN_RENTAL_DAYS = 7;
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
@@ -10,7 +12,6 @@ const formatCurrency = (value) =>
    Modal personalizado de confirmação de remoção de item
 ───────────────────────────────────────────────────────── */
 function RemoveItemModal({ item, onConfirm, onCancel }) {
-  // Fechar com ESC
   const handleKey = useCallback(
     (e) => { if (e.key === 'Escape') onCancel(); },
     [onCancel]
@@ -33,7 +34,6 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
         className="glass w-full max-w-md rounded-3xl shadow-glass-lg overflow-hidden animate-scale-in"
         style={{ animation: 'scale-in 220ms cubic-bezier(0.34,1.56,0.64,1) both' }}
       >
-        {/* Header com alerta visual */}
         <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent border-b border-red-500/20">
           <div className="absolute inset-0 bg-red-500/5" />
           <div className="relative p-6 sm:p-8">
@@ -56,13 +56,11 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
           </div>
         </div>
 
-        {/* Conteúdo */}
         <div className="p-6 sm:p-8">
           <p className="text-base leading-relaxed text-nexus-300">
-            Esta ação removerá <strong className="font-semibold text-white">"{item.nome}"</strong> do seu carrinho de compras.
+            Esta ação removerá <strong className="font-semibold text-white">&quot;{item.nome}&quot;</strong> do seu carrinho de compras.
           </p>
 
-          {/* Card resumo do produto melhorado */}
           <div className="mt-6 rounded-2xl border border-border-color bg-card p-4">
             <div className="flex items-start gap-4">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-border-color bg-card">
@@ -83,13 +81,14 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
                   <span className="text-sm font-bold text-nexus-200">
                     {formatCurrency(item.preco_unitario)}
                   </span>
-                  <span className="text-xs text-nexus-500">/ unidade</span>
+                  <span className="text-xs text-nexus-500">
+                    {item.tipo === 'aluguel' ? `/ ${item.dias_aluguel} dias` : '/ unidade'}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Aviso de impacto */}
           <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
             <svg className="h-5 w-5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -99,7 +98,6 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
             </p>
           </div>
 
-          {/* Botões com melhor hierarquia */}
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
@@ -130,9 +128,9 @@ function RemoveItemModal({ item, onConfirm, onCancel }) {
    Componente principal Cart
 ───────────────────────────────────────────────────────── */
 export default function Cart() {
-  const { items, totalItems, subtotal, updateQuantity, removeItem, clearCart, getItemSubtotal } = useCart();
+  const { items, totalItems, subtotal, updateQuantity, updateRentalDays, removeItem, clearCart, getItemSubtotal } = useCart();
   const { confirm } = useModal();
-  const [pendingRemove, setPendingRemove] = useState(null); // item a ser removido
+  const [pendingRemove, setPendingRemove] = useState(null);
 
   const handleRemoveClick = (item) => {
     setPendingRemove(item);
@@ -230,9 +228,21 @@ export default function Cart() {
                             <p className="text-[11px] font-medium uppercase tracking-widest text-nexus-500">{item.fabricante}</p>
                           )}
                           <h3 className="truncate font-medium text-white">{item.nome}</h3>
-                          <p className="mt-1 text-sm text-nexus-300">{formatCurrency(item.preco_unitario)} / unid.</p>
+                          {item.tipo === 'aluguel' ? (
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <span className="cart-rental-badge">
+                                <ClockIconSm />
+                                {item.dias_aluguel} dias de aluguel
+                              </span>
+                              <span className="text-xs text-nexus-400">
+                                {formatCurrency(calcDailyRate(item.valor_aluguel_mensal_base, item.dias_aluguel))}/dia
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="mt-1 text-sm text-nexus-300">{formatCurrency(item.preco_unitario)} / unid.</p>
+                          )}
                         </div>
-                        {/* Botão remover → abre modal personalizado */}
+                        {/* Botão remover */}
                         <button
                           type="button"
                           id={`remove-item-${item.id}`}
@@ -246,38 +256,68 @@ export default function Cart() {
                       </div>
 
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                        {/* Controle de quantidade */}
-                        <div className="neumorphic flex items-center rounded-xl p-1" aria-label={`Quantidade de ${item.nome}`}>
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.id, item.quantidade - 1)}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
-                            aria-label={`Diminuir quantidade de ${item.nome}`}
-                          >
-                            <MinusIcon className="h-4 w-4" />
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            inputMode="numeric"
-                            value={item.quantidade}
-                            onChange={(e) => updateQuantity(item.id, e.target.value)}
-                            className="w-10 border-0 bg-transparent p-0 text-center text-sm font-semibold text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                            aria-label={`Quantidade de ${item.nome}`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => updateQuantity(item.id, item.quantidade + 1)}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
-                            aria-label={`Aumentar quantidade de ${item.nome}`}
-                          >
-                            <PlusIcon className="h-4 w-4" />
-                          </button>
-                        </div>
+                        {item.tipo === 'aluguel' ? (
+                          /* Rental: adjust days */
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-nexus-500 font-medium">Dias:</span>
+                            <div className="neumorphic flex items-center rounded-xl p-1">
+                              <button
+                                type="button"
+                                onClick={() => updateRentalDays(item.id, (item.dias_aluguel || MIN_RENTAL_DAYS) - 1)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
+                                aria-label="Diminuir dias de aluguel"
+                              >
+                                <MinusIcon className="h-3.5 w-3.5" />
+                              </button>
+                              <span className="w-10 text-center text-sm font-bold text-nexus-300">
+                                {item.dias_aluguel}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateRentalDays(item.id, (item.dias_aluguel || MIN_RENTAL_DAYS) + 1)}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
+                                aria-label="Aumentar dias de aluguel"
+                              >
+                                <PlusIcon className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Purchase: adjust quantity */
+                          <div className="neumorphic flex items-center rounded-xl p-1" aria-label={`Quantidade de ${item.nome}`}>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantidade - 1)}
+                              className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
+                              aria-label={`Diminuir quantidade de ${item.nome}`}
+                            >
+                              <MinusIcon className="h-4 w-4" />
+                            </button>
+                            <input
+                              type="number"
+                              min="1"
+                              inputMode="numeric"
+                              value={item.quantidade}
+                              onChange={(e) => updateQuantity(item.id, e.target.value)}
+                              className="w-10 border-0 bg-transparent p-0 text-center text-sm font-semibold text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                              aria-label={`Quantidade de ${item.nome}`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantidade + 1)}
+                              className="flex h-9 w-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-dark-hover hover:text-white"
+                              aria-label={`Aumentar quantidade de ${item.nome}`}
+                            >
+                              <PlusIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
 
                         {/* Subtotal do item */}
                         <div className="text-right">
-                          <p className="text-xs uppercase tracking-wide text-nexus-500">Subtotal</p>
+                          <p className="text-xs uppercase tracking-wide text-nexus-500">
+                            {item.tipo === 'aluguel' ? `Total (${item.dias_aluguel} dias)` : 'Subtotal'}
+                          </p>
                           <p className="mt-1 font-display text-lg font-semibold text-white">
                             {formatCurrency(getItemSubtotal(item))}
                           </p>
@@ -338,6 +378,14 @@ export default function Cart() {
 }
 
 /* ─── Icons ─── */
+function ClockIconSm() {
+  return (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" strokeWidth="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 7v5l3 3" />
+    </svg>
+  );
+}
 function CartIcon({ className }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

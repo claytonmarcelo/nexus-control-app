@@ -221,6 +221,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 PORT=3000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+API_URL=http://localhost:3000
 
 # Admin padrão
 ROOT_ADMIN_EMAIL=admin@seudominio.com

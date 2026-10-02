@@ -13,8 +13,7 @@ Este documento lista todas as variáveis de ambiente que precisam ser configurad
 
 - **`JWT_REFRESH_SECRET`**: Segredo para assinar tokens de refresh
   - ⚠️ **CRÍTICO**: Use uma string diferente do JWT_SECRET (mínimo 32 caracteres)
-  - ❌ NUNCA use: `nexus_refresh_secret_key_gourmet_2026` ou qualquer valor do .env.example
-  - ✅ Exemplo seguro: `outra_string_aleatoria_diferente_aqui_987654321`
+  - ❌ Nunca reutilize o JWT_SECRET nem use valores de exemplo
 
 - **`ROOT_ADMIN_PASSWORD`**: Senha do administrador raiz (conta pessoal real)
   - ⚠️ **CRÍTICO**: Use uma senha forte (mínimo 12 caracteres, com letras, números e símbolos)
@@ -37,31 +36,17 @@ Este documento lista todas as variáveis de ambiente que precisam ser configurad
 - **`DB_NAME`**: Nome do banco de dados (padrão: nexusdb)
 - **`DB_CONNECTION_LIMIT`**: Limite de conexões MySQL (padrão: 5 para AWS Academy)
 - **`FRONTEND_URL`**: URL pública do frontend (https://seu-dominio-aws.com)
-  - ⚠️ Configure com a URL real da instância AWS Academy
+  - ⚠️ Configure com a origem pública do frontend (sem caminho)
+- **`API_URL`**: Origem pública da API (ex: https://api.seu-dominio-aws.com)
+  - ⚠️ Configure com a origem pública da API (sem `/api`)
 
 ### Frontend (.env)
 
 - **`VITE_API_URL`**: URL pública da API backend (https://seu-dominio-aws.com/api)
   - ⚠️ Configure com a URL real da instância AWS Academy
+- **`VITE_ROOT_ADMIN_EMAIL`**: mesmo valor configurado em `ROOT_ADMIN_EMAIL`; configure antes do build frontend
 
-## 👤 Contas de Usuário
-
-### Conta de Demonstração (Pública)
-- **`DEMO_ADMIN_EMAIL`**: `admin.demo@nexuscontrol.com` (fixo)
-- **`DEMO_ADMIN_PASSWORD`**: `999618` (fixo)
-- ✅ Estas credenciais são públicas e podem ser compartilhadas em apresentações
-
-### Contas de Teste (Seed)
-- **`SEED_FUNCIONARIO_PASSWORD`**: `func123` (pode manter como está)
-- **`SEED_CLIENTE_PASSWORD`**: `cliente123` (pode manter como está)
-- ✅ Senhas de teste podem permanecer com valores padrão
-
-### Credenciais de Teste (Automação)
-- **`TEST_ADMIN_EMAIL`**: `admin@nexuscontrol.com` (padrão)
-- **`TEST_ADMIN_PASSWORD`**: `admin123` (padrão)
-- **`TEST_CLIENTE_EMAIL`**: `cliente@nexuscontrol.com` (padrão)
-- **`TEST_CLIENTE_PASSWORD`**: `cliente123` (padrão)
-- ✅ Usados apenas em testes automatizados
+O seed não cria contas de demonstração nem pedidos de exemplo em produção. Credenciais de teste são exclusivas do ambiente de CI.
 
 ## 📧 Configuração de Email (Opcional)
 
@@ -91,6 +76,7 @@ Antes de iniciar o deploy na AWS Academy:
 - [ ] Configurar `DB_PASS` com senha forte do MySQL
 - [ ] Definir `NODE_ENV=production`
 - [ ] Configurar `FRONTEND_URL` com URL real da instância AWS
+- [ ] Configurar `API_URL` com a origem pública da API
 - [ ] Configurar `VITE_API_URL` com URL real da API backend
 - [ ] Configurar `DB_CONNECTION_LIMIT=5` (recurso limitado AWS Academy)
 - [ ] Opcional: Configurar variáveis SMTP se recuperação de senha for necessária
@@ -105,6 +91,7 @@ npm install
 npm run build
 npm run db:migrate
 npm run db:seed
+npm prune --omit=dev
 NODE_ENV=production npm start
 ```
 

@@ -1,11 +1,10 @@
-import React from 'react';
 
 /**
  * OrderStepper - Componente visual para rastreamento de pedidos
  * Exibe timeline neumórfica dos status do pedido com animações suaves
  */
 
-export default function OrderStepper({ status = 'pendente', createdAt = new Date() }) {
+export default function OrderStepper({ status = 'pendente', createdAt: _createdAt = new Date() }) {
   const steps = [
     { id: 'pendente', label: 'Pedido Criado', icon: '📋', description: 'Pedido em processamento' },
     { id: 'confirmado', label: 'Confirmado', icon: '✓', description: 'Pagamento aprovado' },

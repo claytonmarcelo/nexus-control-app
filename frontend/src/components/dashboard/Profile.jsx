@@ -4,6 +4,7 @@ import { userService, checkoutService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
 import { formatDate } from '../../utils/date';
 import { isRootAdmin } from '../../utils/access';
+import { validatePassword, PASSWORD_POLICY_MESSAGE } from '../../utils/password';
 import Spinner from '../ui/Spinner';
 
 export default function Profile() {
@@ -12,10 +13,14 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState('info');
   const [formData, setFormData] = useState({ nome: '', email: '' });
   const [passwordData, setPasswordData] = useState({ senha_atual: '', nova_senha: '', confirmar_nova_senha: '' });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
   const rootAdmin = isRootAdmin(user);
 
   useEffect(() => {
@@ -37,20 +42,24 @@ export default function Profile() {
   };
 
   const handleDeleteOrder = async (id) => {
-    confirm({
+    const isConfirmed = await confirm({
       title: 'Excluir Histórico',
       message: 'Tem certeza que deseja excluir esta compra do seu histórico? Esta ação é irreversível e o pedido sumirá do sistema.',
-      onConfirm: async () => {
-        try {
-          await checkoutService.deleteOrder(id);
-          toast({ message: 'Compra removida do histórico', variant: 'success' });
-          loadOrders();
-        } catch (error) {
-          const message = error.response?.data?.message || 'Erro ao deletar registro de compra';
-          toast({ message, variant: 'danger' });
-        }
-      }
     });
+
+    if (isConfirmed) {
+      setDeletingOrderId(id);
+      try {
+        await checkoutService.deleteOrder(id);
+        setOrders((current) => current.filter((order) => String(order.id) !== String(id)));
+        toast({ message: 'Compra removida do histórico', variant: 'success' });
+      } catch (error) {
+        const message = error.response?.data?.message || 'Erro ao deletar registro de compra';
+        toast({ message, variant: 'danger' });
+      } finally {
+        setDeletingOrderId(null);
+      }
+    }
   };
 
   const handleInfoChange = (e) => {
@@ -81,10 +90,18 @@ export default function Profile() {
 
   const validatePasswordForm = () => {
     const newErrors = {};
-    if (!passwordData.senha_atual) newErrors.senha_atual = 'Senha atual é obrigatória';
-    if (!passwordData.nova_senha) newErrors.nova_senha = 'Nova senha é obrigatória';
-    else if (passwordData.nova_senha.length < 6) newErrors.nova_senha = 'Nova senha deve ter no mínimo 6 caracteres';
-    if (passwordData.nova_senha !== passwordData.confirmar_nova_senha) newErrors.confirmar_nova_senha = 'As senhas não conferem';
+    if (!passwordData.senha_atual) {
+      newErrors.senha_atual = 'Senha atual é obrigatória';
+    }
+    const passwordError = validatePassword(passwordData.nova_senha);
+    if (passwordError) {
+      newErrors.nova_senha = passwordError;
+    }
+    if (!passwordData.confirmar_nova_senha) {
+      newErrors.confirmar_nova_senha = 'Confirmação de nova senha é obrigatória';
+    } else if (passwordData.nova_senha !== passwordData.confirmar_nova_senha) {
+      newErrors.confirmar_nova_senha = 'As senhas não conferem';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -246,7 +263,7 @@ export default function Profile() {
                     <div>
                       <h3 className="font-medium text-white">{rootAdmin ? 'Conta protegida' : 'Segurança da conta'}</h3>
                       <p className="text-sm text-nexus-400 mt-1">
-                        {rootAdmin ? 'A conta do administrador raiz não pode ser alterada.' : 'Mantenha sua conta segura alterando sua senha periodicamente. Use exatamente 6 caracteres, com dígitos e um caractere especial.'}
+                        {rootAdmin ? 'A conta do administrador raiz não pode ser alterada.' : PASSWORD_POLICY_MESSAGE}
                       </p>
                     </div>
                   </div>
@@ -255,55 +272,76 @@ export default function Profile() {
 
               <div>
                 <label htmlFor="senha_atual" className="label">Senha atual *</label>
-                <input
-                  id="senha_atual"
-                  name="senha_atual"
-                  type="password"
-                  value={passwordData.senha_atual}
-                  onChange={handlePasswordChange}
-                  disabled={rootAdmin || loading}
-                  className={`input ${errors.senha_atual ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  aria-invalid={!!errors.senha_atual}
-                  aria-describedby={errors.senha_atual ? 'senha_atual-error' : undefined}
-                />
+                <div className="relative">
+                  <input
+                    id="senha_atual"
+                    name="senha_atual"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={passwordData.senha_atual}
+                    onChange={handlePasswordChange}
+                    disabled={rootAdmin || loading}
+                    className={`input pr-12 ${errors.senha_atual ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    aria-invalid={!!errors.senha_atual}
+                    aria-describedby={errors.senha_atual ? 'senha_atual-error' : undefined}
+                  />
+                  <PasswordToggle
+                    visible={showCurrentPassword}
+                    onClick={() => setShowCurrentPassword(prev => !prev)}
+                    label={showCurrentPassword ? 'Ocultar senha atual' : 'Mostrar senha atual'}
+                  />
+                </div>
                 {errors.senha_atual && <p id="senha_atual-error" className="mt-1 text-sm text-red-400" role="alert">{errors.senha_atual}</p>}
               </div>
 
               <div>
                 <label htmlFor="nova_senha" className="label">Nova senha *</label>
-                <input
-                  id="nova_senha"
-                  name="nova_senha"
-                  type="password"
-                  value={passwordData.nova_senha}
-                  onChange={handlePasswordChange}
-                  disabled={rootAdmin || loading}
-                  className={`input ${errors.nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  aria-invalid={!!errors.nova_senha}
-                  aria-describedby={errors.nova_senha ? 'nova_senha-error' : undefined}
-                />
+                <div className="relative">
+                  <input
+                    id="nova_senha"
+                    name="nova_senha"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwordData.nova_senha}
+                    onChange={handlePasswordChange}
+                    disabled={rootAdmin || loading}
+                    className={`input pr-12 ${errors.nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    aria-invalid={!!errors.nova_senha}
+                    aria-describedby={errors.nova_senha ? 'nova_senha-error' : undefined}
+                  />
+                  <PasswordToggle
+                    visible={showNewPassword}
+                    onClick={() => setShowNewPassword(prev => !prev)}
+                    label={showNewPassword ? 'Ocultar nova senha' : 'Mostrar nova senha'}
+                  />
+                </div>
                 {errors.nova_senha && <p id="nova_senha-error" className="mt-1 text-sm text-red-400" role="alert">{errors.nova_senha}</p>}
               </div>
 
               <div>
                 <label htmlFor="confirmar_nova_senha" className="label">Confirmar nova senha *</label>
-                <input
-                  id="confirmar_nova_senha"
-                  name="confirmar_nova_senha"
-                  type="password"
-                  value={passwordData.confirmar_nova_senha}
-                  onChange={handlePasswordChange}
-                  disabled={rootAdmin || loading}
-                  className={`input ${errors.confirmar_nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  aria-invalid={!!errors.confirmar_nova_senha}
-                  aria-describedby={errors.confirmar_nova_senha ? 'confirmar-error' : undefined}
-                />
+                <div className="relative">
+                  <input
+                    id="confirmar_nova_senha"
+                    name="confirmar_nova_senha"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwordData.confirmar_nova_senha}
+                    onChange={handlePasswordChange}
+                    disabled={rootAdmin || loading}
+                    className={`input pr-12 ${errors.confirmar_nova_senha ? 'border-red-500 focus:ring-red-500' : ''}`}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                    aria-invalid={!!errors.confirmar_nova_senha}
+                    aria-describedby={errors.confirmar_nova_senha ? 'confirmar-error' : undefined}
+                  />
+                  <PasswordToggle
+                    visible={showConfirmPassword}
+                    onClick={() => setShowConfirmPassword(prev => !prev)}
+                    label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                  />
+                </div>
                 {errors.confirmar_nova_senha && <p id="confirmar-error" className="mt-1 text-sm text-red-400" role="alert">{errors.confirmar_nova_senha}</p>}
               </div>
 
@@ -363,8 +401,10 @@ export default function Profile() {
                           </p>
                           <button 
                             onClick={() => handleDeleteOrder(order.id)}
-                            className="p-2 text-red-400 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
+                            disabled={deletingOrderId === order.id}
+                            className="p-2 text-red-400 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors border border-transparent hover:border-red-500/30 disabled:cursor-wait disabled:opacity-50"
                             title="Excluir do Histórico"
+                            aria-label={`Excluir pedido ${order.id} do histórico`}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -440,5 +480,24 @@ function RoleBadge({ role, className }) {
     <span className={`px-3 py-1 text-sm font-medium rounded-full ${styles[role]} ${className || ''}`}>
       {labels[role]}
     </span>
+  );
+}
+
+function PasswordToggle({ visible, onClick, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center p-2 rounded-lg text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover transition-colors"
+      aria-label={label || (visible ? 'Ocultar senha' : 'Mostrar senha')}
+    >
+      <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        {visible ? (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c5.2 0 8.7 4.4 9.8 7a15.6 15.6 0 0 1-3.1 4.4M6.2 6.2C4.4 7.5 3.2 9.3 2.2 12c1.1 2.6 4.6 7 9.8 7 1 0 2-.2 2.9-.5" />
+        ) : (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M2.2 12C3.3 9.4 6.8 5 12 5s8.7 4.4 9.8 7c-1.1 2.6-4.6 7-9.8 7s-8.7-4.4-9.8-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+        )}
+      </svg>
+    </button>
   );
 }

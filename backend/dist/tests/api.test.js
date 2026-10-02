@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/glo
 import request from 'supertest';
 import app from '../server.js';
 import pool from '../config/database.js';
+const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
+const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '26481#';
 describe('API Health Check', () => {
     it('GET /api/status should return 200', async () => {
         const response = await request(app).get('/api/status');
@@ -17,7 +19,7 @@ describe('Authentication', () => {
         // Login as admin
         const adminLogin = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
+            .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
         // Login as regular user
         const userLogin = await request(app)
@@ -29,12 +31,12 @@ describe('Authentication', () => {
         it('should login with valid credentials', async () => {
             const response = await request(app)
                 .post('/api/auth/login')
-                .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
+                .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
             expect(response.body.data.accessToken).toBeDefined();
             expect(response.body.data.refreshToken).toBeDefined();
-            expect(response.body.data.user.email).toBe('marcelo10@gmail.com');
+            expect(response.body.data.user.email).toBe(ADMIN_EMAIL);
         });
         it('should reject invalid credentials', async () => {
             const response = await request(app)
@@ -58,7 +60,7 @@ describe('Authentication', () => {
                 .send({
                 nome: 'Test User',
                 email: uniqueEmail,
-                senha: 'password123',
+                senha: 'StrongTestPass123!',
                 nivel_acesso: 'cliente'
             });
             expect(response.status).toBe(201);
@@ -71,8 +73,8 @@ describe('Authentication', () => {
                 .post('/api/auth/register')
                 .send({
                 nome: 'Test User',
-                email: 'marcelo10@gmail.com',
-                senha: 'password123'
+                email: ADMIN_EMAIL,
+                senha: 'StrongTestPass123!'
             });
             expect(response.status).toBe(409);
         });
@@ -90,7 +92,7 @@ describe('Authentication', () => {
                 .set('Authorization', `Bearer ${adminToken}`);
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
-            expect(response.body.data.user.email).toBe('marcelo10@gmail.com');
+            expect(response.body.data.user.email).toBe(ADMIN_EMAIL);
         });
         it('should reject without token', async () => {
             const response = await request(app)
@@ -108,7 +110,7 @@ describe('Authentication', () => {
         it('should refresh access token', async () => {
             const loginResponse = await request(app)
                 .post('/api/auth/login')
-                .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
+                .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
             const response = await request(app)
                 .post('/api/auth/refresh')
                 .send({ refreshToken: loginResponse.body.data.refreshToken });
@@ -126,7 +128,7 @@ describe('Items API', () => {
     beforeAll(async () => {
         const adminLogin = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
+            .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
         const userLogin = await request(app)
             .post('/api/auth/login')
@@ -254,7 +256,7 @@ describe('Users API (Admin Only)', () => {
     beforeAll(async () => {
         const adminLogin = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'marcelo10@gmail.com', senha: '26481#' });
+            .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
     });
     describe('GET /api/usuarios', () => {

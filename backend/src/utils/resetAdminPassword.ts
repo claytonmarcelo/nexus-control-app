@@ -3,12 +3,16 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import type { ResultSetHeader } from 'mysql2';
 import { ROOT_ADMIN_EMAIL } from '../config/access.js';
+import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 
 dotenv.config();
 
 const resetAdminPassword = async () => {
   try {
-    const newPassword = process.env.ROOT_ADMIN_PASSWORD || '26481#';
+    const newPassword = process.env.ROOT_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : '26481#');
+    if (process.env.NODE_ENV === 'production' && validatePassword(newPassword) !== true) {
+      throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
+    }
     const hashedPassword = await bcrypt.hash(newPassword, 12);
     
     const [result] = await pool.execute<ResultSetHeader>(
@@ -18,7 +22,6 @@ const resetAdminPassword = async () => {
     
     if (result.affectedRows > 0) {
       console.log(`✅ Senha do administrador (${ROOT_ADMIN_EMAIL}) redefinida com sucesso!`);
-      console.log(`🔑 Nova senha: ${newPassword}`);
     } else {
       console.log(`❌ Usuário ${ROOT_ADMIN_EMAIL} não encontrado`);
     }

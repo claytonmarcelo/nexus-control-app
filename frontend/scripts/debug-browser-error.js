@@ -25,9 +25,6 @@ async function test() {
   await page.goto('http://localhost:5173/dashboard', { waitUntil: 'networkidle0' });
   console.log('URL final:', page.url());
 
-  console.log('Testando /curriculo:');
-  await page.goto('http://localhost:5173/curriculo', { waitUntil: 'networkidle0' });
-  console.log('URL final:', page.url());
 
   await browser.close();
 }

@@ -484,7 +484,7 @@ Todos os testes: ✅ PASSOU
 ### Começar Rápido
 ```bash
 # 1. Terminal 1 - Backend
-cd backend && npm install && npm run migrate && npm run seed && npm run dev
+cd backend && npm ci && npm run db:migrate && npm run db:seed && npm run dev
 
 # 2. Terminal 2 - Frontend
 cd frontend && npm install && npm run dev

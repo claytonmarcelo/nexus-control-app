@@ -5,23 +5,22 @@ import { itemService, userService } from '../../services/services';
 import { adminService } from '../../services/adminService';
 import { isRootAdmin } from '../../utils/access';
 import ItemFormModal from '../dashboard/ItemFormModal';
-import CurriculoTab from './CurriculoTab';
 
 const ROLE_META = {
   cliente: {
     label: 'Cliente',
     description: 'Experiência de compra e acompanhamento de pedidos',
-    className: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
+    className: 'border-sky-400/30 bg-sky-400/10 text-sky-700 dark:text-sky-200',
   },
   funcionario: {
     label: 'Funcionário',
     description: 'Operação do catálogo e atendimento',
-    className: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+    className: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-200',
   },
   admin: {
     label: 'Administrador',
     description: 'Visão global e gestão completa do Nexus',
-    className: 'border-nexus-400/40 bg-nexus-500/15 text-nexus-200',
+    className: 'border-nexus-400/40 bg-nexus-500/15 text-nexus-800 dark:text-nexus-200',
   },
 };
 
@@ -56,7 +55,6 @@ const TABS = [
   { key: 'acessos', label: 'Acessos', icon: 'shield' },
   { key: 'produtos', label: 'Produtos', icon: 'box' },
   { key: 'pedidos', label: 'Pedidos', icon: 'receipt' },
-  { key: 'curriculo', label: 'Currículo', icon: 'user' },
 ];
 
 export default function AdminControlCenter() {
@@ -86,6 +84,8 @@ export default function AdminControlCenter() {
   const [orderDrafts, setOrderDrafts] = useState({});
   const [savingOrderId, setSavingOrderId] = useState(null);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [batchSaving, setBatchSaving] = useState(null); // { pageKey, role } | null
+  const [globalPermissionOverrides, setGlobalPermissionOverrides] = useState({});
 
   const loadControlData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -241,6 +241,49 @@ export default function AdminControlCenter() {
     }
   };
 
+  // Batch update: aplica enable/disable de uma página para TODOS os usuários de um role
+  const handleBatchUpdate = useCallback(async (pageKey, role, enable) => {
+    const targetUsers = users.filter((u) => (role === 'all' || u.nivel_acesso === role) && !isRootAdmin(u));
+    if (targetUsers.length === 0) {
+      toast({ message: `Nenhum usuário com perfil ${ROLE_META[role]?.label} encontrado.`, variant: 'info' });
+      return;
+    }
+    setBatchSaving({ pageKey, role, enable });
+    try {
+      await Promise.all(
+        targetUsers.map((u) => {
+          const fallback = buildDefaultPermissions(u.nivel_acesso, pages);
+          const current = { ...fallback, ...(u.permissions || {}) };
+          return adminService.updatePermissions({
+            userId: u.id,
+            nivel_acesso: u.nivel_acesso,
+            ativo: isUserActive(u),
+            permissions: { ...current, [pageKey]: enable },
+          });
+        }),
+      );
+      setUsers((prev) =>
+        prev.map((u) => {
+          if ((role !== 'all' && u.nivel_acesso !== role) || isRootAdmin(u)) return u;
+          const fallback = buildDefaultPermissions(u.nivel_acesso, pages);
+          return { ...u, permissions: { ...fallback, ...(u.permissions || {}), [pageKey]: enable } };
+        }),
+      );
+      if (role === 'all') {
+        setGlobalPermissionOverrides((current) => ({ ...current, [pageKey]: enable }));
+      }
+      const audience = role === 'all' ? 'todos os usuários' : `usuários com perfil ${ROLE_META[role]?.label}`;
+      toast({
+        message: `Acesso ${enable ? 'liberado' : 'bloqueado'} para ${targetUsers.length} ${audience} na página.`,
+        variant: 'success',
+      });
+    } catch {
+      toast({ message: 'Não foi possível atualizar o acesso em lote.', variant: 'danger' });
+    } finally {
+      setBatchSaving(null);
+    }
+  }, [users, pages, toast]);
+
   const handleRoleChange = (role) => {
     setPermissionDraft((current) => ({
       ...current,
@@ -383,16 +426,16 @@ export default function AdminControlCenter() {
         <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-nexus-400/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-700 dark:text-nexus-400">
               <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-nexus-400/30 bg-nexus-500/10 shadow-gold">
                 <ControlIcon kind="shield" className="h-4 w-4" />
               </span>
               Operação protegida
             </div>
-            <h1 className="font-display text-3xl font-bold text-white sm:text-4xl bg-gradient-to-r from-white via-nexus-200 to-nexus-300 bg-clip-text text-transparent">
+            <h1 className="font-display text-3xl font-bold text-text-primary sm:text-4xl dark:bg-gradient-to-r dark:from-white dark:via-nexus-200 dark:to-nexus-300 dark:bg-clip-text dark:text-transparent">
               Admin Control Center
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-nexus-300 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary dark:text-nexus-300 sm:text-base">
               Controle os acessos, catálogo e pedidos do Nexus com uma visão única da operação.
             </p>
           </div>
@@ -444,17 +487,21 @@ export default function AdminControlCenter() {
       {activeTab === 'acessos' && (
         <AccessSection
           pages={pages}
+          allUsers={users}
           users={filteredUsers}
           selectedUser={selectedUser}
           permissionDraft={permissionDraft}
           loadingPermissions={loadingPermissions}
           savingPermissions={savingPermissions}
+          batchSaving={batchSaving}
+          globalPermissionOverrides={globalPermissionOverrides}
           userSearch={userSearch}
           onUserSearchChange={setUserSearch}
           onUserSelect={setSelectedUserId}
           onDraftChange={setPermissionDraft}
           onRoleChange={handleRoleChange}
           onSave={handlePermissionSave}
+          onBatchUpdate={handleBatchUpdate}
         />
       )}
 
@@ -480,10 +527,6 @@ export default function AdminControlCenter() {
           onSave={saveOrderStatus}
           onExpandedChange={setExpandedOrderId}
         />
-      )}
-
-      {activeTab === 'curriculo' && (
-        <CurriculoTab />
       )}
 
       <ItemFormModal
@@ -771,156 +814,633 @@ function SystemRouteMap({ pages, roleViews }) {
   );
 }
 
-function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, userSearch, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave }) {
-  const rootUser = selectedUser && isRootAdmin(selectedUser);
+/* ─── ACCESS SECTION ─────────────────────────────────────── */
+
+/** Sub-abas internas da seção Acessos */
+const ACCESS_SUBTABS = [
+  { key: 'individual', label: 'Controle Individual', icon: 'user' },
+  { key: 'global', label: 'Controle Global (RBAC)', icon: 'shield' },
+];
+
+/**
+ * AccessSection — aba principal de Acessos com duas sub-seções:
+ *  1. Controle Individual: lista de usuários + painel lateral de edição inline
+ *  2. Controle Global: matriz RBAC (página × role) editável de forma global
+ */
+function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, batchSaving, globalPermissionOverrides, userSearch, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave, onBatchUpdate }) {
+  const [accessSubTab, setAccessSubTab] = useState('individual');
+
+  const activeCount = users.filter(isUserActive).length;
+  const adminCount = users.filter((u) => u.nivel_acesso === 'admin').length;
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-5" role="tabpanel">
-      <section className="card xl:col-span-2">
-        <div className="border-b border-dark-border p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Diretório de acesso</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Usuários</h2>
-          <label className="relative mt-4 block">
+    <div className="space-y-5" role="tabpanel">
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: 'Total de usuários', value: users.length, color: 'text-nexus-200', icon: 'users' },
+          { label: 'Contas ativas', value: activeCount, color: 'text-emerald-300', icon: 'check' },
+          { label: 'Administradores', value: adminCount, color: 'text-nexus-300', icon: 'shield' },
+          { label: 'Contas bloqueadas', value: users.length - activeCount, color: 'text-red-300', icon: 'lock' },
+        ].map((stat) => (
+          <div key={stat.label} className="card p-4 flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-nexus-500/10 border border-nexus-500/20 text-nexus-300">
+              <ControlIcon kind={stat.icon} className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className={`text-lg font-bold leading-tight ${stat.color}`}>{stat.value}</p>
+              <p className="text-[11px] text-nexus-500 truncate">{stat.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Sub-navegação interna ── */}
+      <div className="flex gap-1 rounded-xl border border-dark-border bg-dark-bg/60 p-1 w-fit">
+        {ACCESS_SUBTABS.map((tab) => {
+          const active = accessSubTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setAccessSubTab(tab.key)}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                active
+                  ? 'bg-gradient-to-r from-nexus-600 to-nexus-500 text-white shadow-gold'
+                  : 'text-nexus-400 hover:text-white hover:bg-dark-hover'
+              }`}
+              aria-selected={active}
+            >
+              <ControlIcon kind={tab.icon} className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Sub-seção: Controle Individual ── */}
+      {accessSubTab === 'individual' && (
+        <IndividualAccessPanel
+          pages={pages}
+          users={users}
+          selectedUser={selectedUser}
+          permissionDraft={permissionDraft}
+          loadingPermissions={loadingPermissions}
+          savingPermissions={savingPermissions}
+          userSearch={userSearch}
+          onUserSearchChange={onUserSearchChange}
+          onUserSelect={onUserSelect}
+          onDraftChange={onDraftChange}
+          onRoleChange={onRoleChange}
+          onSave={onSave}
+        />
+      )}
+
+      {/* ── Sub-seção: Controle Global RBAC ── */}
+      {accessSubTab === 'global' && (
+        <GlobalAccessPanel
+          pages={pages}
+          users={users}
+          batchSaving={batchSaving}
+          globalPermissionOverrides={globalPermissionOverrides}
+          onBatchUpdate={onBatchUpdate}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ─── INDIVIDUAL ACCESS PANEL ─── */
+/**
+ * Painel split: esquerda = lista de usuários, direita = editor inline de permissões.
+ * Em mobile vira empilhado (coluna).
+ */
+function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, userSearch, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave }) {
+
+  const handleSelectUser = (userId) => {
+    onUserSelect(userId);
+  };
+
+  return (
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[380px_1fr]">
+
+      {/* ── Coluna esquerda: Diretório de usuários ── */}
+      <section className="card flex flex-col min-h-0">
+        <div className="flex flex-col gap-3 border-b border-dark-border p-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Diretório</p>
+            <h2 className="mt-1 text-lg font-semibold text-white">Selecione um usuário</h2>
+          </div>
+          <label className="relative">
             <span className="sr-only">Buscar usuário</span>
             <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-400" />
             <input
               value={userSearch}
-              onChange={(event) => onUserSearchChange(event.target.value)}
-              className="input py-2 pl-10 text-sm"
-              placeholder="Buscar nome ou e-mail"
+              onChange={(e) => onUserSearchChange(e.target.value)}
+              className="input py-2 pl-9 text-sm w-full"
+              placeholder="Buscar nome ou e-mail…"
             />
           </label>
         </div>
-        <div className="max-h-[620px] divide-y divide-dark-border overflow-y-auto">
-          {users.map((targetUser) => {
-            const selected = String(selectedUser?.id) === String(targetUser.id);
-            const role = ROLE_META[targetUser.nivel_acesso] || ROLE_META.cliente;
+
+        <div className="divide-y divide-dark-border overflow-y-auto max-h-[560px]">
+          {users.length === 0 ? (
+            <EmptyPanel icon="users" title="Nenhum usuário encontrado" text="Tente ajustar o filtro de busca." />
+          ) : users.map((targetUser) => {
+            const roleMeta = ROLE_META[targetUser.nivel_acesso] || ROLE_META.cliente;
+            const active = isUserActive(targetUser);
+            const root = isRootAdmin(targetUser);
+            const isSelected = String(targetUser.id) === String(selectedUser?.id);
+
             return (
               <button
                 key={targetUser.id}
                 type="button"
-                onClick={() => onUserSelect(targetUser.id)}
-                className={`flex w-full items-center gap-3 p-4 text-left transition-colors ${selected ? 'bg-nexus-500/10' : 'hover:bg-dark-hover'}`}
+                onClick={() => handleSelectUser(targetUser.id)}
+                className={`w-full flex items-center gap-3 p-4 text-left transition-all duration-150 ${
+                  isSelected
+                    ? 'bg-nexus-500/10 border-l-2 border-nexus-500'
+                    : 'hover:bg-dark-hover/60 border-l-2 border-transparent'
+                }`}
+                id={`user-row-${targetUser.id}`}
+                aria-selected={isSelected}
               >
-                <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-dark-hover text-sm font-semibold text-nexus-200">
+                {/* Avatar */}
+                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nexus-500/20 to-nexus-700/10 border border-nexus-500/20 text-sm font-bold text-nexus-200">
                   {initials(targetUser.nome)}
-                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-dark-card ${isUserActive(targetUser) ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-dark-card ${active ? 'bg-emerald-400' : 'bg-red-400'}`} />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium text-white">{targetUser.nome || 'Usuário sem nome'}</span>
-                  <span className="block truncate text-xs text-nexus-400">{targetUser.email}</span>
-                  <span className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[11px] ${role.className}`}>{role.label}</span>
-                </span>
-                <ControlIcon kind="chevron" className={`h-4 w-4 shrink-0 transition-transform ${selected ? 'rotate-90 text-nexus-300' : 'text-nexus-500'}`} />
+                {/* Info */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`font-semibold text-sm truncate ${isSelected ? 'text-nexus-200' : 'text-white'}`}>{targetUser.nome || 'Usuário sem nome'}</span>
+                    {root && <span className="rounded-full border border-nexus-400/40 bg-nexus-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-nexus-300">Raiz</span>}
+                  </div>
+                  <p className="text-xs text-nexus-400 truncate">{targetUser.email}</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${roleMeta.className}`}>{roleMeta.label}</span>
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${active ? 'border-emerald-400/25 bg-emerald-400/8 text-emerald-300' : 'border-red-400/25 bg-red-400/8 text-red-300'}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                      {active ? 'Ativa' : 'Bloqueada'}
+                    </span>
+                  </div>
+                </div>
+                {/* Chevron indicator */}
+                <ControlIcon kind="chevron" className={`h-4 w-4 shrink-0 transition-colors ${isSelected ? 'text-nexus-400' : 'text-nexus-600'}`} />
               </button>
             );
           })}
-          {users.length === 0 && <p className="p-8 text-center text-sm text-nexus-400">Nenhum usuário encontrado.</p>}
         </div>
       </section>
 
-      <section className="card p-5 sm:p-6 xl:col-span-3">
+      {/* ── Coluna direita: Editor inline de permissões ── */}
+      <section className="card flex flex-col min-h-0">
         {!selectedUser ? (
-          <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nexus-500/10 text-nexus-300"><ControlIcon kind="users" className="h-7 w-7" /></span>
-            <p className="mt-4 font-medium text-white">Selecione um usuário</p>
-            <p className="mt-1 text-sm text-nexus-400">Escolha uma pessoa para editar os acessos.</p>
+          <div className="flex flex-1 flex-col items-center justify-center p-12 text-center gap-4">
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-nexus-500/10 border border-nexus-500/20">
+              <ControlIcon kind="user" className="h-8 w-8 text-nexus-400" />
+            </span>
+            <div>
+              <p className="font-semibold text-white">Nenhum usuário selecionado</p>
+              <p className="mt-1 text-sm text-nexus-400">Selecione um usuário na lista ao lado para editar suas permissões.</p>
+            </div>
           </div>
         ) : (
-          <>
-            <div className="flex flex-col gap-4 border-b border-dark-border pb-5 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-nexus-500/10 text-base font-semibold text-nexus-200">{initials(selectedUser.nome)}</span>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-xl font-semibold text-white">{selectedUser.nome}</h2>
-                    {rootUser && <span className="rounded-full border border-nexus-400/40 bg-nexus-500/10 px-2 py-0.5 text-[11px] font-semibold text-nexus-200">Administrador raiz</span>}
-                  </div>
-                  <p className="text-sm text-nexus-400">{selectedUser.email}</p>
-                </div>
-              </div>
-              <span className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${permissionDraft.active ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-red-400/30 bg-red-400/10 text-red-200'}`}>
-                <span className={`h-2 w-2 rounded-full ${permissionDraft.active ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                {permissionDraft.active ? 'Acesso liberado' : 'Acesso bloqueado'}
-              </span>
-            </div>
-
-            {rootUser ? (
-              <div className="mt-6 rounded-2xl border border-nexus-400/25 bg-nexus-500/10 p-5 text-sm text-nexus-200">
-                Este é o administrador raiz do sistema. Suas permissões permanecem protegidas.
-              </div>
-            ) : (
-              <>
-                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <label>
-                    <span className="label">Nível de acesso</span>
-                    <select value={permissionDraft.role} onChange={(event) => onRoleChange(event.target.value)} className="input">
-                      {Object.entries(ROLE_META).map(([role, meta]) => <option key={role} value={role}>{meta.label}</option>)}
-                    </select>
-                  </label>
-                  <div>
-                    <span className="label">Status da conta</span>
-                    <label className="flex min-h-[50px] cursor-pointer items-center justify-between rounded-xl border border-dark-border bg-dark-hover px-4">
-                      <span>
-                        <span className="block text-sm font-medium text-white">{permissionDraft.active ? 'Conta liberada' : 'Conta bloqueada'}</span>
-                        <span className="block text-xs text-nexus-400">Bloqueia toda a navegação</span>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={permissionDraft.active}
-                        onChange={(event) => onDraftChange((current) => ({ ...current, active: event.target.checked }))}
-                        className="h-5 w-5 accent-nexus-500"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="mt-7">
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <span className="label mb-0">Permissões de navegação</span>
-                      <p className="mt-1 text-sm text-nexus-400">Desative uma página para removê-la da experiência deste usuário.</p>
-                    </div>
-                    {loadingPermissions && <span className="text-xs text-nexus-400">Carregando permissões…</span>}
-                  </div>
-                  <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {pages.map((page) => {
-                      const enabled = permissionDraft.permissions?.[page.key] !== false;
-                      return (
-                        <label key={page.key} className="flex cursor-pointer items-center gap-3 rounded-xl border border-dark-border bg-dark-hover p-4 transition-colors hover:border-nexus-500/40">
-                          <input
-                            type="checkbox"
-                            checked={enabled}
-                            onChange={(event) => onDraftChange((current) => ({
-                              ...current,
-                              permissions: { ...current.permissions, [page.key]: event.target.checked },
-                            }))}
-                            className="h-5 w-5 shrink-0 accent-nexus-500"
-                          />
-                          <span className="flex min-w-0 flex-1 items-center gap-3">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dark-card text-nexus-300"><ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" /></span>
-                            <span className="min-w-0"><span className="block truncate text-sm font-medium text-white">{page.label}</span><span className="block truncate text-xs text-nexus-400">{page.path || `/${page.key}`}</span></span>
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-7 flex flex-col-reverse gap-3 border-t border-dark-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-nexus-500">As alterações são registradas imediatamente no servidor.</p>
-                  <button type="button" onClick={onSave} disabled={savingPermissions || loadingPermissions} className="btn-primary">
-                    {savingPermissions ? <><Spinner className="mr-2 h-4 w-4" />Salvando…</> : <><ControlIcon kind="check" className="mr-2 h-5 w-5" />Salvar acessos</>}
-                  </button>
-                </div>
-              </>
-            )}
-          </>
+          <UserPermissionEditor
+            user={selectedUser}
+            pages={pages}
+            permissionDraft={permissionDraft}
+            loadingPermissions={loadingPermissions}
+            savingPermissions={savingPermissions}
+            onDraftChange={onDraftChange}
+            onRoleChange={onRoleChange}
+            onSave={onSave}
+          />
         )}
       </section>
     </div>
   );
 }
+
+/* ─── USER PERMISSION EDITOR (inline, no painel direito) ─── */
+function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions, savingPermissions, onDraftChange, onRoleChange, onSave }) {
+  const rootUser = isRootAdmin(user);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Header do editor */}
+      <div className="flex items-center gap-4 border-b border-dark-border p-5">
+        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nexus-500/30 to-nexus-700/10 border border-nexus-500/30 text-sm font-bold text-nexus-200">
+          {initials(user.nome)}
+          <span className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-dark-card ${isUserActive(user) ? 'bg-emerald-400' : 'bg-red-400'}`} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-bold text-white">{user.nome || 'Usuário'}</h2>
+            {rootUser && <span className="rounded-full border border-nexus-400/40 bg-nexus-500/10 px-2 py-0.5 text-[10px] font-semibold text-nexus-200">Raiz</span>}
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${permissionDraft.active ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-red-400/30 bg-red-400/10 text-red-200'}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${permissionDraft.active ? 'bg-emerald-400' : 'bg-red-400'}`} />
+              {permissionDraft.active ? 'Liberado' : 'Bloqueado'}
+            </span>
+          </div>
+          <p className="text-xs text-nexus-400">{user.email}</p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-xs text-nexus-500 hidden sm:block">
+            Editando permissões individualmente
+          </span>
+        </div>
+      </div>
+
+      {/* Corpo do editor */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        {rootUser ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-nexus-400/25 bg-nexus-500/10 p-8 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nexus-500/20 border border-nexus-500/30">
+              <ControlIcon kind="shield" className="h-6 w-6 text-nexus-300" />
+            </span>
+            <div>
+              <p className="font-semibold text-white">Administrador Raiz Protegido</p>
+              <p className="mt-1 text-xs text-nexus-400 max-w-xs">As permissões deste administrador raiz são permanentes e não podem ser alteradas pelo painel de controle.</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Configurações da conta */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-nexus-500 mb-3">Configurações da conta</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label>
+                  <span className="label text-xs">Nível de acesso</span>
+                  <select
+                    value={permissionDraft.role}
+                    onChange={(e) => onRoleChange(e.target.value)}
+                    className="input text-sm"
+                  >
+                    {Object.entries(ROLE_META).map(([role, meta]) => (
+                      <option key={role} value={role}>{meta.label}</option>
+                    ))}
+                  </select>
+                </label>
+                <div>
+                  <span className="label text-xs">Status da conta</span>
+                  <label className="flex min-h-[46px] cursor-pointer items-center justify-between rounded-xl border border-dark-border bg-dark-hover px-4 gap-2">
+                    <span>
+                      <span className="block text-sm font-medium text-white">{permissionDraft.active ? 'Conta liberada' : 'Conta bloqueada'}</span>
+                      <span className="block text-[11px] text-nexus-400">Bloqueia toda a navegação</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={permissionDraft.active}
+                      onChange={(e) => onDraftChange((cur) => ({ ...cur, active: e.target.checked }))}
+                      className="h-4 w-4 accent-nexus-500 shrink-0"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Badge de perfil */}
+            {permissionDraft.role && ROLE_META[permissionDraft.role] && (
+              <div className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 ${ROLE_META[permissionDraft.role].className}`}>
+                <ControlIcon kind="shield" className="h-4 w-4 shrink-0" />
+                <span className="text-xs leading-snug">{ROLE_META[permissionDraft.role].description}</span>
+              </div>
+            )}
+
+            {/* Permissões de navegação */}
+            <div>
+              <div className="flex items-end justify-between mb-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-nexus-500">Permissões de navegação</p>
+                  <p className="mt-0.5 text-[11px] text-nexus-400">Desative páginas para removê-las da experiência do usuário.</p>
+                </div>
+                {loadingPermissions && (
+                  <span className="flex items-center gap-1.5 text-[11px] text-nexus-400">
+                    <Spinner className="h-3 w-3" />Carregando…
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {pages.map((page) => {
+                  const enabled = permissionDraft.permissions?.[page.key] !== false;
+                  return (
+                    <label
+                      key={page.key}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all duration-200 ${
+                        enabled
+                          ? 'border-nexus-500/30 bg-nexus-500/5 hover:border-nexus-500/50'
+                          : 'border-dark-border bg-dark-hover hover:border-nexus-500/20'
+                      }`}
+                    >
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors ${
+                        enabled ? 'border-nexus-500/30 bg-nexus-500/15 text-nexus-300' : 'border-dark-border bg-dark-card text-nexus-500/50'
+                      }`}>
+                        <ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block truncate text-sm font-medium ${enabled ? 'text-white' : 'text-nexus-400'}`}>{page.label}</span>
+                        <span className="block truncate text-[11px] text-nexus-500">{page.path || `/${page.key}`}</span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={enabled}
+                        onChange={(e) => onDraftChange((cur) => ({
+                          ...cur,
+                          permissions: { ...cur.permissions, [page.key]: e.target.checked },
+                        }))}
+                        className="h-4 w-4 shrink-0 accent-nexus-500"
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Footer com ações */}
+      {!rootUser && (
+        <div className="flex items-center justify-between gap-3 border-t border-dark-border p-5">
+          <p className="text-xs text-nexus-500 hidden sm:block">Alterações aplicadas imediatamente no servidor.</p>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={savingPermissions || loadingPermissions}
+            className="btn-primary py-2.5 px-6 text-sm ml-auto"
+          >
+            {savingPermissions
+              ? <><Spinner className="mr-2 h-4 w-4" />Salvando…</>
+              : <><ControlIcon kind="check" className="mr-2 h-4 w-4" />Salvar acessos</>}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── GLOBAL ACCESS PANEL (RBAC Matrix) ─── */
+/**
+ * Painel de controle global: exibe uma matriz Pages × Roles com indicadores visuais.
+ * Permite ao admin ver de forma consolidada quais roles têm acesso a quais páginas.
+ * Nota: edição global de roles por página é operacional/visual — as mudanças individuais
+ * ainda são salvas via o painel individual por usuário.
+ */
+function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverrides, onBatchUpdate }) {
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [search, setSearch] = useState('');
+
+  const filteredPages = useMemo(() => {
+    return pages.filter((page) => {
+      const matchesSearch =
+        !search.trim() ||
+        page.label?.toLowerCase().includes(search.toLowerCase()) ||
+        (page.path || `/${page.key}`).toLowerCase().includes(search.toLowerCase());
+      return matchesSearch;
+    });
+  }, [pages, search]);
+
+  // Estatísticas por role
+  const roleStats = useMemo(() => {
+    return Object.keys(ROLE_META).map((role) => {
+      const usersWithRole = users.filter((u) => u.nivel_acesso === role);
+      const active = usersWithRole.filter(isUserActive).length;
+      return { role, total: usersWithRole.length, active };
+    });
+  }, [users]);
+
+  return (
+    <div className="space-y-5">
+      {/* Cards de resumo por perfil */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {roleStats.map(({ role, total, active }) => {
+          const meta = ROLE_META[role];
+          return (
+            <div key={role} className={`rounded-2xl border p-5 ${meta.className}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ControlIcon kind="shield" className="h-4 w-4" />
+                  <span className="text-sm font-semibold">{meta.label}</span>
+                </div>
+                <span className="text-xs opacity-70">{meta.description}</span>
+              </div>
+              <div className="flex items-end gap-3">
+                <div>
+                  <p className="text-2xl font-bold">{total}</p>
+                  <p className="text-xs opacity-70">usuários neste perfil</p>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-300">{active}</p>
+                  <p className="text-xs opacity-70">ativos</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Matriz RBAC */}
+      <section className="card overflow-hidden">
+        {/* Header */}
+        <div className="flex flex-col gap-4 border-b border-dark-border p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Matriz de acesso</p>
+            <h2 className="mt-1.5 text-xl font-semibold text-white">Controle Global por Perfil</h2>
+            <p className="mt-0.5 text-sm text-nexus-400">
+              Visão consolidada de quais perfis têm acesso a cada página do sistema.
+            </p>
+          </div>
+          <label className="relative sm:w-64">
+            <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="input py-2 pl-9 text-sm w-full"
+              placeholder="Filtrar páginas…"
+            />
+          </label>
+        </div>
+
+        {/* Filtro de role */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-dark-border px-5 py-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-nexus-500 mr-1">Filtrar por perfil:</span>
+          <button
+            type="button"
+            onClick={() => setRoleFilter('all')}
+            className={`rounded-xl px-3 py-1 text-xs font-medium transition-all ${
+              roleFilter === 'all'
+                ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
+                : 'border border-dark-border bg-dark-hover text-nexus-300 hover:text-white'
+            }`}
+          >
+            Todos os perfis ({pages.length} páginas)
+          </button>
+          {Object.entries(ROLE_META).map(([role, meta]) => (
+            <button
+              key={role}
+              type="button"
+              onClick={() => setRoleFilter(role)}
+              className={`rounded-xl px-3 py-1 text-xs font-medium transition-all ${
+                roleFilter === role
+                  ? meta.className + ' font-semibold'
+                  : 'border border-dark-border bg-dark-hover text-nexus-300 hover:text-white'
+              }`}
+            >
+              {meta.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tabela da matriz */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-dark-border">
+                <th className="py-3 pl-5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-nexus-400 w-[220px]">
+                  Página / Rota
+                </th>
+                {Object.entries(ROLE_META).map(([role, meta]) => (
+                  <th key={role} className="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider">
+                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 ${meta.className}`}>
+                      <ControlIcon kind="shield" className="h-3 w-3" />
+                      {meta.label}
+                    </span>
+                  </th>
+                ))}
+                <th className="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider text-nexus-400 whitespace-nowrap">
+                  Cobertura
+                </th>
+                <th className="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wider text-nexus-400 whitespace-nowrap">
+                  Todos os usuários
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-dark-border/60">
+              {filteredPages
+                .filter((page) => {
+                  if (roleFilter === 'all') return true;
+                  return page.roles?.includes(roleFilter) ?? roleFilter === 'admin';
+                })
+                .map((page) => {
+                  const roleAccess = Object.keys(ROLE_META).map((role) => ({
+                    role,
+                    allowed: globalPermissionOverrides[page.key] ?? (page.roles?.includes(role) ?? role === 'admin'),
+                  }));
+                  const allowedCount = roleAccess.filter((r) => r.allowed).length;
+                  const coveragePct = Math.round((allowedCount / Object.keys(ROLE_META).length) * 100);
+                  const rowSaving = batchSaving?.pageKey === page.key && batchSaving?.role === 'all';
+
+                  return (
+                    <tr
+                      key={page.key}
+                      className="group transition-colors hover:bg-dark-hover/40"
+                    >
+                      {/* Página */}
+                      <td className="py-3.5 pl-5 pr-4">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-nexus-500/10 border border-nexus-500/20 text-nexus-300">
+                            <ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <p className="font-medium text-white">{page.label}</p>
+                            <code className="text-[10px] text-nexus-500 font-mono">{page.path || `/${page.key}`}</code>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Células de acesso por role */}
+                      {roleAccess.map(({ role, allowed }) => (
+                        <td key={role} className="py-3.5 px-4 text-center">
+                          <span
+                            title={allowed ? `${ROLE_META[role].label} tem acesso` : `${ROLE_META[role].label} sem acesso`}
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border mx-auto transition-all ${
+                              allowed
+                                ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-400'
+                                : 'border-dark-border/50 bg-dark-bg/40 text-nexus-600/50'
+                            }`}
+                          >
+                            {allowed
+                              ? <ControlIcon kind="check" className="h-4 w-4" />
+                              : <ControlIcon kind="lock" className="h-3.5 w-3.5" />
+                            }
+                          </span>
+                        </td>
+                      ))}
+
+                      {/* Cobertura */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className={`text-xs font-semibold ${coveragePct === 100 ? 'text-emerald-300' : coveragePct >= 66 ? 'text-nexus-300' : 'text-amber-300'}`}>
+                            {allowedCount}/{Object.keys(ROLE_META).length}
+                          </span>
+                          <div className="w-16 h-1.5 rounded-full bg-dark-border overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                coveragePct === 100 ? 'bg-emerald-400' : coveragePct >= 66 ? 'bg-nexus-400' : 'bg-amber-400'
+                              }`}
+                              style={{ width: `${coveragePct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-5">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => onBatchUpdate(page.key, 'all', true)}
+                            disabled={rowSaving}
+                            className="btn-primary min-h-9 px-3 py-1.5 text-xs"
+                            aria-label={`Liberar ${page.label} para todos os usuários`}
+                          >
+                            {rowSaving && batchSaving.enable ? <Spinner className="h-4 w-4" /> : 'Liberar'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onBatchUpdate(page.key, 'all', false)}
+                            disabled={rowSaving}
+                            className="btn-secondary min-h-9 px-3 py-1.5 text-xs"
+                            aria-label={`Bloquear ${page.label} para todos os usuários`}
+                          >
+                            {rowSaving && !batchSaving.enable ? <Spinner className="h-4 w-4" /> : 'Bloquear'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+
+          {filteredPages.length === 0 && (
+            <EmptyPanel icon="search" title="Nenhuma página encontrada" text="Experimente ajustar o filtro de busca." />
+          )}
+        </div>
+
+        {/* Legenda */}
+        <div className="flex flex-wrap items-center gap-4 border-t border-dark-border px-5 py-3 text-xs text-nexus-400">
+          <span className="font-semibold uppercase tracking-wider text-nexus-500">Legenda:</span>
+          <span className="flex items-center gap-1.5">
+            <span className="flex h-5 w-5 items-center justify-center rounded border border-emerald-400/30 bg-emerald-400/10 text-emerald-400">
+              <ControlIcon kind="check" className="h-3 w-3" />
+            </span>
+            Acesso permitido
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="flex h-5 w-5 items-center justify-center rounded border border-dark-border/50 bg-dark-bg/40 text-nexus-600/50">
+              <ControlIcon kind="lock" className="h-3 w-3" />
+            </span>
+            Acesso restrito
+          </span>
+          <span className="ml-auto text-nexus-500">
+            Configurações individuais por usuário disponíveis na aba <strong className="text-nexus-400">Controle Individual</strong>.
+          </span>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 
 function ProductsSection({ items, deletingProductId, seedingCatalog, onSeed, onCreate, onEdit, onDelete }) {
   return (

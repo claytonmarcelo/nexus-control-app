@@ -50,13 +50,6 @@ export const adminService = {
     }));
   },
 
-  async getCurriculo() {
-    return unpack(await api.get('/curriculo'));
-  },
-
-  async updateCurriculo(curriculo) {
-    return unpack(await api.put('/curriculo', { curriculo }));
-  },
 
   async seedCatalog() {
     return unpack(await api.post('/admin/seed'));

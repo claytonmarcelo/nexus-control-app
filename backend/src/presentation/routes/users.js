@@ -23,15 +23,17 @@ import { USER_ROLES } from '../../domain/entities/User.js';
 const router = Router();
 
 router.use(authenticate);
-router.use(authorizePage('usuarios'));
 
-router.post('/', validateAdminUserCreate, authorize(USER_ROLES.ADMIN), create);
-router.get('/', validatePagination, authorize(USER_ROLES.ADMIN), getAll);
-router.get('/:id/permissions', validateIdParam, authorize(USER_ROLES.ADMIN), getPermissions);
-router.put('/:id/permissions', validateIdParam, validatePermissions, authorize(USER_ROLES.ADMIN), updatePermissions);
+// Rotas de administração de usuários (apenas admin com permissão na página 'usuarios')
+router.post('/', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateAdminUserCreate, create);
+router.get('/', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validatePagination, getAll);
+router.get('/:id/permissions', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, getPermissions);
+router.put('/:id/permissions', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, validatePermissions, updatePermissions);
+router.delete('/:id', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, remove);
+
+// Rotas de perfil/usuário (permitidas para o próprio usuário autenticado ou admin)
 router.get('/:id', validateIdParam, getById);
 router.put('/:id', validateIdParam, validateUserUpdate, update);
-router.delete('/:id', validateIdParam, authorize(USER_ROLES.ADMIN), remove);
 router.put('/:id/password', validateIdParam, validatePasswordChange, changePassword);
 
 export default router;

@@ -128,7 +128,7 @@ aws cloudfront create-invalidation --distribution-id XXXXX --paths "/*"
 ```bash
 # Health check
 curl https://nexus-control.com/api/health
-# Expected: {"status": "ok", "timestamp": "..."}
+# Expected: {"status":"ok","database":"ok"}
 
 # Test API endpoint
 curl https://nexus-control.com/api/status

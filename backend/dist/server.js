@@ -10,18 +10,34 @@ import itemsRoutes from './presentation/routes/items.js';
 import usersRoutes from './presentation/routes/users.js';
 import ordersRoutes from './presentation/routes/orders.js';
 import adminRoutes from './presentation/routes/admin.js';
-import curriculoRoutes from './presentation/routes/curriculo.js';
 dotenv.config();
-// Validar FRONTEND_URL em produção (com fallback para AWS Academy)
+// Require explicit public origins in production; wildcard origins are unsafe.
 const isProduction = process.env.NODE_ENV === 'production';
 const frontendUrl = process.env.FRONTEND_URL;
-if (isProduction && !frontendUrl) {
-    console.warn('⚠️ FRONTEND_URL não configurado explicitamente. Habilitando origens dinâmicas para AWS Academy.');
+const apiUrl = process.env.API_URL;
+const parseOrigins = (value, variableName) => {
+    if (!value)
+        return [];
+    return value.split(',').map((entry) => {
+        const configuredOrigin = entry.trim();
+        if (!configuredOrigin || configuredOrigin === '*') {
+            throw new Error(`${variableName} deve conter origens explícitas, sem wildcard.`);
+        }
+        const parsedOrigin = new URL(configuredOrigin);
+        if (!['http:', 'https:'].includes(parsedOrigin.protocol)) {
+            throw new Error(`${variableName} deve conter URLs HTTP ou HTTPS.`);
+        }
+        return parsedOrigin.origin;
+    });
+};
+if (isProduction && (!frontendUrl || !apiUrl)) {
+    throw new Error('FRONTEND_URL e API_URL são obrigatórios em produção.');
 }
 const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = (frontendUrl || 'http://localhost:5173,http://localhost:5174,http://localhost:5175').split(',').map((origin) => origin.trim());
+const allowedOrigins = parseOrigins(frontendUrl || 'http://localhost:5173,http://localhost:5174,http://localhost:5175', 'FRONTEND_URL');
+const allowedApiOrigins = parseOrigins(apiUrl || 'http://localhost:3000', 'API_URL');
 // Configurar helmet com CSP explícita para Google Fonts e recursos necessários
 app.use(helmet({
     contentSecurityPolicy: {
@@ -30,7 +46,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com'],
             imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'", '*', ...allowedOrigins]
+            connectSrc: ["'self'", ...allowedApiOrigins]
         }
     },
     frameguard: { action: 'deny' },
@@ -46,20 +62,7 @@ app.use(cors({
         // Requisições sem origem (curl, server-to-server, mobile)
         if (!origin)
             return callback(null, true);
-        // Se permitir qualquer ou origens listadas
-        if (frontendUrl === '*' || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-            return callback(null, true);
-        }
-        // Permitir origens de redes locais e domínios da AWS EC2 / Academy
-        if (origin.includes('localhost') ||
-            origin.includes('127.0.0.1') ||
-            origin.includes('.compute.amazonaws.com') ||
-            origin.includes('.amazonaws.com') ||
-            /^http:\/\/\d+\.\d+\.\d+\.\d+(:\d+)?$/.test(origin)) {
-            return callback(null, true);
-        }
-        // Em produção na AWS, permitir para garantir funcionamento do frontend
-        return callback(null, true);
+        return callback(null, allowedOrigins.includes(origin));
     },
     credentials: true
 }));
@@ -70,7 +73,7 @@ const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10000,
     message: { error: 'Muitas requisições originadas deste IP, tente novamente mais tarde.' },
-    skip: (req) => req.path === '/health' || req.path === '/api/status'
+    skip: (req) => req.path === '/health' || req.path === '/api/health' || req.path === '/api/status'
 });
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -84,6 +87,16 @@ app.use('/api/auth/login', loginLimiter);
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });
+app.get('/api/health', async (req, res) => {
+    try {
+        const pool = (await import('./config/database.js')).default;
+        await pool.execute('SELECT 1');
+        res.json({ status: 'ok', database: 'ok' });
+    }
+    catch {
+        res.status(503).json({ status: 'unavailable', database: 'unavailable' });
+    }
+});
 app.get('/api/status', (req, res) => {
     res.json({ success: true, message: 'Nexus Control API está rodando' });
 });
@@ -92,14 +105,12 @@ app.use('/api/itens', itemsRoutes);
 app.use('/api/usuarios', usersRoutes);
 app.use('/api/pedidos', ordersRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/curriculo', curriculoRoutes);
 // Fallback sem prefixo /api para compatibilidade com proxies reversos Nginx/ALB
 app.use('/auth', authRoutes);
 app.use('/itens', itemsRoutes);
 app.use('/usuarios', usersRoutes);
 app.use('/pedidos', ordersRoutes);
 app.use('/admin', adminRoutes);
-app.use('/curriculo', curriculoRoutes);
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Rota não encontrada' });
 });
@@ -121,28 +132,19 @@ const initDatabase = async () => {
             await seedDatabase();
             console.log('✅ Catálogo inicializado com sucesso no banco de dados!');
         }
-        // Seed do currículo se não existir
-        try {
-            const [curriculoRows] = await pool.execute('SELECT COUNT(*) as total FROM curriculo');
-            const curriculoTotal = curriculoRows?.[0]?.total || 0;
-            if (curriculoTotal === 0) {
-                console.log('🌱 Tabela curriculo vazia. Executando seed inicial do currículo...');
-                const { migrateCurriculoSeed } = await import('./utils/migrate_curriculo_seed.js');
-                await migrateCurriculoSeed(pool);
-                console.log('✅ Currículo inicializado com sucesso!');
-            }
-        }
-        catch (e) {
-            console.warn('⚠️ Seed do currículo:', e.message);
-        }
     }
     catch (error) {
+        if (isProduction)
+            throw error;
         console.warn('⚠️ Inicialização do banco de dados:', error.message);
     }
 };
 if (process.env.NODE_ENV !== 'test') {
-    app.listen(PORT, async () => {
+    const server = app.listen(PORT, () => {
         console.log(`Servidor Nexus Control rodando na porta ${PORT}`);
-        await initDatabase();
+        initDatabase().catch((error) => {
+            console.error('Falha ao inicializar o banco em produção:', error.message);
+            server.close(() => process.exit(1));
+        });
     });
 }

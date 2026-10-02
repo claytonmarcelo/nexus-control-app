@@ -1,5 +1,7 @@
 # 🔍 ANÁLISE CRÍTICA: FLUXOS DE AUTENTICAÇÃO - NEXUS CONTROL APP
 
+> Relatório histórico: várias conclusões abaixo descrevem uma versão anterior. No estado atual, cadastro/troca/reset usam política única de 12+ caracteres, refresh usa chave separada, recuperação não retorna token na API e os endpoints públicos de reset têm rate limit.
+
 ## ⚠️ PROBLEMAS IDENTIFICADOS
 
 ### 1. DISCREPÂNCIA NO LOGIN

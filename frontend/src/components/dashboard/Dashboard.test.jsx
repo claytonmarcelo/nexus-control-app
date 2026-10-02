@@ -30,6 +30,13 @@ const mockUser = {
 };
 
 const renderWithProviders = (component, user = mockUser) => {
+  useAuth.mockReturnValue({
+    user: { ...user },
+    isAdmin: user.nivel_acesso === 'admin',
+    isFuncionario: user.nivel_acesso === 'funcionario',
+    isCliente: user.nivel_acesso === 'cliente',
+  });
+
   return render(
     <BrowserRouter>
       <AuthProvider>
@@ -93,12 +100,6 @@ describe('Dashboard Component', () => {
   });
 
   it('shows admin actions for admin user', async () => {
-    useAuth.mockReturnValue({
-      user: { ...mockUser, nivel_acesso: 'admin' },
-      isAdmin: true,
-      isFuncionario: false,
-      isCliente: false,
-    });
     itemService.getAll.mockResolvedValue({ items: [] });
     healthService.check.mockResolvedValue({ users: 0 });
     

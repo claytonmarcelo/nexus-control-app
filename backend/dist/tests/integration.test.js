@@ -1,6 +1,8 @@
 import request from 'supertest';
 import app from '../server.js';
 import pool from '../config/database.js';
+const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
+const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '26481#';
 describe('Integration Tests - Carrinho e Checkout', () => {
     let adminToken = '';
     let clienteToken = '';
@@ -13,8 +15,8 @@ describe('Integration Tests - Carrinho e Checkout', () => {
         const adminLogin = await request(app)
             .post('/api/auth/login')
             .send({
-            email: 'marcelo10@gmail.com',
-            senha: '26481#',
+            email: ADMIN_EMAIL,
+            senha: ADMIN_PASSWORD,
         });
         adminToken = adminLogin.body.data.accessToken;
         adminId = adminLogin.body.data.user.id;

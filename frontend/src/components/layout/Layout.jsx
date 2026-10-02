@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModal } from '../../contexts/ModalContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -30,6 +30,12 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [mobileMenuOpen]);
 
+  // Trava scroll do body quando menu mobile está aberto
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const handleLogout = async () => {
     const confirmed = await confirm({
       title: 'Sair do sistema',
@@ -41,7 +47,6 @@ export default function Layout() {
     
     if (confirmed) {
       logout();
-      navigate('/login');
     }
   };
 
@@ -61,7 +66,10 @@ export default function Layout() {
 
   return (
     <div className="page-container">
-      <header className="glass border-b border-border sticky top-0 z-[1000]">
+      <header
+        className="border-b border-border sticky top-0 z-[1000]"
+        style={{ backgroundColor: 'var(--bg-primary)', backdropFilter: 'none' }}
+      >
         <div className="max-w-7xl 3xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4 sm:gap-8">
@@ -156,11 +164,16 @@ export default function Layout() {
         {/* Drawer Retrátil para Tablet Retrato e Mobile (< 768px) */}
         {mobileMenuOpen && (
           <div
-            className="fixed inset-0 top-16 z-[999] bg-black/60 backdrop-blur-md md:hidden animate-fade-in"
+            className="fixed inset-0 top-16 z-[999] md:hidden animate-fade-in"
+            style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
             onClick={() => setMobileMenuOpen(false)}
           >
             <div
-              className="glass border-b border-border p-5 space-y-4 shadow-2xl animate-slide-down"
+              className="border-b border-border p-5 space-y-4 shadow-2xl animate-slide-down"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border-color)',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 pb-3 border-b border-border">
@@ -248,11 +261,6 @@ export default function Layout() {
               <span className="font-medium text-primary">Nexus Control</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-nexus-400">
-              <a href="/sobre" className="hover:text-nexus-300 transition-colors">Quem Somos</a>
-              <Link to="/curriculo" className="hover:text-nexus-300 text-nexus-300 font-semibold transition-colors flex items-center gap-1">
-                <span>📄</span>
-                <span>Currículo</span>
-              </Link>
               <span>Desenvolvido por <strong className="text-primary">Clayton Marcelo</strong></span>
               <a
                 href="https://github.com/claytonmarcelo"
@@ -302,10 +310,35 @@ function UsersIcon({ className }) {
 
 function NexusLogo({ className }) {
   return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2"/>
-      <path d="M16 8V24M8 16H24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="16" cy="16" r="6" stroke="currentColor" strokeWidth="1.5" opacity="0.5"/>
+    <svg className={className} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Nexus Control">
+      <defs>
+        <linearGradient id="nexusGradL" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#E5C158" />
+          <stop offset="100%" stopColor="#B8962E" />
+        </linearGradient>
+      </defs>
+      {/* Outer ring */}
+      <circle cx="24" cy="24" r="21" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeOpacity="0.35" fill="none" />
+      {/* Central hub */}
+      <circle cx="24" cy="24" r="4.5" fill="url(#nexusGradL)" />
+      {/* Top */}
+      <line x1="24" y1="19.5" x2="24" y2="8" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="24" cy="7" r="2.5" fill="url(#nexusGradL)" />
+      {/* Bottom */}
+      <line x1="24" y1="28.5" x2="24" y2="40" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="24" cy="41" r="2.5" fill="url(#nexusGradL)" />
+      {/* Top-Right */}
+      <line x1="27.9" y1="21.75" x2="36.5" y2="16.8" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="37.9" cy="16" r="2.5" fill="url(#nexusGradL)" />
+      {/* Bottom-Left */}
+      <line x1="20.1" y1="26.25" x2="11.5" y2="31.2" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10.1" cy="32" r="2.5" fill="url(#nexusGradL)" />
+      {/* Top-Left */}
+      <line x1="20.1" y1="21.75" x2="11.5" y2="16.8" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10.1" cy="16" r="2.5" fill="url(#nexusGradL)" />
+      {/* Bottom-Right */}
+      <line x1="27.9" y1="26.25" x2="36.5" y2="31.2" stroke="url(#nexusGradL)" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="37.9" cy="32" r="2.5" fill="url(#nexusGradL)" />
     </svg>
   );
 }

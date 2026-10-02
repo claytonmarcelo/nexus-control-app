@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { itemService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
 import { useCart } from '../../contexts/CartContext';
+import { calcDailyRate, calcRentalTotal } from '../../contexts/CartContext';
 import LoadingScreen from '../ui/LoadingScreen';
 import EmptyState from '../ui/EmptyState';
 import Spinner from '../ui/Spinner';
@@ -11,6 +12,10 @@ import ItemFormModal from './ItemFormModal';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
+
+const MIN_RENTAL_DAYS = 7;
+const MAX_RENTAL_DAYS = 365;
+const QUICK_DAYS = [7, 14, 30, 60, 90, 180];
 
 const CATEGORY_COLORS = {
   Servidores: 'from-blue-600/30 to-blue-800/10 border-blue-500/20 text-blue-300',
@@ -25,12 +30,218 @@ function getCategoryStyle(categoria) {
   return CATEGORY_COLORS[categoria] || CATEGORY_COLORS.default;
 }
 
-function ProductCard({ item, user, isAdmin, isFuncionario, isCliente, onEdit, onDelete, onAddToCart, deletingId }) {
+/* ─────────────────────────────────────────────────────────
+   RENTAL DAYS PICKER MODAL
+───────────────────────────────────────────────────────── */
+function RentalDaysModal({ item, onConfirm, onCancel }) {
+  const [dias, setDias] = useState(MIN_RENTAL_DAYS);
+  const sliderRef = useRef(null);
+
+  const sliderPct = ((dias - MIN_RENTAL_DAYS) / (MAX_RENTAL_DAYS - MIN_RENTAL_DAYS)) * 100;
+  const dailyRate = calcDailyRate(item.valor_aluguel_mensal, dias);
+  const totalRental = calcRentalTotal(item.valor_aluguel_mensal, dias);
+
+  // Update slider CSS custom property for fill effect
+  useEffect(() => {
+    if (sliderRef.current) {
+      sliderRef.current.style.setProperty('--slider-pct', `${sliderPct.toFixed(1)}%`);
+    }
+  }, [sliderPct]);
+
+  // Close on ESC
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onCancel(); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onCancel]);
+
+  const setSafeDays = (val) => {
+    const v = Math.max(MIN_RENTAL_DAYS, Math.min(MAX_RENTAL_DAYS, Math.round(Number(val) || MIN_RENTAL_DAYS)));
+    setDias(v);
+  };
+
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 1);
+  const returnDate = new Date(deliveryDate);
+  returnDate.setDate(returnDate.getDate() + dias);
+
+  const formatDate = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+
+  // Determine tier label and discount message
+  const tierLabel = dias <= 14 ? 'Curto Prazo' : dias <= 30 ? 'Médio Prazo (-10%)' : dias <= 90 ? 'Longo Prazo (-20%)' : 'Plano Fidelidade (-26%)';
+  const tierColor = dias <= 14 ? '#f59e0b' : dias <= 30 ? '#10b981' : dias <= 90 ? '#3b82f6' : '#a855f7';
+
+  return (
+    <div
+      className="rental-modal-overlay"
+      onClick={(e) => e.target === e.currentTarget && onCancel()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rental-modal-title"
+    >
+      <div className="rental-modal">
+        {/* Header Compacto */}
+        <div className="rental-modal-header">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-nexus-500/30 bg-nexus-500/10 shrink-0">
+              <ClockIcon className="h-4 w-4 text-nexus-400" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-nexus-500 block leading-tight">Nexus Rent · Locação</span>
+              <h2 id="rental-modal-title" className="text-sm font-bold text-white truncate leading-tight">
+                {item.nome}
+              </h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="p-1 rounded-lg text-nexus-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+            aria-label="Fechar modal de aluguel"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Body Compacto */}
+        <div className="rental-modal-body">
+          {/* Status e Faixa de Preço */}
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-nexus-400 font-medium">
+              Base: <strong className="text-white">{formatCurrency(item.valor_aluguel_mensal)}/mês</strong>
+            </span>
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              style={{ background: `${tierColor}15`, border: `1px solid ${tierColor}40`, color: tierColor }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: tierColor }} />
+              {tierLabel}
+            </span>
+          </div>
+
+          {/* Stepper + Display de Dias */}
+          <div className="rental-days-display">
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setSafeDays(dias - 1)}
+                disabled={dias <= MIN_RENTAL_DAYS}
+                className="w-8 h-8 rounded-lg bg-dark-bg/60 border border-nexus-500/20 text-nexus-300 hover:bg-nexus-500/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center font-bold text-base transition-colors"
+                aria-label="Diminuir 1 dia"
+              >
+                −
+              </button>
+              <div className="text-center">
+                <div className="rental-days-number leading-none">{dias} <span className="text-sm font-normal text-nexus-400">dias</span></div>
+                <div className="text-[11px] text-nexus-400 mt-1">
+                  📅 {formatDate(deliveryDate)} até {formatDate(returnDate)}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSafeDays(dias + 1)}
+                disabled={dias >= MAX_RENTAL_DAYS}
+                className="w-8 h-8 rounded-lg bg-dark-bg/60 border border-nexus-500/20 text-nexus-300 hover:bg-nexus-500/20 hover:text-white disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center font-bold text-base transition-colors"
+                aria-label="Aumentar 1 dia"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Slider de Dias */}
+            <div className="mt-2.5">
+              <input
+                ref={sliderRef}
+                type="range"
+                min={MIN_RENTAL_DAYS}
+                max={MAX_RENTAL_DAYS}
+                step={1}
+                value={dias}
+                onChange={(e) => setSafeDays(e.target.value)}
+                className="rental-days-slider"
+                aria-label="Controle deslizante de dias de aluguel"
+                id="rental-days-slider"
+              />
+            </div>
+          </div>
+
+          {/* Seleção rápida em botões compactos */}
+          <div className="flex items-center justify-between gap-1.5">
+            <span className="text-[11px] font-semibold text-nexus-500 uppercase tracking-wider shrink-0">Atalhos:</span>
+            <div className="rental-quick-days flex-1">
+              {QUICK_DAYS.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setSafeDays(d)}
+                  className={`rental-quick-btn ${dias === d ? 'active' : ''}`}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Resumo financeiro inteligente */}
+          <div className="rental-price-breakdown">
+            <div className="rental-price-row">
+              <span>Diária calculada:</span>
+              <span className="text-nexus-200 font-semibold">{formatCurrency(dailyRate)}/dia</span>
+            </div>
+            <div className="rental-price-row total">
+              <span>Investimento total ({dias} dias):</span>
+              <span className="rental-price-total-value">{formatCurrency(totalRental)}</span>
+            </div>
+          </div>
+
+          {/* Aviso corporativo Nexus */}
+          <div className="rental-info-badge">
+            <svg className="w-3.5 h-3.5 shrink-0 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-[11px] leading-tight text-nexus-300">
+              Garantia de disponibilidade imediata e substituição expressa Nexus Care inclusas.
+            </span>
+          </div>
+
+          {/* Ações */}
+          <div className="flex gap-2.5 pt-0.5">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="btn-secondary py-2 px-3 text-xs flex-1"
+              id="rental-modal-cancel"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={() => onConfirm(dias)}
+              className="btn-primary py-2 px-3 text-xs flex-[1.6] justify-center gap-1.5 font-semibold"
+              id="rental-modal-confirm"
+            >
+              <ClockIcon className="h-4 w-4" />
+              <span>Alugar por {formatCurrency(totalRental)}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+   PRODUCT CARD
+───────────────────────────────────────────────────────── */
+function ProductCard({ item, user, isAdmin, isFuncionario, onEdit, onDelete, onAddToCart, onRent, deletingId }) {
   const [imgError, setImgError] = useState(false);
   const catStyle = getCategoryStyle(item.categoria);
   const isOwn = item.criado_por === user?.id;
   const canEdit = isAdmin || isFuncionario || isOwn;
   const canDelete = isAdmin || (isFuncionario && isOwn);
+  const available = item.estoque == null || Number(item.estoque) > 0;
 
   return (
     <article
@@ -112,33 +323,43 @@ function ProductCard({ item, user, isAdmin, isFuncionario, isCliente, onEdit, on
             </div>
           )}
           {item.valor_aluguel_mensal > 0 && (
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-nexus-500 uppercase tracking-wide">Aluguel/mês</span>
-              <span className="text-sm font-semibold text-nexus-300">{formatCurrency(item.valor_aluguel_mensal)}</span>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-nexus-500 uppercase tracking-wide">Aluguel</span>
+                <span className="text-sm font-semibold text-nexus-300">{formatCurrency(item.valor_aluguel_mensal)}/mês</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-nexus-600 uppercase tracking-wide">Mín. 7 dias</span>
+                <span className="text-[11px] text-nexus-500">
+                  {formatCurrency(calcDailyRate(item.valor_aluguel_mensal, 7))}/dia
+                </span>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Client CTA buttons */}
+        {/* CTA buttons */}
         <div className="flex flex-col gap-2 pt-1">
           {item.valor_venda > 0 && (
             <button
               id={`add-to-cart-${item.id}`}
               className="btn-primary w-full gap-2 py-2.5 text-xs"
-              onClick={() => onAddToCart(item, 'compra')}
+              onClick={() => onAddToCart(item)}
+              disabled={!available}
             >
               <CartPlusIcon className="h-4 w-4" />
-              Adicionar ao carrinho
+              {available ? 'Adicionar ao carrinho' : 'Sem estoque'}
             </button>
           )}
           {item.valor_aluguel_mensal > 0 && (
             <button
               id={`rent-${item.id}`}
               className="btn-secondary w-full gap-2 py-2.5 text-xs"
-              onClick={() => onAddToCart(item, 'aluguel')}
+              onClick={() => onRent(item)}
+              disabled={!available}
             >
               <ClockIcon className="h-4 w-4" />
-              Alugar por mês
+              {available ? 'Selecionar dias de aluguel' : 'Sem estoque'}
             </button>
           )}
         </div>
@@ -147,6 +368,9 @@ function ProductCard({ item, user, isAdmin, isFuncionario, isCliente, onEdit, on
   );
 }
 
+/* ─────────────────────────────────────────────────────────
+   MAIN ITEMS COMPONENT
+───────────────────────────────────────────────────────── */
 export default function Items() {
   const { user, isAdmin, isFuncionario, isCliente } = useAuth();
   const { toast, confirm } = useModal();
@@ -156,6 +380,7 @@ export default function Items() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
+  const [rentalModalItem, setRentalModalItem] = useState(null);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const [search, setSearch] = useState(queryParams.get('search') || '');
@@ -165,8 +390,6 @@ export default function Items() {
     setLoading(true);
     try {
       const response = await itemService.getAll({ limit: 100 });
-      // Backend retorna { success: true, data: { items: [...] }, pagination: {...} }
-      // itemService retorna response.data.data, então acesso response.data.items
       const itemsData = response?.data?.items || response?.items || [];
       setItems(Array.isArray(itemsData) ? itemsData : []);
     } catch (error) {
@@ -178,34 +401,49 @@ export default function Items() {
 
   useEffect(() => { loadItems(); }, [loadItems]);
 
-  const handleAddToCart = (item, tipo) => {
-    if (tipo === 'compra') {
-      addItem({
-        id: item.id,
-        item_id: item.id,
-        nome: item.nome,
-        descricao: item.descricao,
-        fabricante: item.fabricante,
-        imagem_url: item.imagem_url,
-        preco_unitario: item.valor_venda,
-        valor_venda: item.valor_venda,
-        categoria: item.categoria,
-      });
-      toast({ message: `"${item.nome}" adicionado ao carrinho!`, variant: 'success' });
-    } else {
-      addItem({
-        id: `${item.id}-aluguel`,
-        item_id: item.id,
-        nome: `${item.nome} (Aluguel/mês)`,
-        descricao: item.descricao,
-        fabricante: item.fabricante,
-        imagem_url: item.imagem_url,
-        preco_unitario: item.valor_aluguel_mensal,
-        valor_aluguel_mensal: item.valor_aluguel_mensal,
-        categoria: item.categoria,
-      });
-      toast({ message: `"${item.nome}" (aluguel) adicionado ao carrinho!`, variant: 'success' });
-    }
+  // Purchase: add directly
+  const handleAddToCart = (item) => {
+    addItem({
+      id: item.id,
+      item_id: item.id,
+      nome: item.nome,
+      descricao: item.descricao,
+      fabricante: item.fabricante,
+      imagem_url: item.imagem_url,
+      preco_unitario: item.valor_venda,
+      valor_venda: item.valor_venda,
+      categoria: item.categoria,
+      tipo: 'compra',
+    });
+    toast({ message: `"${item.nome}" adicionado ao carrinho!`, variant: 'success' });
+  };
+
+  // Rental: open modal to pick days
+  const handleRent = (item) => {
+    setRentalModalItem(item);
+  };
+
+  const handleRentalConfirm = (dias) => {
+    const item = rentalModalItem;
+    const totalRental = calcRentalTotal(item.valor_aluguel_mensal, dias);
+    addItem({
+      id: `${item.id}-aluguel`,
+      item_id: item.id,
+      nome: item.nome,
+      descricao: item.descricao,
+      fabricante: item.fabricante,
+      imagem_url: item.imagem_url,
+      preco_unitario: totalRental,
+      categoria: item.categoria,
+      tipo: 'aluguel',
+      dias_aluguel: dias,
+      valor_aluguel_mensal_base: item.valor_aluguel_mensal,
+    });
+    toast({
+      message: `"${item.nome}" adicionado para aluguel de ${dias} dias — ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRental)}`,
+      variant: 'success',
+    });
+    setRentalModalItem(null);
   };
 
   const handleDelete = async (item) => {
@@ -230,26 +468,23 @@ export default function Items() {
   };
 
   const handleFormSubmit = async (data) => {
-    try {
-      if (editingItem) {
-        await itemService.update(editingItem.id, data);
-        setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...data } : i));
-        toast({ message: 'Item atualizado com sucesso', variant: 'success' });
-      } else {
-        const newItem = await itemService.create(data);
-        setItems(prev => [newItem.item, ...prev]);
-        toast({ message: 'Item criado com sucesso', variant: 'success' });
-      }
-      setShowForm(false);
-      setEditingItem(null);
-    } catch (error) {
-      throw error;
+    if (editingItem) {
+      await itemService.update(editingItem.id, data);
+      setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...data } : i));
+      toast({ message: 'Item atualizado com sucesso', variant: 'success' });
+    } else {
+      const newItem = await itemService.create(data);
+      setItems(prev => [newItem.item, ...prev]);
+      toast({ message: 'Item criado com sucesso', variant: 'success' });
     }
+    setShowForm(false);
+    setEditingItem(null);
   };
 
-  const categories = ['Todos', ...Array.from(new Set(items.map(i => i.categoria).filter(Boolean)))];
+  const catalogItems = items.filter(item => Number(item.valor_venda) > 0 || Number(item.valor_aluguel_mensal) > 0);
+  const categories = ['Todos', ...Array.from(new Set(catalogItems.map(i => i.categoria).filter(Boolean)))];
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = catalogItems.filter(item => {
     const matchesSearch =
       item.nome.toLowerCase().includes(search.toLowerCase()) ||
       item.descricao?.toLowerCase().includes(search.toLowerCase()) ||
@@ -276,11 +511,11 @@ export default function Items() {
         )}
       </div>
 
-      {/* KPIs Section */}
+      {/* KPIs */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
           <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Total de Produtos</span>
-          <span className="mt-1 text-3xl font-bold text-white">{items.length}</span>
+          <span className="mt-1 text-3xl font-bold text-white">{catalogItems.length}</span>
         </div>
         <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
           <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Categorias</span>
@@ -289,13 +524,13 @@ export default function Items() {
         <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
           <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Itens em Estoque</span>
           <span className="mt-1 text-3xl font-bold text-white">
-            {items.reduce((acc, item) => acc + (item.estoque || 0), 0)}
+            {catalogItems.reduce((acc, item) => acc + (item.estoque || 0), 0)}
           </span>
         </div>
         <div className="flex flex-col rounded-xl border border-dark-border bg-dark-card p-4 transition-all hover:border-nexus-500/30 hover:shadow-lg">
           <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-nexus-500">Valor do Estoque</span>
           <span className="mt-1 text-xl sm:text-2xl font-bold text-gourmet-champagne">
-            {formatCurrency(items.reduce((acc, item) => acc + ((item.estoque || 0) * (item.valor_venda || 0)), 0))}
+            {formatCurrency(catalogItems.reduce((acc, item) => acc + ((item.estoque || 0) * (item.valor_venda || 0)), 0))}
           </span>
         </div>
       </div>
@@ -313,7 +548,6 @@ export default function Items() {
             aria-label="Buscar produtos"
           />
         </div>
-        {/* Category pills */}
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filtro por categoria">
           {categories.map(cat => (
             <button
@@ -336,7 +570,7 @@ export default function Items() {
         <EmptyState
           icon={<BoxIcon className="h-14 w-14" />}
           title="Nenhum item encontrado"
-          description={search || activeCategory !== 'Todos' ? 'Tente alterar o filtro ou a busca' : 'Nenhum produto cadastrado ainda.'}
+          description={search || activeCategory !== 'Todos' ? 'Tente alterar o filtro ou a busca' : 'Nenhum produto com preço de venda ou locação disponível no catálogo.'}
         />
       ) : (
         <div
@@ -354,6 +588,7 @@ export default function Items() {
               onEdit={i => { setEditingItem(i); setShowForm(true); }}
               onDelete={handleDelete}
               onAddToCart={handleAddToCart}
+              onRent={handleRent}
               deletingId={deletingItem}
             />
           ))}
@@ -367,6 +602,15 @@ export default function Items() {
         initialData={editingItem}
         loading={false}
       />
+
+      {/* Rental Days Modal */}
+      {rentalModalItem && (
+        <RentalDaysModal
+          item={rentalModalItem}
+          onConfirm={handleRentalConfirm}
+          onCancel={() => setRentalModalItem(null)}
+        />
+      )}
     </div>
   );
 }

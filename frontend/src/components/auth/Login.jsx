@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useModal } from '../../contexts/ModalContext';
 import api from '../../services/api';
 
 function Login() {
@@ -94,6 +95,7 @@ function LoginForm({ onNavigate }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState([]);
   const { login } = useAuth();
+  const { alert } = useModal();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -124,7 +126,11 @@ function LoginForm({ onNavigate }) {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setErrors([err.response?.data?.message || err.message || 'Erro ao fazer login']);
+      alert({
+        title: 'Acesso Negado',
+        message: err.response?.data?.message || 'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.',
+        variant: 'danger'
+      });
     } finally {
       setLoading(false);
     }
@@ -236,6 +242,7 @@ function LoginForm({ onNavigate }) {
 function RegisterForm({ onNavigate }) {
   const [formData, setFormData] = useState({ nome: '', email: '', senha: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -377,17 +384,25 @@ function RegisterForm({ onNavigate }) {
             </span>
             <input
               id="register-confirm"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               name="confirm"
               value={formData.confirm}
               onChange={handleChange}
-              className="auth-input"
+              className="auth-input auth-input--padded"
               placeholder="Confirmar senha"
               aria-label="Confirmar senha"
               autoComplete="new-password"
               required
               disabled={loading}
             />
+            <button
+              type="button"
+              className="auth-eye-btn"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+            >
+              <EyeIcon visible={showConfirmPassword} />
+            </button>
           </div>
         </div>
 

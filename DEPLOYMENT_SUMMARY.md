@@ -229,16 +229,31 @@ frontend/
 # On EC2 instance:
 git clone https://github.com/claytonmarcelo/nexus-control-app.git
 cd nexus-control-app/backend
-npm ci --production
+npm ci
 
 # Set environment
 cat > .env << EOF
 NODE_ENV=production
-PORT=80
-DATABASE_URL=mysql://user:pass@rds-endpoint/nexus_control
-JWT_SECRET=$(openssl rand -base64 32)
+PORT=3000
+DB_HOST=<rds-endpoint>
+DB_PORT=3306
+DB_USER=<application-user>
+DB_PASS=<secret-from-aws-secrets-manager>
+DB_NAME=nexus_control
+DB_SSL=true
+JWT_SECRET=<unique-random-secret-at-least-32-characters>
+JWT_REFRESH_SECRET=<different-unique-random-secret-at-least-32-characters>
+ROOT_ADMIN_EMAIL=<administrator-email>
+ROOT_ADMIN_PASSWORD=<strong-password-at-least-12-characters>
 FRONTEND_URL=https://nexus-control.com
+API_URL=https://api.nexus-control.com
 EOF
+chmod 600 .env
+
+npm run build
+npm run db:migrate
+npm run db:seed
+npm prune --omit=dev
 
 # Start with PM2
 pm2 start "npm start" --name "nexus-backend"
@@ -247,9 +262,9 @@ pm2 start "npm start" --name "nexus-backend"
 ### 3. Frontend Deployment
 ```bash
 # Build
-cd frontend
+cd ../frontend
 npm ci
-VITE_API_URL=https://nexus-control.com npm run build
+VITE_API_URL=https://api.nexus-control.com/api VITE_ROOT_ADMIN_EMAIL=<administrator-email> npm run build
 
 # Upload to S3 / CloudFront
 aws s3 sync dist/ s3://nexus-control-assets/

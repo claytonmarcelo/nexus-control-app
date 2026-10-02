@@ -47,6 +47,12 @@ jobs:
     - name: Build Backend
       working-directory: ./backend
       run: npm run build
+
+    - name: Prepare Test Database
+      working-directory: ./backend
+      run: |
+        npm run db:migrate
+        npm run db:seed
     
     - name: Run Backend Tests
       working-directory: ./backend

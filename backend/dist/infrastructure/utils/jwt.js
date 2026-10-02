@@ -1,10 +1,10 @@
-import { JWT_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN } from '../config/jwt.js';
+import { JWT_SECRET, JWT_REFRESH_SECRET, JWT_EXPIRES_IN, JWT_REFRESH_EXPIRES_IN } from '../config/jwt.js';
 import jwt from 'jsonwebtoken';
 export const generateToken = (payload) => {
     return jwt.sign({ ...payload, type: 'access' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 export const generateRefreshToken = (payload) => {
-    return jwt.sign({ ...payload, type: 'refresh' }, JWT_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+    return jwt.sign({ ...payload, type: 'refresh' }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
 };
 export const generateTokens = (payload) => {
     return {
@@ -18,6 +18,15 @@ export const verifyToken = (token) => {
         return typeof decoded === 'string' ? null : decoded;
     }
     catch (error) {
+        return null;
+    }
+};
+export const verifyRefreshToken = (token) => {
+    try {
+        const decoded = jwt.verify(token, JWT_REFRESH_SECRET);
+        return typeof decoded === 'string' ? null : decoded;
+    }
+    catch {
         return null;
     }
 };

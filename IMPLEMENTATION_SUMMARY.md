@@ -285,8 +285,8 @@ Status: confirmado
 # 1. Backend
 cd backend
 npm install
-npm run migrate
-npm run seed
+npm run db:migrate
+npm run db:seed
 npm run dev
 
 # 2. Frontend (novo terminal)
@@ -312,7 +312,7 @@ http://localhost:5173
 
 ### Gestão Admin
 ```
-1. Login: admin@nexuscontrol.com / 26481#
+1. Login: use the administrator credentials configured with `ROOT_ADMIN_EMAIL` and `ROOT_ADMIN_PASSWORD`.
 2. Clique em "Admin" (novo na navegação)
 3. Explore 4 abas:
    - Visão Geral: Métricas

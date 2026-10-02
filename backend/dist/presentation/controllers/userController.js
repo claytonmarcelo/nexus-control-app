@@ -65,6 +65,11 @@ export const getAll = async (req, res) => {
 export const getById = async (req, res) => {
     try {
         const { id } = req.params;
+        const requesterRole = req.user?.nivel_acesso;
+        const requesterId = req.user?.id;
+        if (requesterRole !== USER_ROLES.ADMIN && requesterId !== parseInt(id)) {
+            return sendError(res, 'Sem permissão para visualizar este usuário', 403);
+        }
         const user = await findUserById(id);
         if (!user) {
             return sendError(res, 'Usuário não encontrado', 404);

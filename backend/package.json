@@ -4,6 +4,9 @@
   "description": "Backend API for Nexus Control",
   "main": "dist/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",

@@ -35,13 +35,6 @@ const migrations = [
     permitido TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (usuario_id, pagina),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
-    `CREATE TABLE IF NOT EXISTS curriculo (
-    id INT PRIMARY KEY DEFAULT 1,
-    dados JSON NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    updated_by VARCHAR(100) DEFAULT NULL,
-    CHECK (id = 1)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 ];
 const alterStatements = [

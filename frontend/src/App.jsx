@@ -16,8 +16,7 @@ const Profile = lazy(() => import('./components/dashboard/Profile'));
 const Cart = lazy(() => import('./components/cart/Cart'));
 const Checkout = lazy(() => import('./components/cart/Checkout'));
 const AdminControlCenter = lazy(() => import('./components/admin/AdminControlCenter'));
-const AboutUs = lazy(() => import('./components/about/AboutUs'));
-const CurriculoPage = lazy(() => import('./components/curriculo/CurriculoPage'));
+const WelcomePage = lazy(() => import('./components/welcome/WelcomePage'));
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -64,10 +63,9 @@ function App() {
             </PublicRoute>
           } />
           <Route path="/recuperar-senha" element={<ForgotPassword />} />
-          <Route path="/curriculo" element={<CurriculoPage />} />
           
           <Route element={<Layout />}>
-            <Route path="/sobre" element={<AboutUs />} />
+
             <Route path="/dashboard" element={
               <PrivateRoute requiredPermission="dashboard">
                 <Dashboard />
@@ -105,7 +103,7 @@ function App() {
             } />
           </Route>
           
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<WelcomePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

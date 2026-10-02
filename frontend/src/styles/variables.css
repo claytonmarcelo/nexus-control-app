@@ -29,6 +29,7 @@ html.dark {
   --accent-gold-dark: #b8962e;
   --accent-gold-faint: rgba(212, 175, 55, 0.1);
   --accent-gold-border: rgba(212, 175, 55, 0.2);
+  --accent-gold-glow: rgba(212, 175, 55, 0.3);
 
   /* Border & Shadow */
   --border-color: rgba(212, 175, 55, 0.15);
@@ -85,6 +86,7 @@ html.light {
   --accent-gold-dark: #8b6408;
   --accent-gold-faint: rgba(184, 134, 11, 0.1);
   --accent-gold-border: rgba(184, 134, 11, 0.2);
+  --accent-gold-glow: rgba(184, 134, 11, 0.25);
 
   /* Border & Shadow */
   --border-color: rgba(0, 0, 0, 0.1);

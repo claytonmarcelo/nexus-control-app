@@ -53,13 +53,11 @@ async function verifyAll() {
 
   const routes = [
     '/login',
-    '/curriculo',
     '/dashboard',
     '/itens',
     '/carrinho',
     '/usuarios',
     '/admin',
-    '/sobre',
     '/perfil',
   ];
 
@@ -67,7 +65,7 @@ async function verifyAll() {
     await page.goto(`http://localhost:5173${route}`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 600));
     const title = await page.title();
-    console.log(`✓ Rota ${route} carregou OK! URL: ${page.url()}`);
+    console.log(`✓ Rota ${route} (${title}) carregou OK! URL: ${page.url()}`);
   }
 
   await browser.close();

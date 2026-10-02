@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * DashboardCanvas - Gráficos nativos HTML5 Canvas sem dependências externas

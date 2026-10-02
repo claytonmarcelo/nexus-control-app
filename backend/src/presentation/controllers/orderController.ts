@@ -93,7 +93,7 @@ export const getOrderById = async (req, res) => {
     }
 
     // Verificar se o usuário é dono do pedido ou admin
-    if (req.user.nivel_acesso !== 'admin' && order.usuario_id !== req.user.id) {
+    if (req.user.nivel_acesso !== 'admin' && String(order.usuario_id) !== String(req.user.id)) {
       return sendError(res, 'Acesso negado', 403);
     }
 
@@ -206,7 +206,7 @@ export const deleteOrderById = async (req, res) => {
     }
 
     // Permitir se for admin OU se for o dono do pedido
-    if (req.user.nivel_acesso !== 'admin' && req.user.id !== order.usuario_id) {
+    if (req.user.nivel_acesso !== 'admin' && String(req.user.id) !== String(order.usuario_id)) {
       return sendError(res, 'Acesso negado. Apenas o proprietário ou um administrador podem deletar este registro.', 403);
     }
 

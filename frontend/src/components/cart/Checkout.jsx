@@ -206,9 +206,18 @@ export default function Checkout() {
               <ul className="divide-y divide-dark-border">
                 {items.map((item) => (
                   <li key={item.id} className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-white">{item.nome}</p>
-                      <p className="mt-1 text-sm text-nexus-400">{item.quantidade} × {formatCurrency(item.preco_unitario)}</p>
+                      {item.tipo === 'aluguel' ? (
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <span className="cart-rental-badge" style={{ fontSize: '0.65rem' }}>
+                            ⏱ {item.dias_aluguel} dias
+                          </span>
+                          <span className="text-xs text-nexus-500">{formatCurrency(item.preco_unitario)}</span>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-sm text-nexus-400">{item.quantidade} × {formatCurrency(item.preco_unitario)}</p>
+                      )}
                     </div>
                     <p className="shrink-0 font-medium text-nexus-300">{formatCurrency(getItemSubtotal(item))}</p>
                   </li>

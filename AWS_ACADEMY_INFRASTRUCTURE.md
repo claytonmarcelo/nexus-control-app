@@ -117,13 +117,13 @@
 
 ### 5. **ALB (Application Load Balancer)**
 - **Purpose:** Distribute traffic across EC2 instances
-- **Port:** 443 (HTTPS) → 80 (backend)
+- **Port:** 443 (HTTPS) → 3000 (backend)
 - **Health Check:** `/api/health` (30s interval, 3s timeout)
 - **Stickiness:** Enabled (session affinity)
 
 ### 6. **Security Groups**
 - **ALB SG:** Inbound 80/443 from internet (0.0.0.0/0)
-- **EC2 SG:** Inbound 80 from ALB SG, SSH 22 from admin IP
+- **EC2 SG:** Inbound 3000 from ALB SG, SSH 22 from admin IP
 - **RDS SG:** Inbound 3306 from EC2 SG only
 
 ### 7. **CloudWatch**
@@ -186,9 +186,7 @@ FLUSH PRIVILEGES;
 **Step 5: Migrate Schema**
 ```bash
 # From backend directory
-npm run migrate:prod
-# or manual:
-mysql -h <rds-endpoint> -u admin -p nexus_control < database-schema.sql
+npm run db:migrate
 ```
 
 ### Database Backup Strategy
@@ -252,8 +250,8 @@ ssh -i nexus-keypair.pem ubuntu@<public-ip>
 # Update system
 sudo apt update && sudo apt upgrade -y
 
-# Install Node.js 18+
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Install Node.js 20.19+
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs npm
 
 # Install Git
@@ -266,18 +264,32 @@ sudo npm install -g pm2
 git clone https://github.com/claytonmarcelo/nexus-control-app.git
 cd nexus-control-app/backend
 
-# Install dependencies
-npm ci --production
-
 # Set environment variables
 cat > .env << EOF
 NODE_ENV=production
-PORT=80
-DATABASE_URL=mysql://admin:password@<rds-endpoint>/nexus_control
-JWT_SECRET=$(openssl rand -base64 32)
+PORT=3000
+DB_HOST=<rds-endpoint>
+DB_PORT=3306
+DB_USER=<application-user>
+DB_PASS=<secret-from-aws-secrets-manager>
+DB_NAME=nexus_control
+DB_SSL=true
+JWT_SECRET=<unique-random-secret-at-least-32-characters>
+JWT_REFRESH_SECRET=<different-unique-random-secret-at-least-32-characters>
+ROOT_ADMIN_EMAIL=<administrator-email>
+ROOT_ADMIN_PASSWORD=<strong-password-at-least-12-characters>
 FRONTEND_URL=https://nexus-control.com
+API_URL=https://api.nexus-control.com
 LOG_LEVEL=info
 EOF
+chmod 600 .env
+
+# Install dependencies, build, and prepare the database
+npm ci
+npm run build
+npm run db:migrate
+npm run db:seed
+npm prune --omit=dev
 
 # Start application
 pm2 start "npm start" --name "nexus-backend"
@@ -299,7 +311,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
 ```bash
 # Verify /api/health endpoint
 curl http://localhost/api/health
-# Expected response: {"status": "ok", "timestamp": "2026-09-07T..."}
+# Expected response: {"status":"ok","database":"ok"}
 ```
 
 ### Auto Scaling Configuration
@@ -479,7 +491,7 @@ Attach to: ALB + CloudFront
 
 **ALB HTTPS Configuration**
 ```bash
-# Listener: 443 → 80 (backend)
+# Listener: HTTPS 443 forwards to the target group on port 3000
 aws elbv2 create-listener \
   --load-balancer-arn <alb-arn> \
   --protocol HTTPS \
@@ -651,27 +663,9 @@ aws ec2 create-subnet --vpc-id vpc-xxxxx --cidr-block 10.0.2.0/24 --availability
 # Point domain to CloudFront
 ```
 
-### Continuous Deployment
+### Continuous Deployment Status
 
-**GitHub Actions**
-```yaml
-# .github/workflows/deploy-production.yml
-name: Deploy to Production
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build
-        run: npm run build
-      - name: Deploy to EC2
-        run: |
-          ssh -i ${{ secrets.EC2_KEY }} ubuntu@${{ secrets.EC2_IP }} \
-          'cd ~/nexus-control-app && git pull && npm ci --production && pm2 restart all'
-```
+O repositório contém CI para build, lint e testes, mas ainda não contém um workflow de deploy AWS. O deploy descrito neste documento é manual; habilitar CD exige escolher e configurar o destino (por exemplo, CodeDeploy/SSM para EC2 ou ECS), a role IAM via OIDC e os identificadores AWS do ambiente. Não use uma chave SSH privada de longa duração como secret do GitHub.
 
 ---
 

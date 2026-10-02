@@ -106,20 +106,16 @@ export default function Users() {
   };
 
   const handleFormSubmit = async (data) => {
-    try {
-      if (editingUser) {
-        await userService.update(editingUser.id, data);
-        setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...data } : u));
-        toast({ message: 'Usuário atualizado com sucesso', variant: 'success' });
-      } else {
-        await userService.create(data);
-        await loadUsers();
-        toast({ message: 'Usuário criado com sucesso', variant: 'success' });
-      }
-      handleFormClose();
-    } catch (error) {
-      throw error;
+    if (editingUser) {
+      await userService.update(editingUser.id, data);
+      setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...data } : u));
+      toast({ message: 'Usuário atualizado com sucesso', variant: 'success' });
+    } else {
+      await userService.create(data);
+      await loadUsers();
+      toast({ message: 'Usuário criado com sucesso', variant: 'success' });
     }
+    handleFormClose();
   };
 
   const filteredUsers = users.filter(u =>

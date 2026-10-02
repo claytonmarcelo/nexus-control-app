@@ -2,26 +2,31 @@ import pool from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import { ROOT_ADMIN_EMAIL, ROOT_ADMIN_NAME } from '../config/access.js';
+import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 dotenv.config();
+const isProduction = process.env.NODE_ENV === 'production';
+const rootAdminPassword = process.env.ROOT_ADMIN_PASSWORD || (isProduction ? '' : '26481#');
 const seedUsers = [
     {
         nome: ROOT_ADMIN_NAME,
         email: ROOT_ADMIN_EMAIL,
-        senha: process.env.ROOT_ADMIN_PASSWORD || '26481#',
+        senha: rootAdminPassword,
         nivel_acesso: 'admin'
     },
-    {
-        nome: 'Funcionário Teste',
-        email: 'funcionario@nexuscontrol.com',
-        senha: 'func123',
-        nivel_acesso: 'funcionario'
-    },
-    {
-        nome: 'Cliente Teste',
-        email: 'cliente@nexuscontrol.com',
-        senha: 'cliente123',
-        nivel_acesso: 'cliente'
-    }
+    ...(!isProduction ? [
+        {
+            nome: 'Funcionário Teste',
+            email: 'funcionario@nexuscontrol.com',
+            senha: 'func123',
+            nivel_acesso: 'funcionario'
+        },
+        {
+            nome: 'Cliente Teste',
+            email: 'cliente@nexuscontrol.com',
+            senha: 'cliente123',
+            nivel_acesso: 'cliente'
+        }
+    ] : [])
 ];
 const seedItems = [
     { nome: 'Servidor Rack Dell PowerEdge R440', descricao: 'Servidor 1U ideal para virtualização, bancos de dados corporativos e aplicações críticas.', categoria: 'Servidores', fabricante: 'Dell', imagem_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80', valor_venda: 25999.90, valor_aluguel_mensal: 1299.90, criado_por_email: ROOT_ADMIN_EMAIL },
@@ -47,6 +52,9 @@ const seedItems = [
     { nome: 'Treinamento de Equipe em TI', descricao: 'Capacitação técnica em DevOps, Cloud Computing, Segurança da Informação e Desenvolvimento.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80', valor_venda: 6500.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' }
 ];
 export const seedDatabase = async () => {
+    if (isProduction && validatePassword(rootAdminPassword) !== true) {
+        throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
+    }
     console.log('🌱 Iniciando seed do banco de dados...');
     try {
         const userIds = new Map();
@@ -68,7 +76,7 @@ export const seedDatabase = async () => {
             }
         }
         for (const item of seedItems) {
-            const userId = userIds.get(item.criado_por_email);
+            const userId = userIds.get(item.criado_por_email) || userIds.get(ROOT_ADMIN_EMAIL);
             const [existing] = await pool.execute('SELECT id FROM itens WHERE nome = ? AND criado_por = ?', [item.nome, userId]);
             if (existing.length === 0) {
                 await pool.execute('INSERT INTO itens (nome, descricao, categoria, fabricante, imagem_url, valor_venda, valor_aluguel_mensal, estoque, criado_por, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())', [item.nome, item.descricao, item.categoria, item.fabricante, item.imagem_url, item.valor_venda, item.valor_aluguel_mensal, 10, userId]);
@@ -103,11 +111,13 @@ export const seedDatabase = async () => {
                 status_pagamento: 'confirmado'
             }
         ];
-        for (const order of sampleOrders) {
-            const [existing] = await pool.execute('SELECT id FROM pedidos WHERE usuario_id = ? AND total = ? LIMIT 1', [order.usuario_id, order.total]);
-            if (existing.length === 0) {
-                await pool.execute('INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento, status_pagamento, criado_em) VALUES (?, ?, ?, ?, ?, NOW())', [order.usuario_id, JSON.stringify(order.items), order.total, order.metodo_pagamento, order.status_pagamento]);
-                console.log(`✅ Pedido de exemplo criado para usuário ${order.usuario_id}`);
+        if (!isProduction) {
+            for (const order of sampleOrders) {
+                const [existing] = await pool.execute('SELECT id FROM pedidos WHERE usuario_id = ? AND total = ? LIMIT 1', [order.usuario_id, order.total]);
+                if (existing.length === 0) {
+                    await pool.execute('INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento, status_pagamento, criado_em) VALUES (?, ?, ?, ?, ?, NOW())', [order.usuario_id, JSON.stringify(order.items), order.total, order.metodo_pagamento, order.status_pagamento]);
+                    console.log(`✅ Pedido de exemplo criado para usuário ${order.usuario_id}`);
+                }
             }
         }
         console.log('✅ Seed concluído com sucesso');

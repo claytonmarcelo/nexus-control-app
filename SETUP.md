@@ -4,7 +4,7 @@
 
 ### 1. Pré-requisitos
 
-- **Node.js** >= 18.x
+- **Node.js** >= 20.19
 - **npm** ou **yarn**
 - **MySQL** >= 8.0
 - **.env** configurado (copie `.env.example`)
@@ -18,6 +18,7 @@
 NODE_ENV=development
 PORT=3000
 FRONTEND_URL=http://localhost:5173
+API_URL=http://localhost:3000
 
 # Banco de Dados
 DB_HOST=localhost
@@ -27,7 +28,10 @@ DB_NAME=nexus_control
 DB_SSL=false
 
 # JWT
-JWT_SECRET=sua_chave_super_secreta_aqui
+JWT_SECRET=gere_uma_chave_aleatoria_com_mais_de_32_caracteres
+JWT_REFRESH_SECRET=gere_outra_chave_diferente_com_mais_de_32_caracteres
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
 JWT_EXPIRATION=24h
 JWT_REFRESH_EXPIRATION=7d
 
@@ -38,7 +42,7 @@ EMAIL_PASS=sua_senha_app_google
 
 # Admin Root
 ROOT_ADMIN_EMAIL=admin@nexuscontrol.com
-ROOT_ADMIN_PASSWORD=26481#
+ROOT_ADMIN_PASSWORD=UseUmaSenhaForteCom12Caracteres!
 ROOT_ADMIN_NAME=Administrador
 ```
 
@@ -46,6 +50,7 @@ ROOT_ADMIN_NAME=Administrador
 
 ```env
 VITE_API_URL=http://localhost:3000/api
+VITE_ROOT_ADMIN_EMAIL=admin@nexuscontrol.com
 ```
 
 ### 3. Setup do Banco de Dados
@@ -53,10 +58,10 @@ VITE_API_URL=http://localhost:3000/api
 ```bash
 # Backend - Executar migrações
 cd backend
-npm run migrate
+npm run db:migrate
 
 # Backend - Seedar dados iniciais
-npm run seed
+npm run db:seed
 ```
 
 ### 4. Instalar Dependências
@@ -93,9 +98,11 @@ Acesse: **http://localhost:5173**
 
 | Email | Senha | Role | Descrição |
 |-------|-------|------|-----------|
-| `admin@nexuscontrol.com` | `26481#` | admin | Administrador raiz |
-| `funcionario@nexuscontrol.com` | `func123` | funcionario | Operador de catálogo |
-| `cliente@nexuscontrol.com` | `cliente123` | cliente | Cliente de compras |
+| `admin@nexuscontrol.com` | Configure `ROOT_ADMIN_PASSWORD` | admin | Administrador raiz local |
+| `funcionario@nexuscontrol.com` | `func123` | funcionario | Apenas desenvolvimento/testes |
+| `cliente@nexuscontrol.com` | `cliente123` | cliente | Apenas desenvolvimento/testes |
+
+As contas de demonstração nunca devem ser criadas em produção. As senhas padrão do seed são exclusivas de desenvolvimento.
 
 ### Estrutura de Dados
 
@@ -158,8 +165,8 @@ Acesse: **http://localhost:5173**
 npm run dev          # Iniciar servidor em modo desenvolvimento
 npm run build        # Compilar TypeScript
 npm run start        # Iniciar servidor compilado
-npm run migrate      # Executar migrações do banco
-npm run seed         # Seedar dados iniciais
+npm run db:migrate   # Executar migrações do banco
+npm run db:seed      # Seedar dados iniciais
 npm run test         # Executar testes
 npm run lint         # Verificar código
 ```
@@ -287,7 +294,7 @@ VITE_API_URL=http://localhost:3001/api
 ```bash
 # Verifique as credenciais do banco em .env
 # Execute manualmente:
-npm run migrate
+npm run db:migrate
 
 # Se persistir, verifique os logs
 ```
