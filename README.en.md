@@ -220,6 +220,8 @@ ROOT_ADMIN_NAME=Administrator
 ROOT_ADMIN_PASSWORD=YourSecurePassword123!
 ```
 
+New passwords must contain at least 8 characters, including letters, numbers, and symbols.
+
 Install dependencies and setup database:
 
 ```bash

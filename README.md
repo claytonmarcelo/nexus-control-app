@@ -229,6 +229,8 @@ ROOT_ADMIN_NAME=Administrador
 ROOT_ADMIN_PASSWORD=SuaSenhaSegura123!
 ```
 
+Novas senhas devem ter pelo menos 8 caracteres e incluir letras, números e símbolos.
+
 Instale as dependências e prepare o banco:
 
 ```bash
