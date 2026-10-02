@@ -16,7 +16,7 @@ Este documento lista todas as variáveis de ambiente que precisam ser configurad
   - ❌ Nunca reutilize o JWT_SECRET nem use valores de exemplo
 
 - **`ROOT_ADMIN_PASSWORD`**: Senha do administrador raiz (conta pessoal real)
-  - ⚠️ **CRÍTICO**: Use uma senha forte (mínimo 12 caracteres, com letras, números e símbolos)
+  - ⚠️ **CRÍTICO**: Use uma senha forte (mínimo 8 caracteres, com letras, números e símbolos)
   - ❌ NUNCA use valores de exemplo ou senhas fracas
   - ✅ Esta é a sua conta pessoal de administrador - não compartilhe
 

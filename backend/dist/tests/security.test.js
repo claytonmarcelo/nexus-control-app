@@ -17,6 +17,7 @@ describe('Security and readiness checks', () => {
     });
     it('rejects passwords below the production strength policy', () => {
         expect(validatePassword('abc123!')).not.toBe(true);
+        expect(validatePassword('Abcde1!x')).toBe(true);
         expect(validatePassword('LongEnoughPassword123!')).toBe(true);
     });
     it('does not grant CORS access to an unlisted origin', async () => {

@@ -244,7 +244,7 @@ DB_SSL=true
 JWT_SECRET=<unique-random-secret-at-least-32-characters>
 JWT_REFRESH_SECRET=<different-unique-random-secret-at-least-32-characters>
 ROOT_ADMIN_EMAIL=<administrator-email>
-ROOT_ADMIN_PASSWORD=<strong-password-at-least-12-characters>
+ROOT_ADMIN_PASSWORD=<strong-password-at-least-8-characters>
 FRONTEND_URL=https://nexus-control.com
 API_URL=https://api.nexus-control.com
 EOF
