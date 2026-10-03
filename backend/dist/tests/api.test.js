@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
+import bcrypt from 'bcryptjs';
 import app from '../server.js';
 import pool from '../config/database.js';
+import { createTestClient, deleteTestClient } from './helpers/testClient.js';
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
-const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '26481#';
+const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
 describe('API Health Check', () => {
     it('GET /api/status should return 200', async () => {
         const response = await request(app).get('/api/status');
@@ -15,17 +17,19 @@ describe('API Health Check', () => {
 describe('Authentication', () => {
     let adminToken = '';
     let userToken = '';
+    let testClientId;
     beforeAll(async () => {
         // Login as admin
         const adminLogin = await request(app)
             .post('/api/auth/login')
             .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
-        // Login as regular user
-        const userLogin = await request(app)
-            .post('/api/auth/login')
-            .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
-        userToken = userLogin.body.data.accessToken;
+        const testClient = await createTestClient();
+        userToken = testClient.token;
+        testClientId = testClient.id;
+    });
+    afterAll(async () => {
+        await deleteTestClient(testClientId);
     });
     describe('POST /api/auth/login', () => {
         it('should login with valid credentials', async () => {
@@ -55,18 +59,37 @@ describe('Authentication', () => {
     describe('POST /api/auth/register', () => {
         it('should register new user', async () => {
             const uniqueEmail = `test${Date.now()}@test.com`;
-            const response = await request(app)
-                .post('/api/auth/register')
-                .send({
-                nome: 'Test User',
-                email: uniqueEmail,
-                senha: 'StrongTestPass123!',
-                nivel_acesso: 'cliente'
-            });
-            expect(response.status).toBe(201);
-            expect(response.body.success).toBe(true);
-            expect(response.body.data.user.email).toBe(uniqueEmail);
-            expect(response.body.data.accessToken).toBeDefined();
+            const password = '654321#';
+            let userId;
+            try {
+                const response = await request(app)
+                    .post('/api/auth/register')
+                    .send({
+                    nome: 'Test User',
+                    email: uniqueEmail,
+                    senha: password,
+                    nivel_acesso: 'cliente'
+                });
+                expect(response.status).toBe(201);
+                expect(response.body.success).toBe(true);
+                expect(response.body.data.user.email).toBe(uniqueEmail);
+                expect(response.body.data.accessToken).toBeDefined();
+                userId = response.body.data.user.id;
+                const [users] = await pool.execute('SELECT senha FROM usuarios WHERE id = ?', [userId]);
+                expect(users).toHaveLength(1);
+                expect(users[0].senha).not.toBe(password);
+                expect(await bcrypt.compare(password, users[0].senha)).toBe(true);
+                const loginResponse = await request(app)
+                    .post('/api/auth/login')
+                    .send({ email: uniqueEmail, senha: password });
+                expect(loginResponse.status).toBe(200);
+                expect(loginResponse.body.data.user.email).toBe(uniqueEmail);
+            }
+            finally {
+                if (userId) {
+                    await pool.execute('DELETE FROM usuarios WHERE id = ?', [userId]);
+                }
+            }
         });
         it('should reject duplicate email', async () => {
             const response = await request(app)
@@ -74,7 +97,7 @@ describe('Authentication', () => {
                 .send({
                 nome: 'Test User',
                 email: ADMIN_EMAIL,
-                senha: 'StrongTestPass123!'
+                senha: '654321#'
             });
             expect(response.status).toBe(409);
         });
@@ -83,6 +106,17 @@ describe('Authentication', () => {
                 .post('/api/auth/register')
                 .send({});
             expect(response.status).toBe(400);
+        });
+        it('should reject passwords outside the global format', async () => {
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send({
+                nome: 'Test User',
+                email: `weak-password-${Date.now()}@test.com`,
+                senha: 'StrongTestPass123!'
+            });
+            expect(response.status).toBe(400);
+            expect(response.body.errors[0].msg).toMatch(/6 dígitos seguidos de 1 símbolo/);
         });
     });
     describe('GET /api/auth/me', () => {
@@ -125,15 +159,21 @@ describe('Items API', () => {
     let adminToken = '';
     let userToken = '';
     let createdItemId = '';
+    let testClientId;
     beforeAll(async () => {
         const adminLogin = await request(app)
             .post('/api/auth/login')
             .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
-        const userLogin = await request(app)
-            .post('/api/auth/login')
-            .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
-        userToken = userLogin.body.data.accessToken;
+        const testClient = await createTestClient();
+        userToken = testClient.token;
+        testClientId = testClient.id;
+    });
+    afterAll(async () => {
+        if (createdItemId) {
+            await pool.execute('DELETE FROM itens WHERE id = ?', [createdItemId]);
+        }
+        await deleteTestClient(testClientId);
     });
     describe('POST /api/itens', () => {
         it('should create item as admin', async () => {
@@ -189,6 +229,66 @@ describe('Items API', () => {
                 .set('Authorization', `Bearer ${adminToken}`);
             expect(response.status).toBe(200);
             expect(response.body.data.items.length).toBeLessThanOrEqual(2);
+        });
+    });
+    describe('GET /api/itens catalog filtering', () => {
+        it('should apply search and category filters to the priced catalog before pagination', async () => {
+            const itemName = `Searchable catalog item ${Date.now()}`;
+            const created = await request(app)
+                .post('/api/itens')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                nome: itemName,
+                descricao: 'Catalog search regression fixture',
+                categoria: 'Categoria de teste',
+                valor_venda: 10,
+                valor_aluguel_mensal: 0,
+                estoque: 1,
+            });
+            const itemId = created.body.data?.item?.id;
+            expect(created.status).toBe(201);
+            expect(itemId).toBeDefined();
+            try {
+                const response = await request(app)
+                    .get('/api/itens')
+                    .query({ page: 1, limit: 5, catalogOnly: true, search: itemName, categoria: 'Categoria de teste' })
+                    .set('Authorization', `Bearer ${adminToken}`);
+                expect(response.status).toBe(200);
+                expect(response.body.data.items.map((item) => item.nome)).toEqual([itemName]);
+                expect(response.body.pagination.total).toBe(1);
+            }
+            finally {
+                await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+            }
+        });
+        it('should keep unpriced inventory visible when catalog filtering is not requested', async () => {
+            const created = await request(app)
+                .post('/api/itens')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ nome: `Unpriced inventory ${Date.now()}`, descricao: 'Inventory-only item' });
+            const itemId = created.body.data?.item?.id;
+            expect(created.status).toBe(201);
+            expect(itemId).toBeDefined();
+            try {
+                const response = await request(app)
+                    .get('/api/itens?page=1&limit=100')
+                    .set('Authorization', `Bearer ${adminToken}`);
+                expect(response.status).toBe(200);
+                expect(response.body.data.items.some((item) => String(item.id) === String(itemId))).toBe(true);
+            }
+            finally {
+                await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+            }
+        });
+        it('should paginate priced catalog items and include every catalog category', async () => {
+            const response = await request(app)
+                .get('/api/itens?page=1&limit=2&catalogOnly=true')
+                .set('Authorization', `Bearer ${adminToken}`);
+            expect(response.status).toBe(200);
+            expect(response.body.data.items).toHaveLength(2);
+            expect(response.body.data.items.every((item) => Number(item.valor_venda) > 0 || Number(item.valor_aluguel_mensal) > 0)).toBe(true);
+            expect(response.body.data.categories).toEqual(expect.arrayContaining(response.body.data.items.map((item) => item.categoria)));
+            expect(response.body.pagination.total).toBeGreaterThanOrEqual(2);
         });
     });
     describe('GET /api/itens/:id', () => {
@@ -253,11 +353,19 @@ describe('Items API', () => {
 });
 describe('Users API (Admin Only)', () => {
     let adminToken = '';
+    let userToken = '';
+    let testClientId;
     beforeAll(async () => {
         const adminLogin = await request(app)
             .post('/api/auth/login')
             .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
         adminToken = adminLogin.body.data.accessToken;
+        const testClient = await createTestClient();
+        userToken = testClient.token;
+        testClientId = testClient.id;
+    });
+    afterAll(async () => {
+        await deleteTestClient(testClientId);
     });
     describe('GET /api/usuarios', () => {
         it('should list all users for admin', async () => {
@@ -269,12 +377,9 @@ describe('Users API (Admin Only)', () => {
             expect(Array.isArray(response.body.data.users)).toBe(true);
         });
         it('should reject non-admin', async () => {
-            const userLogin = await request(app)
-                .post('/api/auth/login')
-                .send({ email: 'cliente@nexuscontrol.com', senha: 'cliente123' });
             const response = await request(app)
                 .get('/api/usuarios')
-                .set('Authorization', `Bearer ${userLogin.body.data.accessToken}`);
+                .set('Authorization', `Bearer ${userToken}`);
             expect(response.status).toBe(403);
         });
     });
@@ -290,6 +395,73 @@ describe('Users API (Admin Only)', () => {
                 .set('Authorization', `Bearer ${adminToken}`);
             expect(response.status).toBe(400);
         });
+    });
+});
+describe('DELETE /api/usuarios/me', () => {
+    let client;
+    let itemId;
+    let orderId;
+    let rootAdminId;
+    beforeAll(async () => {
+        client = await createTestClient();
+        const [rootAdmins] = await pool.execute('SELECT id FROM usuarios WHERE LOWER(email) = ? LIMIT 1', [ADMIN_EMAIL.toLowerCase()]);
+        rootAdminId = rootAdmins[0]?.id;
+        if (!rootAdminId)
+            throw new Error('Administrador raiz de teste não encontrado');
+        const [itemResult] = await pool.execute('INSERT INTO itens (nome, descricao, criado_por) VALUES (?, ?, ?)', ['Item de teste para exclusão de conta', 'Deve permanecer no catálogo', client.id]);
+        itemId = itemResult.insertId;
+        const [orderResult] = await pool.execute('INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento) VALUES (?, ?, ?, ?)', [client.id, JSON.stringify([]), 0, 'pix']);
+        orderId = orderResult.insertId;
+    });
+    afterAll(async () => {
+        if (itemId)
+            await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+        await deleteTestClient(client?.id);
+    });
+    it('requires authentication and the current password', async () => {
+        const unauthenticated = await request(app)
+            .delete('/api/usuarios/me')
+            .send({ senha_atual: '123456#' });
+        expect(unauthenticated.status).toBe(401);
+        const missingPassword = await request(app)
+            .delete('/api/usuarios/me')
+            .set('Authorization', `Bearer ${client.token}`)
+            .send({});
+        expect(missingPassword.status).toBe(400);
+    });
+    it('rejects an incorrect password without changing the account', async () => {
+        const response = await request(app)
+            .delete('/api/usuarios/me')
+            .set('Authorization', `Bearer ${client.token}`)
+            .send({ senha_atual: '000000#' });
+        expect(response.status).toBe(401);
+        const [users] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [client.id]);
+        expect(users).toHaveLength(1);
+    });
+    it('protects the root administrator account', async () => {
+        const adminLogin = await request(app)
+            .post('/api/auth/login')
+            .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
+        const response = await request(app)
+            .delete('/api/usuarios/me')
+            .set('Authorization', `Bearer ${adminLogin.body.data.accessToken}`)
+            .send({ senha_atual: ADMIN_PASSWORD });
+        expect(response.status).toBe(403);
+    });
+    it('deletes the account and its order while preserving catalog items', async () => {
+        const response = await request(app)
+            .delete('/api/usuarios/me')
+            .set('Authorization', `Bearer ${client.token}`)
+            .send({ senha_atual: '123456#' });
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe('Conta excluída com sucesso');
+        const [users] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [client.id]);
+        const [items] = await pool.execute('SELECT criado_por FROM itens WHERE id = ?', [itemId]);
+        const [orders] = await pool.execute('SELECT id FROM pedidos WHERE id = ?', [orderId]);
+        expect(users).toHaveLength(0);
+        expect(items).toHaveLength(1);
+        expect(items[0].criado_por).toBe(rootAdminId);
+        expect(orders).toHaveLength(0);
     });
 });
 afterAll(async () => {

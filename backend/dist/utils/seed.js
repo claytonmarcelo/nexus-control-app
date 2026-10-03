@@ -5,7 +5,7 @@ import { ROOT_ADMIN_EMAIL, ROOT_ADMIN_NAME } from '../config/access.js';
 import { validatePassword } from '../infrastructure/utils/passwordPolicy.js';
 dotenv.config();
 const isProduction = process.env.NODE_ENV === 'production';
-const rootAdminPassword = process.env.ROOT_ADMIN_PASSWORD || (isProduction ? '' : '26481#');
+const rootAdminPassword = process.env.ROOT_ADMIN_PASSWORD || (isProduction ? '' : '264810#');
 const seedUsers = [
     {
         nome: ROOT_ADMIN_NAME,
@@ -17,13 +17,13 @@ const seedUsers = [
         {
             nome: 'Funcionário Teste',
             email: 'funcionario@nexuscontrol.com',
-            senha: 'func123',
+            senha: '123457#',
             nivel_acesso: 'funcionario'
         },
         {
             nome: 'Cliente Teste',
             email: 'cliente@nexuscontrol.com',
-            senha: 'cliente123',
+            senha: '123456#',
             nivel_acesso: 'cliente'
         }
     ] : [])
@@ -52,16 +52,16 @@ const seedItems = [
     { nome: 'Treinamento de Equipe em TI', descricao: 'Capacitação técnica em DevOps, Cloud Computing, Segurança da Informação e Desenvolvimento.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80', valor_venda: 6500.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' }
 ];
 export const seedDatabase = async () => {
-    if (isProduction && validatePassword(rootAdminPassword) !== true) {
-        throw new Error('ROOT_ADMIN_PASSWORD não atende à política de segurança para produção.');
-    }
     console.log('🌱 Iniciando seed do banco de dados...');
     try {
         const userIds = new Map();
         for (const user of seedUsers) {
             const [existing] = await pool.execute('SELECT id FROM usuarios WHERE email = ?', [user.email]);
-            const hashedPassword = await bcrypt.hash(user.senha, 12);
             if (existing.length === 0) {
+                if (validatePassword(user.senha) !== true) {
+                    throw new Error(`A senha inicial configurada para ${user.email} não atende à política global.`);
+                }
+                const hashedPassword = await bcrypt.hash(user.senha, 12);
                 const [result] = await pool.execute('INSERT INTO usuarios (nome, email, senha, nivel_acesso, criado_em) VALUES (?, ?, ?, ?, NOW())', [user.nome, user.email, hashedPassword, user.nivel_acesso]);
                 userIds.set(user.email, result.insertId);
                 console.log(`✅ Usuário criado: ${user.email} (${user.nivel_acesso})`);
@@ -69,8 +69,8 @@ export const seedDatabase = async () => {
             else {
                 userIds.set(user.email, existing[0].id);
                 if (user.email === ROOT_ADMIN_EMAIL) {
-                    await pool.execute('UPDATE usuarios SET nome = ?, senha = ?, nivel_acesso = ? WHERE id = ?', [user.nome, hashedPassword, user.nivel_acesso, existing[0].id]);
-                    console.log(`🔒 Administrador raiz garantido: ${user.email}`);
+                    await pool.execute('UPDATE usuarios SET nome = ?, nivel_acesso = ? WHERE id = ?', [user.nome, user.nivel_acesso, existing[0].id]);
+                    console.log(`🔒 Administrador raiz garantido sem alterar a senha existente: ${user.email}`);
                 }
                 console.log(`⏭️ Usuário já existe: ${user.email}`);
             }

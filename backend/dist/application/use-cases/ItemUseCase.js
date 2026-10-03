@@ -11,9 +11,9 @@ export class ItemUseCase {
         });
         return sendSuccess(null, { item: item.toJSON() }, 'Item criado com sucesso', 201);
     }
-    async getAllItems({ page, limit }) {
-        const result = await this.itemRepository.findAll({ page, limit });
-        return sendPaginated(null, { items: result.items.map(item => item.toJSON()) }, page, limit, result.total, 'Itens listados com sucesso');
+    async getAllItems({ page, limit, search, categoria, catalogOnly }) {
+        const result = await this.itemRepository.findAll({ page, limit, search, categoria, catalogOnly });
+        return sendPaginated(null, { items: result.items.map(item => item.toJSON()), categories: result.categories }, page, limit, result.total, 'Itens listados com sucesso');
     }
     async getItemById(id) {
         const item = await this.itemRepository.findById(id);
