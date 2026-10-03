@@ -349,7 +349,7 @@ export default function AdminControlCenter() {
   const handleSeedCatalog = async () => {
     const accepted = await confirm({
       title: 'Popular Catálogo Oficial',
-      message: 'Deseja sincronizar e popular o banco de dados com os 21 produtos padrão do catálogo Nexus Control (servidores, redes, periféricos e serviços de nuvem)?',
+      message: 'Deseja sincronizar e popular o banco de dados com os 35 produtos e serviços do catálogo oficial Nexus Control (servidores, redes, periféricos, armazenamento, energia, áudio, impressoras, telefonia, rack e serviços corporativos)?',
       confirmText: 'Sim, popular catálogo',
       cancelText: 'Cancelar',
       variant: 'info',

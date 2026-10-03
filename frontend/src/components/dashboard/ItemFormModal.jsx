@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useModal } from '../../contexts/ModalContext';
 
 export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, loading }) {
-  const [formData, setFormData] = useState({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
+  const [formData, setFormData] = useState({ nome: '', descricao: '', categoria: 'Informática', fabricante: '', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useModal();
@@ -10,9 +10,9 @@ export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        setFormData({ nome: initialData.nome, descricao: initialData.descricao || '', categoria: initialData.categoria || 'Informática', valor_venda: initialData.valor_venda || '', valor_aluguel_mensal: initialData.valor_aluguel_mensal || '', estoque: initialData.estoque ?? 10, imagem_url: initialData.imagem_url || '' });
+        setFormData({ nome: initialData.nome, descricao: initialData.descricao || '', categoria: initialData.categoria || 'Informática', fabricante: initialData.fabricante || '', valor_venda: initialData.valor_venda || '', valor_aluguel_mensal: initialData.valor_aluguel_mensal || '', estoque: initialData.estoque ?? 10, imagem_url: initialData.imagem_url || '' });
       } else {
-        setFormData({ nome: '', descricao: '', categoria: 'Informática', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
+        setFormData({ nome: '', descricao: '', categoria: 'Informática', fabricante: '', valor_venda: '', valor_aluguel_mensal: '', estoque: 10, imagem_url: '' });
       }
       setErrors({});
     }
@@ -159,6 +159,18 @@ export default function ItemFormModal({ isOpen, onClose, onSubmit, initialData, 
                   onChange={handleChange}
                   className="input"
                   placeholder="Ex: Servidores"
+                  disabled={isSubmitting || loading}
+                />
+              </div>
+              <div>
+                <label htmlFor="fabricante" className="label">Fabricante</label>
+                <input
+                  id="fabricante"
+                  name="fabricante"
+                  value={formData.fabricante}
+                  onChange={handleChange}
+                  className="input"
+                  placeholder="Ex: Dell, Cisco, Nexus Control"
                   disabled={isSubmitting || loading}
                 />
               </div>

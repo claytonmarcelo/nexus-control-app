@@ -40,6 +40,13 @@ const CATEGORY_COLORS = {
   Segurança: 'from-red-600/30 to-red-800/10 border-red-500/20 text-red-300',
   Energia: 'from-yellow-600/30 to-yellow-800/10 border-yellow-500/20 text-yellow-300',
   Serviços: 'from-purple-600/30 to-purple-800/10 border-purple-500/20 text-purple-300',
+  Computadores: 'from-indigo-600/30 to-indigo-800/10 border-indigo-500/20 text-indigo-300',
+  Periféricos: 'from-teal-600/30 to-teal-800/10 border-teal-500/20 text-teal-300',
+  Áudio: 'from-pink-600/30 to-pink-800/10 border-pink-500/20 text-pink-300',
+  Armazenamento: 'from-orange-600/30 to-orange-800/10 border-orange-500/20 text-orange-300',
+  Impressoras: 'from-lime-600/30 to-lime-800/10 border-lime-500/20 text-lime-300',
+  Telefonia: 'from-violet-600/30 to-violet-800/10 border-violet-500/20 text-violet-300',
+  'Rack & Infraestrutura': 'from-slate-500/30 to-slate-700/10 border-slate-400/20 text-slate-300',
   default: 'from-nexus-600/20 to-nexus-800/10 border-nexus-500/20 text-nexus-300',
 };
 
@@ -395,6 +402,7 @@ export function ItemEditPage() {
     nome: '',
     descricao: '',
     categoria: 'Informática',
+    fabricante: '',
     valor_venda: '',
     valor_aluguel_mensal: '',
     estoque: 10,
@@ -416,6 +424,7 @@ export function ItemEditPage() {
             nome: selectedItem.nome || '',
             descricao: selectedItem.descricao || '',
             categoria: selectedItem.categoria || 'Informática',
+            fabricante: selectedItem.fabricante || '',
             valor_venda: selectedItem.valor_venda ?? '',
             valor_aluguel_mensal: selectedItem.valor_aluguel_mensal ?? '',
             estoque: selectedItem.estoque ?? 10,
@@ -516,6 +525,10 @@ export function ItemEditPage() {
             <div>
               <label htmlFor="categoria" className="label">Categoria</label>
               <input id="categoria" name="categoria" value={formData.categoria} onChange={handleChange} className="input" placeholder="Ex: Servidores" disabled={isSubmitting} />
+            </div>
+            <div>
+              <label htmlFor="fabricante" className="label">Fabricante</label>
+              <input id="fabricante" name="fabricante" value={formData.fabricante} onChange={handleChange} className="input" placeholder="Ex: Dell, Cisco, Nexus Control" disabled={isSubmitting} />
             </div>
             <div>
               <label htmlFor="estoque" className="label">Estoque</label>

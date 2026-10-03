@@ -54,7 +54,23 @@ const seedItems = [
   { nome: 'Consultoria em Segurança Digital', descricao: 'Análise de vulnerabilidades, pentest, adequação LGPD e plano de recuperação de desastres.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80', valor_venda: 4500.00, valor_aluguel_mensal: 0, criado_por_email: ROOT_ADMIN_EMAIL },
   { nome: 'Migração para Nuvem AWS', descricao: 'Planejamento e execução de migração de servidores on-premise para infraestrutura AWS.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80', valor_venda: 8900.00, valor_aluguel_mensal: 0, criado_por_email: ROOT_ADMIN_EMAIL },
   { nome: 'Desenvolvimento de Aplicação Customizada', descricao: 'Desenvolvimento de software sob medida web, mobile e desktop com tecnologias modernas.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80', valor_venda: 12500.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' },
-  { nome: 'Treinamento de Equipe em TI', descricao: 'Capacitação técnica em DevOps, Cloud Computing, Segurança da Informação e Desenvolvimento.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80', valor_venda: 6500.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' }
+  { nome: 'Treinamento de Equipe em TI', descricao: 'Capacitação técnica em DevOps, Cloud Computing, Segurança da Informação e Desenvolvimento.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80', valor_venda: 6500.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' },
+  // === Novos Produtos ===
+  { nome: 'Servidor HPE ProLiant DL380 Gen10', descricao: 'Servidor 2U de alta performance para cargas de trabalho pesadas, virtualização enterprise e HPC.', categoria: 'Servidores', fabricante: 'HPE', imagem_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80', valor_venda: 34999.90, valor_aluguel_mensal: 1799.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Servidor Rack Supermicro SYS-1029P', descricao: 'Servidor compacto 1U com suporte a dual Xeon Scalable, ideal para cloud privada e hyperconvergência.', categoria: 'Servidores', fabricante: 'Supermicro', imagem_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80', valor_venda: 19999.90, valor_aluguel_mensal: 999.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Estabilizador SMS Revolution Speed 3kVA', descricao: 'Estabilizador senoidal com regulação precisa de tensão, proteção contra surtos e filtro de linha.', categoria: 'Energia', fabricante: 'SMS', imagem_url: 'https://images.unsplash.com/photo-1593344607421-4f24300fa88e?w=800&q=80', valor_venda: 2899.90, valor_aluguel_mensal: 159.90, criado_por_email: 'funcionario@nexuscontrol.com' },
+  { nome: 'PDU Inteligente APC Rack Mount 32A', descricao: 'Unidade de distribuição de energia gerenciável com monitoramento remoto por tomada e alertas.', categoria: 'Energia', fabricante: 'APC', imagem_url: 'https://images.unsplash.com/photo-1593344607421-4f24300fa88e?w=800&q=80', valor_venda: 3499.90, valor_aluguel_mensal: 199.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Impressora HP LaserJet Pro MFP M428fdw', descricao: 'Multifuncional laser monocromática com impressão duplex, scanner ADF e Wi-Fi integrado.', categoria: 'Impressoras', fabricante: 'HP', imagem_url: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=800&q=80', valor_venda: 3199.90, valor_aluguel_mensal: 179.90, criado_por_email: 'funcionario@nexuscontrol.com' },
+  { nome: 'Webcam Logitech Brio 4K', descricao: 'Webcam profissional Ultra HD 4K com HDR, Windows Hello e campo de visão ajustável de 90°.', categoria: 'Periféricos', fabricante: 'Logitech', imagem_url: 'https://images.unsplash.com/photo-1587826080692-f439cd0b70da?w=800&q=80', valor_venda: 1299.90, valor_aluguel_mensal: 69.90, criado_por_email: 'funcionario@nexuscontrol.com' },
+  { nome: 'Speaker JBL Charge 5 Pro', descricao: 'Caixa de som Bluetooth portátil com som estéreo premium, IP67, powerbank e 20h de bateria.', categoria: 'Áudio', fabricante: 'JBL', imagem_url: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80', valor_venda: 899.90, valor_aluguel_mensal: 49.90, criado_por_email: 'funcionario@nexuscontrol.com' },
+  { nome: 'Rack de Piso 42U Furukawa', descricao: 'Rack padrão 19" de 42U com ventilação forçada, portas perfuradas e capacidade para 800kg.', categoria: 'Rack & Infraestrutura', fabricante: 'Furukawa', imagem_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80', valor_venda: 4999.90, valor_aluguel_mensal: 299.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Telefone IP Grandstream GRP2616', descricao: 'Telefone VoIP empresarial com 6 linhas, tela LCD colorida 4.3", Bluetooth e Wi-Fi dual-band.', categoria: 'Telefonia', fabricante: 'Grandstream', imagem_url: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=800&q=80', valor_venda: 1599.90, valor_aluguel_mensal: 89.90, criado_por_email: 'funcionario@nexuscontrol.com' },
+  // === Novos Serviços ===
+  { nome: 'Backup & Disaster Recovery', descricao: 'Implementação de rotinas automatizadas de backup, replicação offsite e plano de recuperação de desastres.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80', valor_venda: 5500.00, valor_aluguel_mensal: 899.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Monitoramento de Infraestrutura 24/7', descricao: 'Setup e operação de monitoramento proativo com Zabbix/Grafana, alertas inteligentes e dashboards.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80', valor_venda: 0, valor_aluguel_mensal: 1499.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Cabeamento Estruturado Certificado', descricao: 'Projeto, instalação e certificação de infraestrutura de cabeamento Cat6/Cat6a e fibra óptica.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80', valor_venda: 3800.00, valor_aluguel_mensal: 0, criado_por_email: 'funcionario@nexuscontrol.com' },
+  { nome: 'Gestão de Licenças & Ativos', descricao: 'Inventário automatizado, controle de licenças Microsoft/Adobe/Oracle e gestão de ciclo de vida de ativos.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', valor_venda: 0, valor_aluguel_mensal: 799.90, criado_por_email: ROOT_ADMIN_EMAIL },
+  { nome: 'Service Desk Dedicado', descricao: 'Equipe de suporte N1/N2/N3 exclusiva com atendimento presencial e remoto, SLA customizado e portal de chamados.', categoria: 'Serviços', fabricante: 'Nexus Control', imagem_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80', valor_venda: 0, valor_aluguel_mensal: 2499.90, criado_por_email: ROOT_ADMIN_EMAIL },
 ];
 
 export const seedDatabase = async () => {
@@ -117,17 +133,17 @@ export const seedDatabase = async () => {
       {
         usuario_id: clienteId,
         items: [
-          { id: 1, nome: 'Notebook Dell XPS 15', quantidade: 1, preco_unitario: 8999.90 },
-          { id: 3, nome: 'Teclado Mecânico Keychron K2', quantidade: 1, preco_unitario: 699.90 }
+          { nome: 'Notebook Dell XPS 15', quantidade: 1, preco_unitario: 12999.90 },
+          { nome: 'Teclado Mecânico Keychron K2', quantidade: 1, preco_unitario: 699.90 }
         ],
-        total: 9699.80,
+        total: 13699.80,
         metodo_pagamento: 'pix',
         status_pagamento: 'confirmado'
       },
       {
         usuario_id: clienteId,
         items: [
-          { id: 4, nome: 'Mouse Logitech MX Master 3', quantidade: 2, preco_unitario: 549.90 }
+          { nome: 'Mouse Logitech MX Master 3', quantidade: 2, preco_unitario: 549.90 }
         ],
         total: 1099.80,
         metodo_pagamento: 'cartao',
