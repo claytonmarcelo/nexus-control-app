@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Profile from './Profile';
 import { useAuth } from '../../contexts/AuthContext';
 import { ModalProvider } from '../../contexts/ModalContext';
-import { userService } from '../../services/services';
+import { checkoutService, userService } from '../../services/services';
 import { ROOT_ADMIN_EMAIL } from '../../utils/access';
 
 vi.mock('../../contexts/AuthContext', () => ({
@@ -63,6 +63,21 @@ describe('Profile account deletion', () => {
     expect(await screen.findByText('Informe sua senha atual para continuar')).toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(userService.deleteOwnAccount).not.toHaveBeenCalled();
+  });
+
+  it('presents the profile sections with clear tab navigation', async () => {
+    checkoutService.getMyOrders.mockResolvedValue([]);
+    renderProfile();
+
+    expect(screen.getByRole('heading', { name: 'Meu perfil' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Informações pessoais' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Segurança' }));
+    expect(screen.getByRole('heading', { name: 'Segurança da conta' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Histórico' }));
+    expect(await screen.findByRole('heading', { name: 'Histórico de compras' })).toBeInTheDocument();
+    expect(checkoutService.getMyOrders).toHaveBeenCalledWith({ limit: 50 });
   });
 
   it('does not call the API when the user cancels confirmation', async () => {

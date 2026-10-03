@@ -175,63 +175,107 @@ export default function Profile() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold text-white">Meu Perfil</h1>
-        <p className="text-nexus-400 mt-1">Gerencie suas informações pessoais e segurança</p>
-      </div>
+    <div className="mx-auto max-w-5xl space-y-6 lg:space-y-8 animate-fade-in">
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-500">Conta e preferências</p>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Meu perfil</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
+          Gerencie seus dados, a segurança do acesso e o histórico da sua conta.
+        </p>
+      </header>
 
-      <div className="card overflow-hidden">
-        <div className="border-b border-dark-border">
-          <nav className="flex" aria-label="Abas do perfil">
-            <button
-              onClick={() => setActiveTab('info')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === 'info'
-                  ? 'border-nexus-500 text-white'
-                  : 'border-transparent text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover'
-              }`}
-            >
-              Informações
-            </button>
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === 'security'
-                  ? 'border-nexus-500 text-white'
-                  : 'border-transparent text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover'
-              }`}
-            >
-              Segurança
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === 'history'
-                  ? 'border-nexus-500 text-white'
-                  : 'border-transparent text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover'
-              }`}
-            >
-              Histórico de Compras
-            </button>
-          </nav>
+      <section className="relative overflow-hidden rounded-2xl border border-dark-border bg-dark-card p-5 shadow-elevation-1 sm:p-7" aria-label="Resumo do perfil">
+        <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-nexus-500/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-nexus-500/30 bg-gradient-to-br from-nexus-500/30 to-nexus-700/20 text-2xl font-bold text-nexus-300 sm:h-20 sm:w-20 sm:text-3xl">
+              {user?.nome?.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-nexus-500">Perfil pessoal</p>
+              <h2 className="mt-1 truncate text-xl font-semibold text-white sm:text-2xl">{user?.nome}</h2>
+              <p className="mt-1 truncate text-sm text-text-secondary">{user?.email}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <RoleBadge role={user?.nivel_acesso} />
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Conta ativa
+            </span>
+          </div>
         </div>
+      </section>
 
-        <div className="p-6">
+      <section className="card mb-0 overflow-hidden" aria-label="Gerenciar perfil">
+          <div className="border-b border-dark-border p-2 sm:p-3">
+            <nav className="grid grid-cols-3 gap-1" aria-label="Abas do perfil" role="tablist">
+            <button
+              id="profile-info-tab"
+              type="button"
+              onClick={() => setActiveTab('info')}
+              role="tab"
+              aria-label="Dados pessoais"
+              aria-selected={activeTab === 'info'}
+              aria-controls="profile-tab-panel"
+              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
+                activeTab === 'info'
+                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
+                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
+              }`}
+            >
+              <ProfileTabIcon type="info" />
+              <span><span className="sm:hidden">Dados</span><span className="hidden sm:inline">Dados pessoais</span></span>
+            </button>
+            <button
+              id="profile-security-tab"
+              type="button"
+              onClick={() => setActiveTab('security')}
+              role="tab"
+              aria-selected={activeTab === 'security'}
+              aria-controls="profile-tab-panel"
+              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
+                activeTab === 'security'
+                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
+                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
+              }`}
+            >
+              <ProfileTabIcon type="security" />
+              <span>Segurança</span>
+            </button>
+            <button
+              id="profile-history-tab"
+              type="button"
+              onClick={() => setActiveTab('history')}
+              role="tab"
+              aria-label="Histórico"
+              aria-selected={activeTab === 'history'}
+              aria-controls="profile-tab-panel"
+              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
+                activeTab === 'history'
+                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
+                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
+              }`}
+            >
+              <ProfileTabIcon type="history" />
+              <span>Histórico</span>
+            </button>
+            </nav>
+          </div>
+
+        <div id="profile-tab-panel" className="p-5 sm:p-7 lg:p-8" role="tabpanel" aria-labelledby={`profile-${activeTab}-tab`}>
           {activeTab === 'info' && (
-            <form onSubmit={handleInfoSubmit} className="space-y-5" noValidate>
-              <div className="flex items-center gap-6 mb-6">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center text-3xl font-bold text-white">
-                  {user?.nome?.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-white">{user?.nome}</h2>
-                  <p className="text-nexus-400">{user?.email}</p>
-                  <RoleBadge role={user?.nivel_acesso} className="mt-2 inline-block" />
-                  {rootAdmin && <p className="mt-2 text-xs text-yellow-300">Administrador raiz protegido</p>}
-                </div>
+            <form onSubmit={handleInfoSubmit} className="space-y-6" noValidate>
+              <div className="border-b border-dark-border pb-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">Seus dados</p>
+                <h2 className="mt-1 text-xl font-semibold text-white">Informações pessoais</h2>
+                <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                  Essas informações identificam você nas comunicações e atividades da plataforma.
+                </p>
+                {rootAdmin && <p className="mt-3 text-sm text-amber-300">Os dados do administrador raiz são protegidos.</p>}
               </div>
 
+              <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label htmlFor="nome" className="label">Nome completo *</label>
                 <input
@@ -265,8 +309,10 @@ export default function Profile() {
                 />
                 {errors.email && <p id="email-error" className="mt-1 text-sm text-red-400" role="alert">{errors.email}</p>}
               </div>
+              </div>
 
-              <div className="pt-4 border-t border-dark-border">
+              <div className="flex flex-col-reverse gap-3 border-t border-dark-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-text-secondary">Campos marcados com * são obrigatórios.</p>
                 <button type="submit" className="btn-primary" disabled={rootAdmin || loading}>
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -282,16 +328,23 @@ export default function Profile() {
           )}
 
           {activeTab === 'security' && (
-            <form onSubmit={handlePasswordSubmit} className="space-y-5" noValidate>
-              <div className="mb-6">
-                <div className={`p-4 rounded-xl border ${rootAdmin ? 'bg-yellow-600/10 border-yellow-500/30' : 'bg-nexus-600/10 border-nexus-500/30'}`}>
+            <form onSubmit={handlePasswordSubmit} className="space-y-6" noValidate>
+              <div className="border-b border-dark-border pb-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">Proteção de acesso</p>
+                <h2 className="mt-1 text-xl font-semibold text-white">Segurança da conta</h2>
+                <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                  Atualize sua senha periodicamente para manter sua conta protegida.
+                </p>
+              </div>
+              <div>
+                <div className={`rounded-xl border p-4 ${rootAdmin ? 'border-amber-500/30 bg-amber-500/5' : 'border-nexus-500/20 bg-nexus-500/5'}`}>
                   <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-nexus-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0 text-nexus-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <div>
-                      <h3 className="font-medium text-white">{rootAdmin ? 'Conta protegida' : 'Segurança da conta'}</h3>
-                      <p className="text-sm text-nexus-400 mt-1">
+                      <h3 className="font-medium text-white">{rootAdmin ? 'Conta protegida' : 'Requisitos da senha'}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-text-secondary">
                         {rootAdmin ? 'A conta do administrador raiz não pode ser alterada.' : PASSWORD_POLICY_MESSAGE}
                       </p>
                     </div>
@@ -376,7 +429,7 @@ export default function Profile() {
                 {errors.confirmar_nova_senha && <p id="confirmar-error" className="mt-1 text-sm text-red-400" role="alert">{errors.confirmar_nova_senha}</p>}
               </div>
 
-              <div className="pt-4 border-t border-dark-border">
+              <div className="border-t border-dark-border pt-5">
                 <button type="submit" className="btn-primary" disabled={rootAdmin || loading}>
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -393,20 +446,29 @@ export default function Profile() {
 
           {activeTab === 'history' && (
             <div className="space-y-6">
+              <div className="border-b border-dark-border pb-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">Suas atividades</p>
+                <h2 className="mt-1 text-xl font-semibold text-white">Histórico de compras</h2>
+                <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                  Consulte os pedidos associados à sua conta e os respectivos detalhes.
+                </p>
+              </div>
               {loadingOrders ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-3 text-nexus-400">
+                <div className="flex flex-col items-center justify-center gap-3 py-12 text-text-secondary">
                   <Spinner size="lg" />
-                  <p>Carregando seu histórico de aquisições...</p>
+                  <p>Carregando seu histórico de compras...</p>
                 </div>
               ) : orders.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 bg-nexus-600/10 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-nexus-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" className="h-8 w-8 text-nexus-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-white mb-2">Nenhuma compra encontrada</h3>
-                  <p className="text-nexus-400">Você ainda não realizou aquisições no sistema.</p>
+                  <h3 className="mb-2 text-lg font-medium text-white">Nenhum pedido por aqui ainda</h3>
+                  <p className="mx-auto max-w-sm text-sm leading-relaxed text-text-secondary">
+                    Quando você realizar uma compra, os detalhes do pedido aparecerão nesta seção.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -414,14 +476,14 @@ export default function Profile() {
                     <div key={order.id} className="p-5 rounded-2xl bg-dark-card border border-dark-border hover:border-nexus-500/30 transition-colors">
                       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 pb-4 border-b border-dark-border">
                         <div>
-                          <p className="text-nexus-400 text-sm">
+                          <p className="text-sm text-text-secondary">
                             Pedido <span className="text-white font-mono">#{order.id}</span> • {formatDate(order.criado_em)}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
-                            <span className="px-2 py-1 text-xs font-medium rounded-md bg-green-500/20 text-green-400 border border-green-500/20">
+                            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-300">
                               {order.status_pagamento}
                             </span>
-                            <span className="px-2 py-1 text-xs font-medium rounded-md bg-nexus-500/20 text-nexus-400 border border-nexus-500/20 uppercase">
+                            <span className="rounded-md border border-nexus-500/20 bg-nexus-500/10 px-2 py-1 text-xs font-medium uppercase text-nexus-300">
                               {order.metodo_pagamento}
                             </span>
                           </div>
@@ -471,35 +533,55 @@ export default function Profile() {
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Informações da conta</h2>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <section className="card mb-0 p-5 sm:p-6" aria-labelledby="account-summary-title">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <dt className="text-nexus-500">ID do usuário</dt>
-            <dd className="text-white font-mono">{user?.id}</dd>
+            <h2 id="account-summary-title" className="text-lg font-semibold text-white">Detalhes da conta</h2>
+            <p className="mt-1 text-sm text-text-secondary">Informações de cadastro e nível de acesso.</p>
           </div>
-          <div>
-            <dt className="text-nexus-500">Nível de acesso</dt>
-            <dd className="text-white capitalize">{user?.nivel_acesso}</dd>
+        </div>
+        <dl className="mt-5 grid gap-3 border-t border-dark-border pt-4 sm:grid-cols-3">
+          <div className="rounded-xl bg-dark-hover/40 px-4 py-3">
+            <dt className="text-xs font-medium text-text-secondary">Identificação</dt>
+            <dd className="mt-1 font-mono text-sm font-semibold text-white">#{user?.id}</dd>
           </div>
-          <div>
-            <dt className="text-nexus-500">Membro desde</dt>
-            <dd className="text-white">{formatDate(user?.criado_em)}</dd>
+          <div className="rounded-xl bg-dark-hover/40 px-4 py-3">
+            <dt className="text-xs font-medium text-text-secondary">Nível de acesso</dt>
+            <dd className="mt-1 text-sm font-semibold capitalize text-white">{user?.nivel_acesso}</dd>
+          </div>
+          <div className="rounded-xl bg-dark-hover/40 px-4 py-3">
+            <dt className="text-xs font-medium text-text-secondary">Membro desde</dt>
+            <dd className="mt-1 text-sm font-semibold text-white">{formatDate(user?.criado_em)}</dd>
           </div>
         </dl>
-      </div>
+      </section>
 
-      <section className="card p-6 border border-red-500/30" aria-labelledby="delete-account-title">
-        <h2 id="delete-account-title" className="text-lg font-semibold text-red-300">Excluir conta</h2>
-        {rootAdmin ? (
-          <p className="mt-2 text-sm text-nexus-400">A conta do administrador raiz é protegida e não pode ser excluída.</p>
-        ) : (
-          <form onSubmit={handleDeleteAccount} className="mt-3 space-y-4">
-            <p className="text-sm text-nexus-400">
-              A exclusão é permanente e remove seu acesso, histórico de compras e negociações. Itens publicados no catálogo serão mantidos sob responsabilidade do administrador do sistema.
-            </p>
+      <section className="rounded-2xl border border-red-500/20 bg-dark-card p-5 sm:p-6 lg:p-7" aria-labelledby="delete-account-title">
+        <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(260px,0.85fr)] sm:items-center">
+          <div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-300">
+                <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 9v4m0 4h.01M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-red-300">Zona de risco</p>
+                <h2 id="delete-account-title" className="mt-1 text-lg font-semibold text-white">Excluir conta</h2>
+              </div>
+            </div>
+            {rootAdmin ? (
+              <p className="mt-3 text-sm leading-relaxed text-text-secondary">A conta do administrador raiz é protegida e não pode ser excluída.</p>
+            ) : (
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">
+                A exclusão remove seu acesso e histórico de compras e negociações. Os itens publicados no catálogo serão preservados sob responsabilidade do administrador.
+              </p>
+            )}
+          </div>
+          {!rootAdmin && (
+            <form onSubmit={handleDeleteAccount} className="space-y-3 sm:border-l sm:border-dark-border sm:pl-6">
             <div>
               <label htmlFor="senha_exclusao_conta" className="label">Confirme sua senha atual</label>
               <input
@@ -521,22 +603,33 @@ export default function Profile() {
                 <p id="excluir-conta-error" className="mt-1 text-sm text-red-400" role="alert">{accountDeletionError}</p>
               )}
             </div>
-            <button
-              type="submit"
-              className="btn-danger"
-              disabled={deletingAccount}
-            >
-              {deletingAccount ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Spinner size="md" />
-                  Excluindo conta...
-                </span>
-              ) : 'Excluir minha conta'}
-            </button>
-          </form>
-        )}
+              <button type="submit" className="btn-danger w-full sm:w-auto" disabled={deletingAccount}>
+                {deletingAccount ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner size="md" />
+                    Excluindo conta...
+                  </span>
+                ) : 'Excluir minha conta'}
+              </button>
+            </form>
+          )}
+        </div>
       </section>
     </div>
+  );
+}
+
+function ProfileTabIcon({ type }) {
+  const paths = {
+    info: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0 17.9 17.9 0 01-7.5 1.65 17.9 17.9 0 01-7.5-1.65z" />,
+    security: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3l8 3v5c0 5.2-3.4 8.6-8 10-4.6-1.4-8-4.8-8-10V6l8-3zm-3 9l2 2 4-4" />,
+    history: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5m4-1v5l3 2" />,
+  };
+
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {paths[type]}
+    </svg>
   );
 }
 
