@@ -285,6 +285,38 @@ describe('Items API', () => {
   });
 
   describe('GET /api/itens catalog filtering', () => {
+    it('should apply search and category filters to the priced catalog before pagination', async () => {
+      const itemName = `Searchable catalog item ${Date.now()}`;
+      const created = await request(app)
+        .post('/api/itens')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          nome: itemName,
+          descricao: 'Catalog search regression fixture',
+          categoria: 'Categoria de teste',
+          valor_venda: 10,
+          valor_aluguel_mensal: 0,
+          estoque: 1,
+        });
+      const itemId = created.body.data?.item?.id;
+
+      expect(created.status).toBe(201);
+      expect(itemId).toBeDefined();
+
+      try {
+        const response = await request(app)
+          .get('/api/itens')
+          .query({ page: 1, limit: 5, catalogOnly: true, search: itemName, categoria: 'Categoria de teste' })
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.items.map((item) => item.nome)).toEqual([itemName]);
+        expect(response.body.pagination.total).toBe(1);
+      } finally {
+        await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+      }
+    });
+
     it('should keep unpriced inventory visible when catalog filtering is not requested', async () => {
       const created = await request(app)
         .post('/api/itens')
