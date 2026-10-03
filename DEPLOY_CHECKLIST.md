@@ -87,7 +87,7 @@ Antes de iniciar o deploy na AWS Academy:
 ### Backend
 ```bash
 cd backend
-npm install
+npm ci
 npm run build
 npm run db:migrate
 npm run db:seed
@@ -98,7 +98,7 @@ NODE_ENV=production npm start
 ### Frontend
 ```bash
 cd frontend
-npm install
+npm ci
 npm run build
 # Serve os arquivos estáticos em dist/ com nginx ou similar
 ```
@@ -109,7 +109,7 @@ npm run build
 
 2. **Recursos Limitados**: A configuração `DB_CONNECTION_LIMIT=5` foi definida para funcionar dentro dos limites de recursos da AWS Academy.
 
-3. **Segurança**: Nunca commit o arquivo `.env` real no repositório. Use apenas `.env.example` como template.
+3. **Segurança e Git**: Nunca envie `.env`, `.env.production`, `.env.bak` ou outros arquivos de ambiente reais ao repositório. Use apenas os arquivos `.env.example` como template. Faça commits e pushes do código-fonte a partir do ambiente de desenvolvimento; na EC2, não use `git add .` para enviar arquivos gerados pelo build ou configurações locais.
 
 4. **Demo vs Produção**: A conta `admin.demo@nexuscontrol.com` é para demonstrações públicas. A conta `ROOT_ADMIN_EMAIL` é pessoal e não deve ser compartilhada.
 
