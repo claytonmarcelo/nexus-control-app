@@ -106,6 +106,11 @@ export const userService = {
     return response.data;
   },
 
+  async deleteOwnAccount(data) {
+    const response = await api.delete('/usuarios/me', { data });
+    return response.data;
+  },
+
   async changePassword(id, data) {
     const response = await api.put(`/usuarios/${id}/password`, data);
     return response.data;

@@ -150,3 +150,9 @@ export const validatePasswordChange = [
   passwordField('nova_senha', 'Nova senha'),
   handleValidationErrors
 ];
+
+export const validateAccountDeletion = [
+  body('senha_atual')
+    .notEmpty().withMessage('Senha atual é obrigatória'),
+  handleValidationErrors
+];

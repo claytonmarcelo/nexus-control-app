@@ -490,6 +490,94 @@ describe('Users API (Admin Only)', () => {
   });
 });
 
+describe('DELETE /api/usuarios/me', () => {
+  let client;
+  let itemId;
+  let orderId;
+  let rootAdminId;
+
+  beforeAll(async () => {
+    client = await createTestClient();
+    const [rootAdmins] = await pool.execute(
+      'SELECT id FROM usuarios WHERE LOWER(email) = ? LIMIT 1',
+      [ADMIN_EMAIL.toLowerCase()]
+    );
+    rootAdminId = rootAdmins[0]?.id;
+    if (!rootAdminId) throw new Error('Administrador raiz de teste não encontrado');
+
+    const [itemResult] = await pool.execute(
+      'INSERT INTO itens (nome, descricao, criado_por) VALUES (?, ?, ?)',
+      ['Item de teste para exclusão de conta', 'Deve permanecer no catálogo', client.id]
+    );
+    itemId = itemResult.insertId;
+
+    const [orderResult] = await pool.execute(
+      'INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento) VALUES (?, ?, ?, ?)',
+      [client.id, JSON.stringify([]), 0, 'pix']
+    );
+    orderId = orderResult.insertId;
+  });
+
+  afterAll(async () => {
+    if (itemId) await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+    await deleteTestClient(client?.id);
+  });
+
+  it('requires authentication and the current password', async () => {
+    const unauthenticated = await request(app)
+      .delete('/api/usuarios/me')
+      .send({ senha_atual: '123456#' });
+    expect(unauthenticated.status).toBe(401);
+
+    const missingPassword = await request(app)
+      .delete('/api/usuarios/me')
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({});
+    expect(missingPassword.status).toBe(400);
+  });
+
+  it('rejects an incorrect password without changing the account', async () => {
+    const response = await request(app)
+      .delete('/api/usuarios/me')
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({ senha_atual: '000000#' });
+
+    expect(response.status).toBe(401);
+    const [users] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [client.id]);
+    expect(users).toHaveLength(1);
+  });
+
+  it('protects the root administrator account', async () => {
+    const adminLogin = await request(app)
+      .post('/api/auth/login')
+      .send({ email: ADMIN_EMAIL, senha: ADMIN_PASSWORD });
+    const response = await request(app)
+      .delete('/api/usuarios/me')
+      .set('Authorization', `Bearer ${adminLogin.body.data.accessToken}`)
+      .send({ senha_atual: ADMIN_PASSWORD });
+
+    expect(response.status).toBe(403);
+  });
+
+  it('deletes the account and its order while preserving catalog items', async () => {
+    const response = await request(app)
+      .delete('/api/usuarios/me')
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({ senha_atual: '123456#' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe('Conta excluída com sucesso');
+
+    const [users] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [client.id]);
+    const [items] = await pool.execute('SELECT criado_por FROM itens WHERE id = ?', [itemId]);
+    const [orders] = await pool.execute('SELECT id FROM pedidos WHERE id = ?', [orderId]);
+    expect(users).toHaveLength(0);
+    expect(items).toHaveLength(1);
+    expect(items[0].criado_por).toBe(rootAdminId);
+    expect(orders).toHaveLength(0);
+  });
+});
+
 afterAll(async () => {
   await pool.end();
 });

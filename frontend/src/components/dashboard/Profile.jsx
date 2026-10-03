@@ -8,7 +8,7 @@ import { validatePassword, PASSWORD_POLICY_MESSAGE } from '../../utils/password'
 import Spinner from '../ui/Spinner';
 
 export default function Profile() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const { toast, confirm } = useModal();
   const [activeTab, setActiveTab] = useState('info');
   const [formData, setFormData] = useState({ nome: '', email: '' });
@@ -21,6 +21,9 @@ export default function Profile() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [deletingOrderId, setDeletingOrderId] = useState(null);
+  const [accountDeletionPassword, setAccountDeletionPassword] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [accountDeletionError, setAccountDeletionError] = useState('');
   const rootAdmin = isRootAdmin(user);
 
   useEffect(() => {
@@ -142,6 +145,32 @@ export default function Profile() {
       toast({ message, variant: 'danger' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    if (!accountDeletionPassword) {
+      setAccountDeletionError('Informe sua senha atual para continuar');
+      return;
+    }
+
+    const isConfirmed = await confirm({
+      title: 'Excluir sua conta permanentemente?',
+      message: 'Esta ação é irreversível. Seu acesso, histórico de compras e negociações serão excluídos. Os itens publicados no catálogo serão preservados e transferidos para o administrador do sistema.',
+      confirmText: 'Excluir minha conta',
+    });
+    if (!isConfirmed) return;
+
+    setDeletingAccount(true);
+    try {
+      await userService.deleteOwnAccount({ senha_atual: accountDeletionPassword });
+      logout();
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao excluir sua conta';
+      setAccountDeletionError(message);
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -461,6 +490,52 @@ export default function Profile() {
           </div>
         </dl>
       </div>
+
+      <section className="card p-6 border border-red-500/30" aria-labelledby="delete-account-title">
+        <h2 id="delete-account-title" className="text-lg font-semibold text-red-300">Excluir conta</h2>
+        {rootAdmin ? (
+          <p className="mt-2 text-sm text-nexus-400">A conta do administrador raiz é protegida e não pode ser excluída.</p>
+        ) : (
+          <form onSubmit={handleDeleteAccount} className="mt-3 space-y-4">
+            <p className="text-sm text-nexus-400">
+              A exclusão é permanente e remove seu acesso, histórico de compras e negociações. Itens publicados no catálogo serão mantidos sob responsabilidade do administrador do sistema.
+            </p>
+            <div>
+              <label htmlFor="senha_exclusao_conta" className="label">Confirme sua senha atual</label>
+              <input
+                id="senha_exclusao_conta"
+                name="senha_exclusao_conta"
+                type="password"
+                value={accountDeletionPassword}
+                onChange={(event) => {
+                  setAccountDeletionPassword(event.target.value);
+                  setAccountDeletionError('');
+                }}
+                disabled={deletingAccount}
+                className={`input ${accountDeletionError ? 'border-red-500 focus:ring-red-500' : ''}`}
+                autoComplete="current-password"
+                aria-invalid={!!accountDeletionError}
+                aria-describedby={accountDeletionError ? 'excluir-conta-error' : undefined}
+              />
+              {accountDeletionError && (
+                <p id="excluir-conta-error" className="mt-1 text-sm text-red-400" role="alert">{accountDeletionError}</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="btn-danger"
+              disabled={deletingAccount}
+            >
+              {deletingAccount ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner size="md" />
+                  Excluindo conta...
+                </span>
+              ) : 'Excluir minha conta'}
+            </button>
+          </form>
+        )}
+      </section>
     </div>
   );
 }

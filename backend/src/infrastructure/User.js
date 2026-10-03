@@ -94,6 +94,74 @@ export const deleteUser = async (id) => {
   return result.affectedRows > 0;
 };
 
+export const deleteOwnUserAccount = async (id) => {
+  const connection = await pool.getConnection();
+  let transactionStarted = false;
+
+  try {
+    await connection.beginTransaction();
+    transactionStarted = true;
+
+    const [users] = await connection.execute(
+      'SELECT id, email FROM usuarios WHERE id = ? FOR UPDATE',
+      [id]
+    );
+    const user = users[0];
+    if (!user) {
+      await connection.rollback();
+      transactionStarted = false;
+      return { deleted: false, reason: 'not-found' };
+    }
+    if (user.email.toLowerCase() === ROOT_ADMIN_EMAIL) {
+      await connection.rollback();
+      transactionStarted = false;
+      return { deleted: false, reason: 'root-admin' };
+    }
+
+    const [rootAdmins] = await connection.execute(
+      'SELECT id FROM usuarios WHERE LOWER(email) = ? AND id <> ? LIMIT 1 FOR UPDATE',
+      [ROOT_ADMIN_EMAIL, id]
+    );
+    const [itemCounts] = await connection.execute(
+      'SELECT COUNT(*) AS total FROM itens WHERE criado_por = ?',
+      [id]
+    );
+    const rootAdminId = rootAdmins[0]?.id;
+
+    if (Number(itemCounts[0].total) > 0 && !rootAdminId) {
+      await connection.rollback();
+      transactionStarted = false;
+      return { deleted: false, reason: 'root-admin-missing' };
+    }
+
+    if (rootAdminId) {
+      await connection.execute(
+        'UPDATE itens SET criado_por = ? WHERE criado_por = ?',
+        [rootAdminId, id]
+      );
+    }
+
+    const [result] = await connection.execute(
+      'DELETE FROM usuarios WHERE id = ? AND LOWER(email) <> ?',
+      [id, ROOT_ADMIN_EMAIL]
+    );
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      transactionStarted = false;
+      return { deleted: false, reason: 'not-found' };
+    }
+
+    await connection.commit();
+    transactionStarted = false;
+    return { deleted: true };
+  } catch (error) {
+    if (transactionStarted) await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 export const verifyPassword = async (plainPassword, hashedPassword) => {
   return bcrypt.compare(plainPassword, hashedPassword);
 };

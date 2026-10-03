@@ -5,9 +5,10 @@ import {
   findUserById, 
   updateUser, 
   deleteUser,
+  deleteOwnUserAccount,
   updatePassword 
 } from '../../infrastructure/User.js';
-import { USER_ROLES } from '../../infrastructure/User.js';
+import { USER_ROLES, verifyPassword } from '../../infrastructure/User.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import { isRootAdmin, ROOT_ADMIN_EMAIL } from '../../config/access.js';
 import { getUserPermissions, setUserPermissions } from '../../infrastructure/Permission.js';
@@ -167,6 +168,36 @@ export const remove = async (req, res) => {
     sendSuccess(res, null, 'Usuário excluído com sucesso');
   } catch (error) {
     console.error('Erro ao excluir usuário:', error);
+    sendError(res, 'Erro interno do servidor', 500);
+  }
+};
+
+export const deleteOwnAccount = async (req, res) => {
+  try {
+    const user = await findUserById(req.user.id, true);
+    if (!user) return sendError(res, 'Usuário não encontrado', 404);
+    if (isRootAdmin(user)) {
+      return sendError(res, 'A conta do administrador raiz não pode ser excluída', 403);
+    }
+
+    if (!await verifyPassword(req.body.senha_atual, user.senha)) {
+      return sendError(res, 'Senha atual incorreta', 401);
+    }
+
+    const result = await deleteOwnUserAccount(req.user.id);
+    if (result.reason === 'root-admin') {
+      return sendError(res, 'A conta do administrador raiz não pode ser excluída', 403);
+    }
+    if (result.reason === 'root-admin-missing') {
+      return sendError(res, 'Não foi possível preservar os itens do catálogo. Procure o administrador do sistema.', 409);
+    }
+    if (!result.deleted) {
+      return sendError(res, 'Usuário não encontrado', 404);
+    }
+
+    sendSuccess(res, null, 'Conta excluída com sucesso');
+  } catch (error) {
+    console.error('Erro ao excluir a própria conta:', error);
     sendError(res, 'Erro interno do servidor', 500);
   }
 };
