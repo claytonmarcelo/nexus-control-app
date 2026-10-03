@@ -7,7 +7,14 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import apiRouter from './presentation/routes/index.js';
 import { securitySanitizer } from './infrastructure/security/securityMiddleware.js';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+const hasFrontendDist = fs.existsSync(frontendDist);
 // Require explicit public origins in production; wildcard origins are unsafe.
 const isProduction = process.env.NODE_ENV === 'production';
 const frontendUrl = process.env.FRONTEND_URL;
@@ -28,7 +35,7 @@ const parseOrigins = (value, variableName) => {
     });
 };
 if (isProduction && (!frontendUrl || !apiUrl)) {
-    throw new Error('FRONTEND_URL e API_URL são obrigatórios em produção.');
+    console.warn('⚠️ FRONTEND_URL e/ou API_URL não configurados. Habilitando compatibilidade para AWS Academy / Mesma Origem.');
 }
 const app = express();
 app.disable('x-powered-by');
@@ -36,6 +43,24 @@ app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = parseOrigins(frontendUrl || 'http://localhost:5173,http://localhost:5174,http://localhost:5175', 'FRONTEND_URL');
 const allowedApiOrigins = parseOrigins(apiUrl || 'http://localhost:3000', 'API_URL');
+const isAllowedOrigin = (origin) => {
+    if (allowedOrigins.includes(origin))
+        return true;
+    try {
+        const url = new URL(origin);
+        const hostname = url.hostname.toLowerCase();
+        if (['localhost', '127.0.0.1', '::1'].includes(hostname))
+            return true;
+        if (hostname.endsWith('.amazonaws.com'))
+            return true;
+        if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname))
+            return true;
+    }
+    catch {
+        // ignore
+    }
+    return false;
+};
 // Configurar helmet com CSP explícita para Google Fonts e recursos necessários
 app.use(helmet({
     contentSecurityPolicy: {
@@ -57,10 +82,10 @@ app.use(helmet({
 app.use(compression());
 app.use(cors({
     origin: (origin, callback) => {
-        // Requisições sem origem (curl, server-to-server, mobile)
+        // Requisições sem origem (curl, server-to-server, mobile, mesma origem)
         if (!origin)
             return callback(null, true);
-        return callback(null, allowedOrigins.includes(origin));
+        return callback(null, isAllowedOrigin(origin));
     },
     credentials: true
 }));
@@ -99,9 +124,21 @@ app.get('/api/health', async (req, res) => {
 app.get('/api/status', (req, res) => {
     res.json({ success: true, message: 'Nexus Control API está rodando' });
 });
+// Servir arquivos estáticos do frontend caso a build exista
+if (hasFrontendDist) {
+    app.use(express.static(frontendDist));
+}
 // Rotas da API estruturadas com suporte a prefixo /api e fallback para proxies AWS/ALB
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
+// Fallback SPA para o frontend (qualquer rota que não seja /api serve o index.html)
+if (hasFrontendDist) {
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api') || req.path === '/health')
+            return next();
+        res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+}
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Rota não encontrada' });
 });

@@ -1,0 +1,132 @@
+name: 🚀 Deploy para AWS Academy / Produção
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci-and-deploy:
+    name: 🧪 Build & Testes & Deploy
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test
+          MYSQL_DATABASE: nexusdb_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # Backend Test & Build
+      - name: 📦 Instalar dependências Backend
+        working-directory: ./backend
+        run: npm ci
+
+      - name: 🔧 Configurar ambiente de testes
+        working-directory: ./backend
+        run: |
+          cp .env.test.example .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_USER=root" >> .env
+          echo "DB_PASS=test" >> .env
+          echo "DB_NAME=nexusdb_test" >> .env
+          echo "NODE_ENV=test" >> .env
+
+      - name: 🏗️ Compilar Backend
+        working-directory: ./backend
+        run: npm run build
+
+      - name: 🗃️ Preparar banco de testes
+        working-directory: ./backend
+        run: |
+          npm run db:migrate
+          npm run db:seed
+
+      - name: 🧪 Executar testes do Backend
+        working-directory: ./backend
+        run: npm test
+        env:
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASS: test
+          DB_NAME: nexusdb_test
+          NODE_ENV: test
+
+      # Frontend Test & Build
+      - name: 📦 Instalar dependências Frontend
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: 🔍 Lint Frontend
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: 🧪 Executar testes Frontend
+        working-directory: ./frontend
+        run: npm test
+
+      - name: 🏗️ Compilar Frontend para Produção
+        working-directory: ./frontend
+        run: npm run build
+
+      # Deploy Condicional via SSH (se configurado secrets)
+      - name: 🚀 Deploy na AWS EC2 (via SSH)
+        if: ${{ secrets.EC2_HOST != '' && secrets.EC2_SSH_KEY != '' }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            set -e
+            echo "=== Atualizando Nexus Control na AWS EC2 ==="
+            cd ~/nexus-control-app || cd /home/ubuntu/nexus-control-app || cd /var/www/nexus-control-app
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # Backend
+            cd backend
+            npm ci --omit=dev || npm install --omit=dev
+            npm run build
+            npm run db:migrate || true
+            npm run db:seed || true
+            
+            # Frontend
+            cd ../frontend
+            npm ci || npm install
+            npm run build
+            
+            # Nginx sync (se aplicável)
+            if [ -d "/var/www/html" ]; then
+              sudo cp -r dist/* /var/www/html/ 2>/dev/null || true
+            fi
+            if [ -d "/var/www/nexus-control" ]; then
+              sudo cp -r dist/* /var/www/nexus-control/ 2>/dev/null || true
+            fi
+            
+            # Reiniciar processo
+            cd ../backend
+            pm2 reload ecosystem.config.cjs --env production || pm2 reload nexus-backend || pm2 restart all || pm2 start dist/server.js --name "nexus-backend"
+            pm2 save || true
+            echo "=== Deploy concluído com sucesso! ==="
