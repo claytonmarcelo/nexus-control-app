@@ -106,14 +106,21 @@ export const seedDatabase = async () => {
       }
     }
 
+    // Garantir que sempre temos um ID de usuário válido para vincular aos itens
+    let fallbackUserId: number = 1;
+    const [firstUserRows] = await pool.execute<RowDataPacket[]>('SELECT id FROM usuarios ORDER BY id ASC LIMIT 1');
+    if (firstUserRows.length > 0) {
+      fallbackUserId = Number(firstUserRows[0].id);
+    }
+
     for (const item of seedItems) {
-      const userId = userIds.get(item.criado_por_email) || userIds.get(ROOT_ADMIN_EMAIL);
-      const [existing] = await pool.execute<RowDataPacket[]>('SELECT id FROM itens WHERE nome = ? AND criado_por = ?', [item.nome, userId]);
+      const creatorUserId = userIds.get(item.criado_por_email) || userIds.get(ROOT_ADMIN_EMAIL) || fallbackUserId;
+      const [existing] = await pool.execute<RowDataPacket[]>('SELECT id FROM itens WHERE nome = ? LIMIT 1', [item.nome]);
       
       if (existing.length === 0) {
         await pool.execute(
           'INSERT INTO itens (nome, descricao, categoria, fabricante, imagem_url, valor_venda, valor_aluguel_mensal, estoque, criado_por, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-          [item.nome, item.descricao, item.categoria, item.fabricante, item.imagem_url, item.valor_venda, item.valor_aluguel_mensal, 10, userId]
+          [item.nome, item.descricao, item.categoria, item.fabricante, item.imagem_url, item.valor_venda, item.valor_aluguel_mensal, 10, creatorUserId]
         );
         console.log(`✅ Item criado: ${item.nome}`);
       } else {

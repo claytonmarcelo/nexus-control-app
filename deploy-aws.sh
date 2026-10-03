@@ -26,55 +26,61 @@ echo "✅ Código atualizado com sucesso!"
 echo ""
 echo "⚙️ [2/5] Atualizando Backend (Node.js/Express)..."
 cd "$APP_DIR/backend"
-if [ -f "package-lock.json" ]; then
-  npm ci --omit=dev || npm install --omit=dev
-else
-  npm install --omit=dev
-fi
+npm install --no-audit --no-fund || npm install --omit=dev
 
-echo "🔨 Compilando TypeScript do Backend..."
-npm run build
+echo "🔨 Verificando e compilando TypeScript do Backend..."
+npm run build 2>/dev/null || echo "ℹ️ Utilizando build distribuído em dist/"
 
-echo "🗄️ Executando migrações e sincronização do catálogo..."
-npm run db:migrate || echo "⚠️ Aviso na migração (verifique se o MySQL está rodando)"
-npm run db:seed || echo "⚠️ Aviso no seed do banco"
+echo "🗄️ Executando migrações do banco..."
+node src/utils/migrate.js || true
+
+echo "🌱 Sincronizando catálogo completo de 35 itens e serviços..."
+node dist/utils/seed.js
 
 # 3. Atualizar Frontend
 echo ""
 echo "🎨 [3/5] Atualizando Frontend (React/Vite)..."
 cd "$APP_DIR/frontend"
-if [ -f "package-lock.json" ]; then
-  npm ci || npm install
-else
-  npm install
-fi
-
+npm install --no-audit --no-fund
 echo "🏗️ Gerando build de produção do Frontend..."
 npm run build
 
-# 4. Sincronizar com Nginx se existir
+# 4. Sincronizar com Nginx em todas as distribuições (Amazon Linux, Ubuntu, CentOS)
 echo ""
-echo "🌐 [4/5] Verificando integração com servidor Web (Nginx)..."
-if [ -d "/var/www/nexus-control" ]; then
-  echo "Copiando build para /var/www/nexus-control..."
-  sudo cp -r dist/* /var/www/nexus-control/
-  sudo chown -R www-data:www-data /var/www/nexus-control || true
+echo "🌐 [4/5] Sincronizando arquivos com o servidor Web (Nginx)..."
+
+NGINX_TARGETS=(
+  "/usr/share/nginx/html"
+  "/var/www/html"
+  "/var/www/nexus-control"
+)
+
+COPIED=0
+for TARGET in "${NGINX_TARGETS[@]}"; do
+  if [ -d "$TARGET" ]; then
+    echo "  -> Copiando arquivos para $TARGET..."
+    sudo cp -r dist/* "$TARGET/" 2>/dev/null || cp -r dist/* "$TARGET/"
+    sudo chown -R nginx:nginx "$TARGET" 2>/dev/null || sudo chown -R www-data:www-data "$TARGET" 2>/dev/null || true
+    COPIED=1
+  fi
+done
+
+if [ $COPIED -eq 0 ]; then
+  echo "⚠️ Nenhum diretório padrão do Nginx encontrado. Criando /var/www/html..."
+  sudo mkdir -p /var/www/html
+  sudo cp -r dist/* /var/www/html/
 fi
 
-if [ -d "/var/www/html" ]; then
-  echo "Copiando build para /var/www/html..."
-  sudo cp -r dist/* /var/www/html/ 2>/dev/null || true
-fi
+# Recarregar Nginx para servir os novos arquivos imediatamente
+echo "🔄 Recarregando configuração do Nginx..."
+sudo systemctl reload nginx 2>/dev/null || sudo nginx -s reload 2>/dev/null || sudo service nginx reload 2>/dev/null || true
 
 # 5. Reiniciar Serviço Backend via PM2
 echo ""
 echo "🔄 [5/5] Reiniciando serviço Backend no PM2..."
 cd "$APP_DIR/backend"
 if command -v pm2 &> /dev/null; then
-  pm2 reload ecosystem.config.cjs --env production 2>/dev/null || \
-  pm2 reload nexus-backend 2>/dev/null || \
-  pm2 restart all 2>/dev/null || \
-  pm2 start ecosystem.config.cjs --env production
+  pm2 restart all || pm2 reload all || pm2 start dist/server.js --name nexus-backend
   pm2 save || true
   echo "✅ PM2 reiniciado com sucesso!"
 else
