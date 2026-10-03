@@ -11,6 +11,7 @@ import LoadingScreen from './components/ui/LoadingScreen';
 // Lazy load page components
 const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
 const Items = lazy(() => import('./components/dashboard/Items'));
+const ItemEditPage = lazy(() => import('./components/dashboard/Items').then(module => ({ default: module.ItemEditPage })));
 const Users = lazy(() => import('./components/dashboard/Users'));
 const Profile = lazy(() => import('./components/dashboard/Profile'));
 const Cart = lazy(() => import('./components/cart/Cart'));
@@ -74,6 +75,11 @@ function App() {
             <Route path="/itens" element={
               <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
                 <Items />
+              </PrivateRoute>
+            } />
+            <Route path="/itens/:itemId/editar" element={
+              <PrivateRoute allowedRoles={['admin', 'funcionario', 'cliente']} requiredPermission="itens">
+                <ItemEditPage />
               </PrivateRoute>
             } />
             <Route path="/carrinho" element={

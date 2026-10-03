@@ -39,7 +39,11 @@ export const authService = {
 export const itemService = {
   async getAll(params = {}) {
     const response = await api.get('/itens', { params });
-    return response.data.data;
+    const payload = response.data?.data ?? {};
+    return {
+      ...payload,
+      pagination: response.data?.pagination ?? null
+    };
   },
 
   async getMyItems() {

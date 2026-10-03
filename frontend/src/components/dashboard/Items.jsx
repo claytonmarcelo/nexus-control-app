@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { itemService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
@@ -10,8 +10,25 @@ import EmptyState from '../ui/EmptyState';
 import Spinner from '../ui/Spinner';
 import ItemFormModal from './ItemFormModal';
 
+const ITEMS_PER_PAGE = 8;
+
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0);
+
+const getVisiblePageNumbers = (currentPage, totalPages) => {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+
+  const pages = new Set([1, 2, 3, currentPage - 1, currentPage, currentPage + 1, totalPages - 2, totalPages - 1, totalPages]);
+  const sortedPages = [...pages].filter(page => page >= 1 && page <= totalPages).sort((a, b) => a - b);
+
+  return sortedPages.reduce((acc, page, index) => {
+    if (index > 0 && page - acc[acc.length - 1] > 1) {
+      acc.push('ellipsis');
+    }
+    acc.push(page);
+    return acc;
+  }, []);
+};
 
 const MIN_RENTAL_DAYS = 7;
 const MAX_RENTAL_DAYS = 365;
@@ -368,6 +385,175 @@ function ProductCard({ item, user, isAdmin, isFuncionario, onEdit, onDelete, onA
   );
 }
 
+export function ItemEditPage() {
+  const { itemId } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useModal();
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    nome: '',
+    descricao: '',
+    categoria: 'Informática',
+    valor_venda: '',
+    valor_aluguel_mensal: '',
+    estoque: 10,
+    imagem_url: '',
+  });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchItem = async () => {
+      try {
+        const response = await itemService.getById(itemId);
+        const selectedItem = response?.item ?? response ?? null;
+        if (isMounted && selectedItem) {
+          setItem(selectedItem);
+          setFormData({
+            nome: selectedItem.nome || '',
+            descricao: selectedItem.descricao || '',
+            categoria: selectedItem.categoria || 'Informática',
+            valor_venda: selectedItem.valor_venda ?? '',
+            valor_aluguel_mensal: selectedItem.valor_aluguel_mensal ?? '',
+            estoque: selectedItem.estoque ?? 10,
+            imagem_url: selectedItem.imagem_url || '',
+          });
+        }
+      } catch (error) {
+        if (isMounted) {
+          toast({ message: 'Erro ao carregar item para edição', variant: 'danger' });
+          navigate('/itens', { replace: true });
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchItem();
+    return () => { isMounted = false; };
+  }, [itemId, navigate, toast]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    if (!formData.nome.trim()) nextErrors.nome = 'Nome é obrigatório';
+    else if (formData.nome.length > 200) nextErrors.nome = 'Nome deve ter no máximo 200 caracteres';
+    if (formData.descricao && formData.descricao.length > 1000) nextErrors.descricao = 'Descrição deve ter no máximo 1000 caracteres';
+    if (formData.imagem_url && !formData.imagem_url.match(/^https?:\/\/.+/)) nextErrors.imagem_url = 'A URL da imagem deve ser válida (http:// ou https://)';
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      await itemService.update(itemId, formData);
+      toast({ message: 'Item atualizado com sucesso', variant: 'success' });
+      navigate('/itens');
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao salvar item';
+      toast({ message, variant: 'danger' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) return <LoadingScreen />;
+  if (!item) return null;
+
+  return (
+    <div className="space-y-4 animate-fade-in">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nexus-500">Catálogo</p>
+          <h1 className="mt-1 text-2xl font-bold text-white">Editar produto</h1>
+        </div>
+        <button type="button" onClick={() => navigate('/itens')} className="btn-secondary self-start sm:self-auto">
+          Voltar ao catálogo
+        </button>
+      </div>
+
+      <div className="glass relative w-full rounded-2xl border border-nexus-500/30 bg-dark-card/80 p-4 shadow-glass-lg sm:p-6">
+        <div className="mb-5 flex items-center gap-3.5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-nexus-500/30 bg-nexus-500/10 text-nexus-400">
+            <BoxIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-nexus-400">Edição de Produto</p>
+            <h2 className="text-lg font-bold text-white">{item.nome}</h2>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" noValidate>
+          <div>
+            <label htmlFor="nome" className="label">Nome do item *</label>
+            <input id="nome" name="nome" type="text" value={formData.nome} onChange={handleChange} className={`input ${errors.nome ? 'border-red-500 focus:ring-red-500' : ''}`} placeholder="Ex: Servidor Rack Dell PowerEdge R440" maxLength={200} disabled={isSubmitting} aria-invalid={!!errors.nome} />
+            {errors.nome && <p className="mt-1 text-xs text-red-400" role="alert">{errors.nome}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="imagem_url" className="label">URL da Imagem (Externa)</label>
+            <input id="imagem_url" name="imagem_url" type="url" value={formData.imagem_url} onChange={handleChange} className={`input ${errors.imagem_url ? 'border-red-500 focus:ring-red-500' : ''}`} placeholder="https://images.unsplash.com/photo-..." disabled={isSubmitting} aria-invalid={!!errors.imagem_url} />
+            {errors.imagem_url && <p className="mt-1 text-xs text-red-400" role="alert">{errors.imagem_url}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="categoria" className="label">Categoria</label>
+              <input id="categoria" name="categoria" value={formData.categoria} onChange={handleChange} className="input" placeholder="Ex: Servidores" disabled={isSubmitting} />
+            </div>
+            <div>
+              <label htmlFor="estoque" className="label">Estoque</label>
+              <input id="estoque" name="estoque" type="number" min="0" value={formData.estoque} onChange={handleChange} className="input" disabled={isSubmitting} />
+            </div>
+            <div>
+              <label htmlFor="valor_venda" className="label">Valor de venda (R$)</label>
+              <input id="valor_venda" name="valor_venda" type="number" min="0" step="0.01" value={formData.valor_venda} onChange={handleChange} className="input" placeholder="0,00" disabled={isSubmitting} />
+            </div>
+            <div>
+              <label htmlFor="valor_aluguel_mensal" className="label">Aluguel mensal (R$)</label>
+              <input id="valor_aluguel_mensal" name="valor_aluguel_mensal" type="number" min="0" step="0.01" value={formData.valor_aluguel_mensal} onChange={handleChange} className="input" placeholder="0,00" disabled={isSubmitting} />
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label htmlFor="descricao" className="label mb-0">Descrição</label>
+              <span className="text-[11px] text-nexus-400/70">{formData.descricao.length}/1000</span>
+            </div>
+            <textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} className={`input ${errors.descricao ? 'border-red-500 focus:ring-red-500' : ''} resize-none`} placeholder="Detalhes técnicos e especificações do item (opcional)" maxLength={1000} rows={4} disabled={isSubmitting} aria-invalid={!!errors.descricao} />
+            {errors.descricao && <p className="mt-1 text-xs text-red-400" role="alert">{errors.descricao}</p>}
+          </div>
+
+          <div className="flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:items-center sm:justify-end">
+            <button type="button" onClick={() => navigate('/itens')} className="btn-secondary w-full sm:w-auto px-5 py-2.5 text-sm font-medium" disabled={isSubmitting}>
+              Cancelar
+            </button>
+            <button type="submit" className="btn-primary w-full sm:w-auto px-6 py-2.5 text-sm font-medium" disabled={isSubmitting}>
+              {isSubmitting ? 'Salvando...' : 'Atualizar Item'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────
    MAIN ITEMS COMPONENT
 ───────────────────────────────────────────────────────── */
@@ -375,31 +561,47 @@ export default function Items() {
   const { user, isAdmin, isFuncionario, isCliente } = useAuth();
   const { toast, confirm } = useModal();
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState(null);
   const [rentalModalItem, setRentalModalItem] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: ITEMS_PER_PAGE, total: 0, totalPages: 1 });
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const [search, setSearch] = useState(queryParams.get('search') || '');
   const [activeCategory, setActiveCategory] = useState('Todos');
 
-  const loadItems = useCallback(async () => {
+  const loadItems = useCallback(async (nextPage = 1) => {
     setLoading(true);
     try {
-      const response = await itemService.getAll({ limit: 100 });
-      const itemsData = response?.data?.items || response?.items || [];
-      setItems(Array.isArray(itemsData) ? itemsData : []);
+      const response = await itemService.getAll({
+        page: nextPage,
+        limit: ITEMS_PER_PAGE,
+        search: search.trim(),
+        categoria: activeCategory !== 'Todos' ? activeCategory : undefined,
+      });
+      const itemsData = Array.isArray(response?.items) ? response.items : [];
+      setItems(itemsData);
+      setPagination(
+        response?.pagination ?? {
+          page: nextPage,
+          limit: ITEMS_PER_PAGE,
+          total: itemsData.length,
+          totalPages: Math.max(1, Math.ceil(itemsData.length / ITEMS_PER_PAGE)),
+        }
+      );
     } catch (error) {
       toast({ message: 'Erro ao carregar catálogo', variant: 'danger' });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [activeCategory, search, toast]);
 
-  useEffect(() => { loadItems(); }, [loadItems]);
+  useEffect(() => { loadItems(page); }, [loadItems, page]);
 
   // Purchase: add directly
   const handleAddToCart = (item) => {
@@ -485,13 +687,20 @@ export default function Items() {
   const categories = ['Todos', ...Array.from(new Set(catalogItems.map(i => i.categoria).filter(Boolean)))];
 
   const filteredItems = catalogItems.filter(item => {
+    const normalizedSearch = search.trim().toLowerCase();
     const matchesSearch =
-      item.nome.toLowerCase().includes(search.toLowerCase()) ||
-      item.descricao?.toLowerCase().includes(search.toLowerCase()) ||
-      item.fabricante?.toLowerCase().includes(search.toLowerCase());
+      !normalizedSearch ||
+      item.nome?.toLowerCase().includes(normalizedSearch) ||
+      item.descricao?.toLowerCase().includes(normalizedSearch) ||
+      item.fabricante?.toLowerCase().includes(normalizedSearch);
     const matchesCategory = activeCategory === 'Todos' || item.categoria === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handlePageChange = (nextPage) => {
+    const safePage = Math.min(Math.max(1, Number(nextPage) || 1), Math.max(1, pagination.totalPages || 1));
+    setPage(safePage);
+  };
 
   if (loading) return <LoadingScreen />;
 
@@ -543,7 +752,10 @@ export default function Items() {
             type="text"
             placeholder="Buscar por nome, fabricante ou descrição…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="input w-full pl-12"
             aria-label="Buscar produtos"
           />
@@ -552,7 +764,10 @@ export default function Items() {
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => {
+                setActiveCategory(cat);
+                setPage(1);
+              }}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
                 activeCategory === cat
                   ? 'border-nexus-500 bg-nexus-600/20 text-nexus-200'
@@ -573,26 +788,75 @@ export default function Items() {
           description={search || activeCategory !== 'Todos' ? 'Tente alterar o filtro ou a busca' : 'Nenhum produto com preço de venda ou locação disponível no catálogo.'}
         />
       ) : (
-        <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))' }}
-        >
-          {filteredItems.map(item => (
-            <ProductCard
-              key={item.id}
-              item={item}
-              user={user}
-              isAdmin={isAdmin}
-              isFuncionario={isFuncionario}
-              isCliente={isCliente}
-              onEdit={i => { setEditingItem(i); setShowForm(true); }}
-              onDelete={handleDelete}
-              onAddToCart={handleAddToCart}
-              onRent={handleRent}
-              deletingId={deletingItem}
-            />
-          ))}
-        </div>
+        <>
+          <div
+            className="grid gap-4"
+            style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))' }}
+          >
+            {filteredItems.map(item => (
+              <ProductCard
+                key={item.id}
+                item={item}
+                user={user}
+                isAdmin={isAdmin}
+                isFuncionario={isFuncionario}
+                isCliente={isCliente}
+                onEdit={i => navigate(`/itens/${i.id}/editar`)}
+                onDelete={handleDelete}
+                onAddToCart={handleAddToCart}
+                onRent={handleRent}
+                deletingId={deletingItem}
+              />
+            ))}
+          </div>
+
+          {pagination.totalPages > 1 && (
+            <div className="flex flex-col items-center justify-center gap-3 pt-2">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-nexus-500">
+                Página {page} de {pagination.totalPages}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page <= 1}
+                  className="rounded-lg border border-dark-border bg-dark-card px-3 py-1.5 text-xs font-medium text-nexus-300 transition hover:border-nexus-500/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Anterior
+                </button>
+
+                {getVisiblePageNumbers(page, pagination.totalPages).map((pageNumber, index) => (
+                  pageNumber === 'ellipsis' ? (
+                    <span key={`ellipsis-${index}`} className="px-1 text-sm text-nexus-500">…</span>
+                  ) : (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`h-9 min-w-9 rounded-lg border px-2 text-sm font-medium transition ${
+                        pageNumber === page
+                          ? 'border-nexus-500 bg-nexus-500/20 text-white shadow-[0_0_20px_rgba(212,175,55,0.12)]'
+                          : 'border-dark-border bg-dark-card text-nexus-400 hover:border-nexus-500/40 hover:text-white'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  )
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page >= pagination.totalPages}
+                  className="rounded-lg border border-dark-border bg-dark-card px-3 py-1.5 text-xs font-medium text-nexus-300 transition hover:border-nexus-500/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <ItemFormModal

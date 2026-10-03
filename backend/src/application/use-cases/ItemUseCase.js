@@ -14,8 +14,8 @@ export class ItemUseCase {
     return sendSuccess(null, { item: item.toJSON() }, 'Item criado com sucesso', 201);
   }
 
-  async getAllItems({ page, limit }) {
-    const result = await this.itemRepository.findAll({ page, limit });
+  async getAllItems({ page, limit, search, categoria }) {
+    const result = await this.itemRepository.findAll({ page, limit, search, categoria });
     return sendPaginated(null, { items: result.items.map(item => item.toJSON()) }, page, limit, result.total, 'Itens listados com sucesso');
   }
 
