@@ -105,8 +105,15 @@ const loginLimiter = rateLimit({
     message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
     skipSuccessfulRequests: true // Não conta requisições bem-sucedidas
 });
+const passwordResetLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 15, // Máximo 15 tentativas a cada 15 min para prevenir abuso e enumeração
+    message: { error: 'Muitas solicitações de redefinição de senha. Tente novamente em 15 minutos.' }
+});
 app.use('/api/', generalLimiter);
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/forgot-password', passwordResetLimiter);
+app.use('/api/auth/reset-password', passwordResetLimiter);
 // Health check routes - sem rate limit para AWS health checks
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
