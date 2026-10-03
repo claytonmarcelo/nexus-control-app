@@ -124,7 +124,7 @@ function LoginForm({ onNavigate }) {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email.trim().toLowerCase(), password);
       navigate('/dashboard');
     } catch (err) {
       alert({
@@ -175,6 +175,8 @@ function LoginForm({ onNavigate }) {
               placeholder="seu@email.com"
               aria-label="Email"
               autoComplete="email"
+              maxLength={254}
+              spellCheck="false"
               required
               disabled={loading}
             />
@@ -199,6 +201,7 @@ function LoginForm({ onNavigate }) {
               placeholder="••••••••"
               aria-label="Senha"
               autoComplete="current-password"
+              maxLength={128}
               required
               disabled={loading}
             />
@@ -272,8 +275,8 @@ function RegisterForm({ onNavigate }) {
 
     try {
       await register({
-        nome: formData.nome,
-        email: formData.email,
+        nome: formData.nome.trim(),
+        email: formData.email.trim().toLowerCase(),
         senha: formData.senha,
       });
       navigate('/dashboard');
@@ -322,6 +325,7 @@ function RegisterForm({ onNavigate }) {
               className="auth-input"
               placeholder="Nome completo"
               aria-label="Nome completo"
+              maxLength={100}
               required
               disabled={loading}
             />
@@ -346,6 +350,8 @@ function RegisterForm({ onNavigate }) {
               placeholder="seu@email.com"
               aria-label="Email de cadastro"
               autoComplete="email"
+              maxLength={254}
+              spellCheck="false"
               required
               disabled={loading}
             />
@@ -456,7 +462,7 @@ function ForgotForm({ onNavigate }) {
     setMessage('');
     setLoading(true);
     try {
-      const response = await api.post('/auth/forgot-password', { email });
+      const response = await api.post('/auth/forgot-password', { email: email.trim().toLowerCase() });
       const token = response.data.data?.resetToken;
       
       if (token) {

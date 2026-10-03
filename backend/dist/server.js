@@ -5,11 +5,8 @@ import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-import authRoutes from './presentation/routes/auth.js';
-import itemsRoutes from './presentation/routes/items.js';
-import usersRoutes from './presentation/routes/users.js';
-import ordersRoutes from './presentation/routes/orders.js';
-import adminRoutes from './presentation/routes/admin.js';
+import apiRouter from './presentation/routes/index.js';
+import { securitySanitizer } from './infrastructure/security/securityMiddleware.js';
 dotenv.config();
 // Require explicit public origins in production; wildcard origins are unsafe.
 const isProduction = process.env.NODE_ENV === 'production';
@@ -34,6 +31,7 @@ if (isProduction && (!frontendUrl || !apiUrl)) {
     throw new Error('FRONTEND_URL e API_URL são obrigatórios em produção.');
 }
 const app = express();
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const allowedOrigins = parseOrigins(frontendUrl || 'http://localhost:5173,http://localhost:5174,http://localhost:5175', 'FRONTEND_URL');
@@ -67,7 +65,8 @@ app.use(cors({
     credentials: true
 }));
 app.use(morgan('dev'));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(securitySanitizer);
 // Rate limiters específicos
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -100,17 +99,9 @@ app.get('/api/health', async (req, res) => {
 app.get('/api/status', (req, res) => {
     res.json({ success: true, message: 'Nexus Control API está rodando' });
 });
-app.use('/api/auth', authRoutes);
-app.use('/api/itens', itemsRoutes);
-app.use('/api/usuarios', usersRoutes);
-app.use('/api/pedidos', ordersRoutes);
-app.use('/api/admin', adminRoutes);
-// Fallback sem prefixo /api para compatibilidade com proxies reversos Nginx/ALB
-app.use('/auth', authRoutes);
-app.use('/itens', itemsRoutes);
-app.use('/usuarios', usersRoutes);
-app.use('/pedidos', ordersRoutes);
-app.use('/admin', adminRoutes);
+// Rotas da API estruturadas com suporte a prefixo /api e fallback para proxies AWS/ALB
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Rota não encontrada' });
 });

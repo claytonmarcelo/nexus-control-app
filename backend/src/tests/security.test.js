@@ -65,4 +65,46 @@ describe('Security and readiness checks', () => {
     expect([200, 503]).toContain(response.status);
     expect(response.body).toHaveProperty('database');
   });
+
+  it('blocks NoSQL operator injection payloads', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send({ email: { $gt: '' }, senha: 'somepassword' });
+
+    expect([400, 401]).toContain(response.status);
+    expect(response.body.success).toBe(false);
+  });
+
+  it('blocks prototype pollution attempts', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(JSON.parse('{"__proto__": {"admin": true}, "email": "admin@test.com", "senha": "password"}'));
+
+    expect([400, 401]).toContain(response.status);
+    expect(response.body.success).toBe(false);
+  });
+
+  it('removes x-powered-by header and enforces nosniff and frameguard', async () => {
+    const response = await request(app).get('/api/status');
+
+    expect(response.headers['x-powered-by']).toBeUndefined();
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('DENY');
+  });
+
+  it('revokes access token on logout and rejects subsequent usage', async () => {
+    const { accessToken } = generateTokens({ id: 1 });
+
+    const logoutResponse = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    expect(logoutResponse.status).toBe(200);
+
+    const meResponse = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    expect(meResponse.status).toBe(401);
+  });
 });

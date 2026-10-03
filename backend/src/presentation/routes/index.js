@@ -1,0 +1,17 @@
+import { Router } from 'express';
+import authRoutes from './auth.js';
+import itemsRoutes from './items.js';
+import usersRoutes from './users.js';
+import ordersRoutes from './orders.js';
+import adminRoutes from './admin.js';
+
+const apiRouter = Router();
+
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/itens', itemsRoutes);
+apiRouter.use('/usuarios', usersRoutes);
+apiRouter.use('/pedidos', ordersRoutes);
+apiRouter.use('/admin', adminRoutes);
+
+export { authRoutes, itemsRoutes, usersRoutes, ordersRoutes, adminRoutes };
+export default apiRouter;

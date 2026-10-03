@@ -1,10 +1,16 @@
+import bcrypt from 'bcryptjs';
 import { createUser, findUserByEmail, verifyPassword, findUserById } from '../../infrastructure/User.js';
 import { USER_ROLES } from '../../infrastructure/User.js';
-import { generateToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt.js';
+import { generateToken, generateRefreshToken, verifyRefreshToken, decodeToken } from '../../utils/jwt.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import { createPasswordResetToken, resetPasswordWithToken } from '../../infrastructure/PasswordReset.js';
 import { sendPasswordResetEmail } from '../../utils/email.js';
 import { getUserPermissions } from '../../infrastructure/Permission.js';
+import { isAccountLocked, recordFailedLogin, resetFailedLogins } from '../../infrastructure/security/bruteForceProtection.js';
+import { revokeToken } from '../../infrastructure/security/tokenBlacklist.js';
+
+// Dummy hash fixo para tempo de resposta constante, impedindo timing attack e enumeração de emails
+const DUMMY_HASH = '$2a$12$e8wV4W3Yg3i8c8G5c.oVne3MvR4e4u5R7f.Dq0/J9/l4Hj.w.0f3e';
 
 const publicUser = async (user) => ({
   id: user.id,
@@ -41,11 +47,30 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, senha } = req.body;
+    const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
+
+    // Proteção contra ataques de força bruta direcionados ao email
+    if (isAccountLocked(normalizedEmail)) {
+      return sendError(res, 'Muitas tentativas de login incorretas. Tente novamente em 15 minutos.', 429);
+    }
+
     const user = await findUserByEmail(email);
 
-    if (!user || !(await verifyPassword(senha, user.senha))) {
+    if (!user) {
+      // Executa hash dummy para tempo de resposta constante (mitigação de timing attack)
+      await bcrypt.compare(senha, DUMMY_HASH);
+      recordFailedLogin(normalizedEmail);
       return sendError(res, 'Credenciais inválidas', 401);
     }
+
+    const isMatch = await verifyPassword(senha, user.senha);
+    if (!isMatch || (user.ativo !== undefined && !user.ativo)) {
+      recordFailedLogin(normalizedEmail);
+      return sendError(res, 'Credenciais inválidas', 401);
+    }
+
+    // Sucesso: reseta contagem de falhas
+    resetFailedLogins(normalizedEmail);
 
     const accessToken = generateToken({ id: user.id, email: user.email, nivel_acesso: user.nivel_acesso });
     const refreshToken = generateRefreshToken({ id: user.id });
@@ -68,12 +93,15 @@ export const forgotPassword = async (req, res) => {
     if (resetToken) {
       try {
         await sendPasswordResetEmail({ email, token: resetToken });
-      } catch (emailErr) {
+      } catch (emailErr: any) {
         console.warn('Falha no envio de email de recuperação:', emailErr.message);
       }
     }
 
-    const data = resetToken ? { resetToken } : null;
+    // Prevenção contra vazamento de dados: em produção, o token não é exposto na resposta
+    const data = (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') && resetToken
+      ? { resetToken }
+      : null;
 
     sendSuccess(res, data, 'Se o email estiver cadastrado, as instruções de recuperação foram preparadas');
   } catch (error) {
@@ -103,12 +131,12 @@ export const refresh = async (req, res) => {
     const { refreshToken } = req.body;
     const decoded = verifyRefreshToken(refreshToken);
 
-    if (!decoded || decoded.type !== 'refresh') {
+    if (!decoded || (decoded as any).type !== 'refresh') {
       return sendError(res, 'Refresh token inválido', 401);
     }
 
-    const user = await findUserById(decoded.id);
-    if (!user) {
+    const user = await findUserById((decoded as any).id);
+    if (!user || (user.ativo !== undefined && !user.ativo)) {
       return sendError(res, 'Usuário não encontrado', 404);
     }
 
@@ -125,7 +153,7 @@ export const refresh = async (req, res) => {
 export const me = async (req, res) => {
   try {
     const user = await findUserById(req.user.id);
-    if (!user) {
+    if (!user || (user.ativo !== undefined && !user.ativo)) {
       return sendError(res, 'Usuário não encontrado', 404);
     }
 
@@ -137,5 +165,17 @@ export const me = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  sendSuccess(res, null, 'Logout realizado com sucesso');
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const decoded = decodeToken(token) as any;
+      if (decoded?.jti) {
+        revokeToken(decoded.jti, decoded.exp);
+      }
+    }
+    sendSuccess(res, null, 'Logout realizado com sucesso');
+  } catch (error) {
+    sendSuccess(res, null, 'Logout realizado com sucesso');
+  }
 };
