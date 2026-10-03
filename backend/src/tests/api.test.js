@@ -285,6 +285,28 @@ describe('Items API', () => {
   });
 
   describe('GET /api/itens catalog filtering', () => {
+    it('should keep unpriced inventory visible when catalog filtering is not requested', async () => {
+      const created = await request(app)
+        .post('/api/itens')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ nome: `Unpriced inventory ${Date.now()}`, descricao: 'Inventory-only item' });
+      const itemId = created.body.data?.item?.id;
+
+      expect(created.status).toBe(201);
+      expect(itemId).toBeDefined();
+
+      try {
+        const response = await request(app)
+          .get('/api/itens?page=1&limit=100')
+          .set('Authorization', `Bearer ${adminToken}`);
+
+        expect(response.status).toBe(200);
+        expect(response.body.data.items.some((item) => String(item.id) === String(itemId))).toBe(true);
+      } finally {
+        await pool.execute('DELETE FROM itens WHERE id = ?', [itemId]);
+      }
+    });
+
     it('should paginate priced catalog items and include every catalog category', async () => {
       const response = await request(app)
         .get('/api/itens?page=1&limit=2&catalogOnly=true')
