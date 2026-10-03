@@ -68,6 +68,7 @@ describe('Catalog Items UI', () => {
         { id: 1, nome: 'Servidor Dell', descricao: 'Servidor de produção', categoria: 'Servidores', fabricante: 'Dell', imagem_url: '', valor_venda: 1500, valor_aluguel_mensal: 300, estoque: 5 },
         { id: 2, nome: 'Switch Cisco', descricao: 'Switch empresarial', categoria: 'Rede', fabricante: 'Cisco', imagem_url: '', valor_venda: 2200, valor_aluguel_mensal: 420, estoque: 8 },
       ],
+      categories: ['Servidores', 'Rede', 'Computadores'],
       pagination: { page: 1, limit: 8, total: 12, totalPages: 2 },
     });
 
@@ -80,6 +81,8 @@ describe('Catalog Items UI', () => {
 
     expect(screen.getByText(/Página 1 de 2/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Computadores' })).toBeInTheDocument();
+    expect(itemService.getAll).toHaveBeenCalledWith(expect.objectContaining({ catalogOnly: true }));
   });
 
   it('applies search and category filters on the catalog request', async () => {
@@ -87,6 +90,7 @@ describe('Catalog Items UI', () => {
       items: [
         { id: 10, nome: 'Servidor X', descricao: 'Servidor empresarial', categoria: 'Servidores', fabricante: 'Dell', imagem_url: '', valor_venda: 1500, valor_aluguel_mensal: 300, estoque: 4 },
       ],
+      categories: ['Servidores'],
       pagination: { page: 1, limit: 8, total: 1, totalPages: 1 },
     });
 
@@ -108,6 +112,7 @@ describe('Catalog Items UI', () => {
         limit: 8,
         search: 'servidor',
         categoria: 'Servidores',
+        catalogOnly: true,
       }));
     });
   });
@@ -118,6 +123,7 @@ describe('Catalog Items UI', () => {
         items: [
           { id: 11, nome: 'Servidor X', descricao: 'Servidor empresarial', categoria: 'Servidores', fabricante: 'Dell', imagem_url: '', valor_venda: 1500, valor_aluguel_mensal: 300, estoque: 4 },
         ],
+        categories: ['Servidores'],
         pagination: { page: 1, limit: 8, total: 1, totalPages: 1 },
       })
       .mockResolvedValueOnce({
@@ -136,7 +142,35 @@ describe('Catalog Items UI', () => {
       page: 1,
       limit: 8,
       categoria: 'Servidores',
+      catalogOnly: true,
     }));
+  });
+
+  it('adds a rentable catalog service to the cart with the selected rental period', async () => {
+    const addItem = vi.fn();
+    useCart.mockReturnValue({ addItem });
+    itemService.getAll.mockResolvedValue({
+      items: [
+        { id: 21, nome: 'Suporte Técnico Mensal', descricao: 'Suporte remoto', categoria: 'Serviços', fabricante: 'Nexus', imagem_url: '', valor_venda: 0, valor_aluguel_mensal: 2800, estoque: 2 },
+      ],
+      categories: ['Serviços'],
+      pagination: { page: 1, limit: 8, total: 1, totalPages: 1 },
+    });
+
+    renderWithProviders(<Items />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar dias de aluguel' }));
+    fireEvent.click(screen.getByRole('button', { name: /Alugar por/ }));
+
+    await waitFor(() => {
+      expect(addItem).toHaveBeenCalledWith(expect.objectContaining({
+        item_id: 21,
+        nome: 'Suporte Técnico Mensal',
+        tipo: 'aluguel',
+        dias_aluguel: 7,
+        valor_aluguel_mensal_base: 2800,
+      }));
+    });
   });
 
   it('notifies and returns to the catalog when the item fails to load for editing', async () => {

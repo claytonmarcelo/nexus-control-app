@@ -284,6 +284,24 @@ describe('Items API', () => {
     });
   });
 
+  describe('GET /api/itens catalog filtering', () => {
+    it('should paginate priced catalog items and include every catalog category', async () => {
+      const response = await request(app)
+        .get('/api/itens?page=1&limit=2&catalogOnly=true')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.items).toHaveLength(2);
+      expect(response.body.data.items.every((item) =>
+        Number(item.valor_venda) > 0 || Number(item.valor_aluguel_mensal) > 0
+      )).toBe(true);
+      expect(response.body.data.categories).toEqual(expect.arrayContaining(
+        response.body.data.items.map((item) => item.categoria)
+      ));
+      expect(response.body.pagination.total).toBeGreaterThanOrEqual(2);
+    });
+  });
+
   describe('GET /api/itens/:id', () => {
     it('should get item by id', async () => {
       const response = await request(app)

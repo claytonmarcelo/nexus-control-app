@@ -41,8 +41,18 @@ export const getAll = async (req, res) => {
   try {
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 20);
-    const result = await findAllItems({ page, limit });
-    sendPaginated(res, { items: result.items }, page, limit, result.total, 'Itens listados com sucesso');
+    const search = req.query.search ? String(req.query.search).trim() : '';
+    const categoria = req.query.categoria ? String(req.query.categoria).trim() : '';
+    const catalogOnly = req.query.catalogOnly === 'true';
+    const result = await findAllItems({ page, limit, search, categoria, catalogOnly });
+    sendPaginated(
+      res,
+      { items: result.items, categories: result.categories },
+      page,
+      limit,
+      result.total,
+      'Itens listados com sucesso'
+    );
   } catch (error) {
     console.error('Erro ao listar itens:', error);
     sendError(res, 'Erro interno do servidor', 500);

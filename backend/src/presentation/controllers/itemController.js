@@ -27,7 +27,8 @@ export const getAll = async (req, res) => {
     const limit = Number(req.query.limit || 20);
     const search = req.query.search ? String(req.query.search).trim() : '';
     const categoria = req.query.categoria ? String(req.query.categoria).trim() : '';
-    const result = await itemUseCase.getAllItems({ page, limit, search, categoria });
+    const catalogOnly = req.query.catalogOnly === 'true';
+    const result = await itemUseCase.getAllItems({ page, limit, search, categoria, catalogOnly });
     res.status(result.statusCode).json(result);
   } catch (error) {
     console.error('Erro ao listar itens:', error);

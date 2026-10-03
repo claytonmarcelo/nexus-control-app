@@ -13,13 +13,17 @@ export class ItemRepository {
     return new Item({ id: result.insertId, nome, descricao, criado_por, categoria, fabricante, imagem_url, valor_venda, valor_aluguel_mensal, estoque });
   }
 
-  async findAll({ page = 1, limit = 20, search = '', categoria = '' } = {}) {
+  async findAll({ page = 1, limit = 20, search = '', categoria = '', catalogOnly = false } = {}) {
     const normalizedPage = Math.max(1, Number(page) || 1);
     const normalizedLimit = Math.max(1, Number(limit) || 20);
     const offset = (normalizedPage - 1) * normalizedLimit;
     const whereClauses = [];
     const params = [];
     const countParams = [];
+
+    if (catalogOnly) {
+      whereClauses.push('(COALESCE(i.valor_venda, 0) > 0 OR COALESCE(i.valor_aluguel_mensal, 0) > 0)');
+    }
 
     const normalizedSearch = String(search || '').trim();
     if (normalizedSearch) {
@@ -50,10 +54,18 @@ export class ItemRepository {
       `SELECT COUNT(*) AS total FROM itens i ${whereSql}`,
       countParams
     );
+    const categoryRows = catalogOnly
+      ? (await this.database.execute(
+        `SELECT DISTINCT i.categoria FROM itens i
+         WHERE COALESCE(i.valor_venda, 0) > 0 OR COALESCE(i.valor_aluguel_mensal, 0) > 0
+         ORDER BY i.categoria`
+      ))[0]
+      : [];
 
     return {
       items: rows.map(row => new Item(row)),
-      total: Number(countRows[0].total || 0)
+      total: Number(countRows[0].total || 0),
+      categories: categoryRows.map(row => row.categoria).filter(Boolean)
     };
   }
 

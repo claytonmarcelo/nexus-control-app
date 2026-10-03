@@ -570,6 +570,7 @@ export default function Items() {
   const [rentalModalItem, setRentalModalItem] = useState(null);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: ITEMS_PER_PAGE, total: 0, totalPages: 1 });
+  const [catalogCategories, setCatalogCategories] = useState([]);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const [search, setSearch] = useState(queryParams.get('search') || '');
@@ -583,9 +584,11 @@ export default function Items() {
         limit: ITEMS_PER_PAGE,
         search: search.trim(),
         categoria: activeCategory !== 'Todos' ? activeCategory : undefined,
+        catalogOnly: true,
       });
       const itemsData = Array.isArray(response?.items) ? response.items : [];
       setItems(itemsData);
+      setCatalogCategories(Array.isArray(response?.categories) ? response.categories : []);
       setPagination(
         response?.pagination ?? {
           page: nextPage,
@@ -684,7 +687,11 @@ export default function Items() {
   };
 
   const catalogItems = items.filter(item => Number(item.valor_venda) > 0 || Number(item.valor_aluguel_mensal) > 0);
-  const categories = ['Todos', ...Array.from(new Set(catalogItems.map(i => i.categoria).filter(Boolean)))];
+  const categories = ['Todos', ...(
+    catalogCategories.length > 0
+      ? catalogCategories
+      : Array.from(new Set(catalogItems.map(i => i.categoria).filter(Boolean)))
+  )];
 
   const filteredItems = catalogItems.filter(item => {
     const normalizedSearch = search.trim().toLowerCase();
