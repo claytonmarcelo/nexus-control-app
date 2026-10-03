@@ -109,8 +109,10 @@ npm run build
 
 2. **Recursos Limitados**: A configuração `DB_CONNECTION_LIMIT=5` foi definida para funcionar dentro dos limites de recursos da AWS Academy.
 
-3. **Segurança e Git**: Nunca envie `.env`, `.env.production`, `.env.bak` ou outros arquivos de ambiente reais ao repositório. Use apenas os arquivos `.env.example` como template. Faça commits e pushes do código-fonte a partir do ambiente de desenvolvimento; na EC2, não use `git add .` para enviar arquivos gerados pelo build ou configurações locais.
+3. **Catálogo em produção**: Ao iniciar, o backend sincroniza os 21 produtos e serviços oficiais do projeto, mesmo quando o banco já contém outros itens. A sincronização atualiza descrição, categoria, fabricante, imagem e preços desses itens padrão, mantém o estoque em pelo menos 10 e não apaga itens personalizados nem pedidos. Alterações manuais nesses campos dos 21 itens oficiais serão substituídas pelos valores do catálogo do projeto no próximo reinício.
 
-4. **Demo vs Produção**: A conta `admin.demo@nexuscontrol.com` é para demonstrações públicas. A conta `ROOT_ADMIN_EMAIL` é pessoal e não deve ser compartilhada.
+4. **Segurança e Git**: Nunca envie `.env`, `.env.production`, `.env.bak` ou outros arquivos de ambiente reais ao repositório. Use apenas os arquivos `.env.example` como template. Faça commits e pushes do código-fonte a partir do ambiente de desenvolvimento; na EC2, não use `git add .` para enviar arquivos gerados pelo build ou configurações locais.
 
-5. **Verificação de Segurança**: O backend valida automaticamente se as variáveis críticas foram alteradas dos valores de exemplo ao iniciar em modo `production`. Se a validação falhar, o servidor não iniciará.
+5. **Demo vs Produção**: A conta `admin.demo@nexuscontrol.com` é para demonstrações públicas. A conta `ROOT_ADMIN_EMAIL` é pessoal e não deve ser compartilhada.
+
+6. **Verificação de Segurança**: O backend valida automaticamente se as variáveis críticas foram alteradas dos valores de exemplo ao iniciar em modo `production`. Se a validação falhar, o servidor não iniciará.

@@ -149,11 +149,15 @@ const initDatabase = async () => {
     const pool = (await import('./config/database.js')).default;
     const [rows]: any = await pool.execute('SELECT COUNT(*) as total FROM itens');
     const total = rows?.[0]?.total || 0;
-    if (total === 0) {
-      console.log('🌱 Banco de dados sem itens cadastrados. Executando seed automático do catálogo...');
+    if (isProduction || total === 0) {
+      console.log(
+        isProduction
+          ? '🌱 Sincronizando o catálogo oficial de produtos e serviços...'
+          : '🌱 Banco de dados sem itens cadastrados. Executando seed automático do catálogo...'
+      );
       const { seedDatabase } = await import('./utils/seed.js');
       await seedDatabase();
-      console.log('✅ Catálogo inicializado com sucesso no banco de dados!');
+      console.log('✅ Catálogo oficial sincronizado com sucesso no banco de dados!');
     }
 
   } catch (error: any) {
