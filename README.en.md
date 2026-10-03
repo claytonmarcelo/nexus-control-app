@@ -45,22 +45,6 @@ Illustrative screenshots of the **Nexus Control App** interface.
 
 ---
 
-## 📖 About Us Page
-
-The application includes a complete institutional page (`/sobre`) accessible within the web app, featuring:
-
-- **Project Vision:** Nexus Control presented as a corporate full-stack solution
-- **Professional Trajectory:** 8+ years journey (Retail → Logistics → Technology)
-  - Strategic background: business vision, operational discipline, clear communication
-  - Practical application in software development
-- **Academic Background:** Systems Analysis and Development (UNISUAM, Rio de Janeiro)
-- **Professional Objective:** Junior Developer/Intern → Senior → Architect/CTO
-- **Contact:** Direct links to GitHub, LinkedIn, Email, Portfolio
-
-**How to access:** In the web application, click "About Us" in the navigation menu or footer after logging in with any profile (Admin, Employee, or Client).
-
----
-
 ## 🎯 Key Features
 
 **Nexus Control App** is a complete corporate management and control platform. The system offers authentication with multiple access profiles (Admin, Employee, and Client), interactive product and technology/infrastructure service catalog, complete e-commerce flow with real-time checkout (Pix and Credit Card), plus an administrative dashboard with granular user, permission, and order control.
@@ -141,7 +125,6 @@ nexus-control-app/
     ├── src/
     │   ├── components/
     │   │   ├── admin/       # AdminControlCenter.jsx
-    │   │   ├── about/       # AboutUs.jsx (About Us page)
     │   │   ├── auth/        # Login, Register, ForgotPassword
     │   │   ├── cart/        # Cart.jsx, Checkout.jsx
     │   │   ├── dashboard/   # Dashboard, Items, Users, Profile
@@ -165,7 +148,6 @@ nexus-control-app/
 | 📱 Mobile Responsive | 100% responsive (360px-1920px), zero overflow | ✅ |
 | 👤 User Profile | Data management, order history | ✅ |
 | 🛡️ Admin Dashboard | Users, catalog, granular permissions | ✅ |
-| 📖 About Us | Professional trajectory, career transition, objectives | ✅ |
 | 📦 Order Tracking | Visual 5-step timeline (Pending→Delivered) | ✅ |
 | 🧾 Printable Receipt | PDF-ready receipt with @media print native | ✅ |
 | 🎨 Light/Dark Theme | Persistent toggle, 400+ CSS overrides | ✅ |
@@ -261,7 +243,7 @@ npm run dev          # Start at http://localhost:5173
 | Phase | Description | Status |
 |------|-----------|--------|
 | **PHASE 1** | Analysis & Cleanup (3 redundant files removed) | ✅ Complete |
-| **PHASE 2** | "About Us" page (professional trajectory) | ✅ Complete |
+| **PHASE 2** | "About Us" page (subsequently removed) | ✅ Historically completed |
 | **PHASE 3** | 4 Executive Features (Demo, Canvas, Stepper, PDF) | ✅ Complete |
 | **PHASE 4** | E2E Testing (10/10 tests passed) | ✅ Complete |
 | **PHASE 5** | Final Documentation & Release | ✅ Complete |

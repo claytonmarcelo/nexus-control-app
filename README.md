@@ -54,22 +54,6 @@ Para garantir que **tanto o Banco de Dados (API/Backend) quanto a Interface (Fro
 
 ---
 
-## 📖 Página "Quem Somos"
-
-A aplicação inclui uma página institucional completa (`/sobre`) acessível após fazer login, com:
-
-- **Visão do Projeto:** Apresentação do Nexus Control como solução full-stack corporativa
-- **Trajetória Profissional:** Jornada de 8+ anos (Varejo → Logística → Tecnologia)
-  - Bagagem estratégica: visão de negócio, disciplina operacional, comunicação clara
-  - Aplicação prática em desenvolvimento de software
-- **Formação Acadêmica:** Análise e Desenvolvimento de Sistemas (UNISUAM, Rio de Janeiro)
-- **Objetivo Profissional:** Desenvolvedor Júnior/Estagiário → Sênior → Architect/CTO
-- **Contato:** Links diretos para GitHub, LinkedIn, Email, Portfolio
-
-**Como acessar:** Na aplicação web, clique em "Quem Somos" no menu de navegação ou rodapé após fazer login com qualquer perfil (Admin, Funcionário ou Cliente).
-
----
-
 ## 🎯 Funcionalidades Principais
 
 O **Nexus Control App** é uma plataforma completa de controle e gerenciamento corporativo. O sistema oferece autenticação com múltiplos perfis de acesso (Admin, Funcionário e Cliente), catálogo interativo de produtos e serviços de tecnologia/infraestrutura, fluxo completo de e-commerce com checkout em tempo real (Pix e Cartão de Crédito), além de um painel administrativo com controle granular de usuários, permissões e pedidos.
@@ -150,7 +134,6 @@ nexus-control-app/
     ├── src/
     │   ├── components/
     │   │   ├── admin/       # AdminControlCenter.jsx
-    │   │   ├── about/       # AboutUs.jsx (Quem Somos)
     │   │   ├── auth/        # Login, Register, ForgotPassword
     │   │   ├── cart/        # Cart.jsx, Checkout.jsx
     │   │   ├── dashboard/   # Dashboard, Items, Users, Profile
@@ -174,7 +157,6 @@ nexus-control-app/
 | 📱 Mobile Responsivo | 100% responsivo (360px-1920px), zero overflow | ✅ |
 | 👤 Perfil Usuário | Gestão de dados, histórico de pedidos | ✅ |
 | 🛡️ Admin Dashboard | Usuários, catálogo, permissões granulares | ✅ |
-| 📖 Quem Somos | Trajetória profissional, transição de carreira, objetivo | ✅ |
 | 📦 Rastreamento | Timeline visual 5-steps (Pending→Delivered) | ✅ |
 | 🧾 Comprovante PDF | Recibo imprimível com @media print nativo | ✅ |
 | 🎨 Tema Light/Dark | Toggle persistido, 400+ overrides CSS | ✅ |
@@ -270,7 +252,7 @@ npm run dev          # Inicia em http://localhost:5173
 | Fase | Descrição | Status |
 |------|-----------|--------|
 | **FASE 1** | Análise e Limpeza (3 arquivos mortos removidos) | ✅ Complete |
-| **FASE 2** | Página "Quem Somos" (trajetória profissional) | ✅ Complete |
+| **FASE 2** | Página "Quem Somos" (removida posteriormente) | ✅ Concluída historicamente |
 | **FASE 3** | 4 Features Executivas (Demo, Canvas, Stepper, PDF) | ✅ Complete |
 | **FASE 4** | Testes E2E (10/10 testes passed) | ✅ Complete |
 | **FASE 5** | Documentação Final e Release | ✅ Complete |
