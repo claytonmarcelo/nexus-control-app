@@ -1,14 +1,21 @@
 import axios from 'axios';
 
-const getBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+const isLoopbackUrl = (url) =>
+  /^https?:\/\/(?:localhost|127\.0\.0\.1|\[?::1\]?)(?::\d+)?(?:\/|$)/i.test(url);
+
+export const getBaseUrl = (hostname = typeof window !== 'undefined' ? window.location.hostname : '') => {
+  const configuredUrl = import.meta.env.VITE_API_URL?.trim();
+  const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(hostname.toLowerCase());
+
+  if (configuredUrl && (isLocalhost || !isLoopbackUrl(configuredUrl))) {
+    return configuredUrl;
   }
-  // Em produção na nuvem AWS ou qualquer host remoto, usar /api relativo para o Nginx/proxy reverso
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
+
+  if (isLocalhost) {
+    return 'http://localhost:3000/api';
   }
-  return 'http://localhost:3000/api';
+
+  return '/api';
 };
 
 const api = axios.create({

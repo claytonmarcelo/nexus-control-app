@@ -291,11 +291,22 @@ npm run db:migrate
 npm run db:seed
 npm prune --omit=dev
 
-# Start application
-pm2 start "npm start" --name "nexus-backend"
-pm2 save
-sudo pm2 startup
+# Start application with automatic restart after crashes and machine reboots
+pm2 start ecosystem.config.cjs --env production
+pm2 startup
 ```
+
+Run the startup command printed by PM2 for the `ubuntu` user, then save the process
+list and verify it:
+```bash
+pm2 save
+pm2 status
+```
+
+The API/database health check is available at
+`https://nexus-control.com/api/health`. The PM2 startup service keeps the API running
+after an EC2 reboot; the EC2 instance, security groups, load balancer, and database
+must also remain available for users to sign in.
 
 **Step 3: Configure CloudWatch Agent**
 ```bash
@@ -620,6 +631,25 @@ aws secretsmanager get-secret-value --secret-id nexus/production/env | jq -r '.S
 ---
 
 ## Deployment Guide
+
+### Development on a local computer
+
+From the repository root, run `npm run dev` to start both the frontend and API. Local
+login depends on MySQL being available with the settings in `backend/.env`. This
+development command is not a permanent public hosting service.
+
+### Frontend on Vercel with a separately hosted API
+
+Deploy the backend to a persistent host, then set `VITE_API_URL` in the frontend
+hosting environment to the public API URL, including `/api` (for example,
+`https://api.example.com/api`). Rebuild and redeploy the frontend after changing this
+build-time variable. On the backend, set `FRONTEND_URL` to the exact public frontend
+origin and configure the production database and JWT secrets. The API must be
+reachable over HTTPS from users' browsers.
+
+For same-origin hosting, leave `VITE_API_URL` empty and route `/api/*` to the backend
+without caching API responses; route frontend paths to `index.html`. Never publish a
+frontend build that points users to `localhost`.
 
 ### Initial Deployment
 
