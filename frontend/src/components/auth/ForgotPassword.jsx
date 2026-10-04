@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/services';
 import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../ui/ThemeToggle';
 import { PASSWORD_POLICY_MESSAGE, validatePassword } from '../../utils/password';
 
 export default function ForgotPassword() {
@@ -90,30 +91,29 @@ export default function ForgotPassword() {
 
   return (
     <div className="auth-page-wrapper">
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="auth-theme-toggle"
-        aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
-        title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
-      >
-        <span aria-hidden="true" className="text-sm">{theme === 'dark' ? '☼' : '☾'}</span>
-        <span className="text-[11px] font-semibold uppercase tracking-wider">{theme === 'dark' ? 'Claro' : 'Escuro'}</span>
-      </button>
+      <Link to="/login" className="auth-back-link" aria-label="Voltar para login">
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>Login</span>
+      </Link>
 
-      <div className="auth-glow-ring auth-glow-ring--outer" />
-      <div className="auth-glow-ring auth-glow-ring--inner" />
+      {/* Floating Modern Theme Toggle */}
+      <div className="auth-theme-toggle-wrap">
+        <ThemeToggle variant="pill" id="forgot-theme-toggle" />
+      </div>
 
       <div className="auth-circle-container">
         <div className="fp-content">
 
-          <div className="auth-logo" style={{ marginBottom: '12px' }}>
+          <div className="auth-logo">
             {icons[step]}
           </div>
 
-          <div className="auth-form-header" style={{ marginBottom: '16px' }}>
+          <div className="auth-form-header">
             <h1 className="auth-form-title">{titles[step]}</h1>
-            <p className="auth-form-subtitle" style={{ maxWidth: '240px', lineHeight: '1.4' }}>{subtitles[step]}</p>
+            <span className="auth-form-tag">RECUPERAÇÃO</span>
+            <p className="auth-form-subtitle">{subtitles[step]}</p>
           </div>
 
           {step === 'request' && (

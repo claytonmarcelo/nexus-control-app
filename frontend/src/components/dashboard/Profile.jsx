@@ -177,30 +177,60 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 lg:space-y-8 animate-fade-in">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-500">Conta e preferências</p>
-        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Meu perfil</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-base">
-          Gerencie seus dados, a segurança do acesso e o histórico da sua conta.
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Conta e preferências</p>
+        <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+          Meu perfil
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          Gerencie seus dados de acesso, preferências de segurança e histórico de compras.
         </p>
       </header>
 
-      <section className="relative overflow-hidden rounded-2xl border border-dark-border bg-dark-card p-5 shadow-elevation-1 sm:p-7" aria-label="Resumo do perfil">
-        <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-nexus-500/10 blur-3xl" />
+      <section
+        className="relative overflow-hidden rounded-2xl border p-5 sm:p-6 transition-all"
+        style={{
+          backgroundColor: 'var(--bg-elevated-1)',
+          borderColor: 'var(--border-color)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+        aria-label="Resumo do perfil"
+      >
+        <div
+          className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full blur-3xl opacity-30"
+          style={{ backgroundColor: 'var(--accent-gold)' }}
+        />
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-nexus-500/30 bg-gradient-to-br from-nexus-500/30 to-nexus-700/20 text-2xl font-bold text-nexus-300 sm:h-20 sm:w-20 sm:text-3xl">
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border text-2xl font-bold sm:h-20 sm:w-20 sm:text-3xl"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                color: '#0d0d0d',
+                borderColor: 'var(--accent-gold-border)',
+                boxShadow: '0 4px 20px var(--accent-gold-glow)',
+              }}
+            >
               {user?.nome?.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-nexus-500">Perfil pessoal</p>
-              <h2 className="mt-1 truncate text-xl font-semibold text-white sm:text-2xl">{user?.nome}</h2>
-              <p className="mt-1 truncate text-sm text-text-secondary">{user?.email}</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Perfil pessoal</p>
+              <h2 className="mt-0.5 truncate text-xl font-bold sm:text-2xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+                {user?.nome}
+              </h2>
+              <p className="mt-0.5 truncate text-xs sm:text-sm" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
             <RoleBadge role={user?.nivel_acesso} />
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span
+              className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium"
+              style={{
+                backgroundColor: 'var(--color-success-bg)',
+                borderColor: 'var(--color-success-border)',
+                color: 'var(--color-success)',
+              }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: 'var(--color-success)' }} />
               Conta ativa
             </span>
           </div>
@@ -208,8 +238,8 @@ export default function Profile() {
       </section>
 
       <section className="card mb-0 overflow-hidden" aria-label="Gerenciar perfil">
-          <div className="border-b border-dark-border p-2 sm:p-3">
-            <nav className="grid grid-cols-3 gap-1" aria-label="Abas do perfil" role="tablist">
+          <div className="border-b p-2 sm:p-3" style={{ borderColor: 'var(--divider)' }}>
+            <nav className="grid grid-cols-3 gap-2" aria-label="Abas do perfil" role="tablist">
             <button
               id="profile-info-tab"
               type="button"
@@ -218,11 +248,12 @@ export default function Profile() {
               aria-label="Dados pessoais"
               aria-selected={activeTab === 'info'}
               aria-controls="profile-tab-panel"
-              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
-                activeTab === 'info'
-                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
-                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
-              }`}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold transition-all sm:min-h-14 sm:gap-3 sm:px-4 sm:text-sm border"
+              style={{
+                backgroundColor: activeTab === 'info' ? 'var(--accent-gold-faint)' : 'transparent',
+                borderColor: activeTab === 'info' ? 'var(--accent-gold-border)' : 'transparent',
+                color: activeTab === 'info' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+              }}
             >
               <ProfileTabIcon type="info" />
               <span><span className="sm:hidden">Dados</span><span className="hidden sm:inline">Dados pessoais</span></span>
@@ -234,11 +265,12 @@ export default function Profile() {
               role="tab"
               aria-selected={activeTab === 'security'}
               aria-controls="profile-tab-panel"
-              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
-                activeTab === 'security'
-                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
-                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
-              }`}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold transition-all sm:min-h-14 sm:gap-3 sm:px-4 sm:text-sm border"
+              style={{
+                backgroundColor: activeTab === 'security' ? 'var(--accent-gold-faint)' : 'transparent',
+                borderColor: activeTab === 'security' ? 'var(--accent-gold-border)' : 'transparent',
+                color: activeTab === 'security' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+              }}
             >
               <ProfileTabIcon type="security" />
               <span>Segurança</span>
@@ -251,11 +283,12 @@ export default function Profile() {
               aria-label="Histórico"
               aria-selected={activeTab === 'history'}
               aria-controls="profile-tab-panel"
-              className={`flex min-h-14 items-center justify-center gap-2 rounded-xl px-2 py-3 text-xs font-semibold transition-colors sm:min-h-16 sm:gap-3 sm:px-4 sm:text-sm ${
-                activeTab === 'history'
-                  ? 'bg-nexus-500/10 text-nexus-300 ring-1 ring-inset ring-nexus-500/20'
-                  : 'text-text-secondary hover:bg-dark-hover hover:text-white'
-              }`}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold transition-all sm:min-h-14 sm:gap-3 sm:px-4 sm:text-sm border"
+              style={{
+                backgroundColor: activeTab === 'history' ? 'var(--accent-gold-faint)' : 'transparent',
+                borderColor: activeTab === 'history' ? 'var(--accent-gold-border)' : 'transparent',
+                color: activeTab === 'history' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+              }}
             >
               <ProfileTabIcon type="history" />
               <span>Histórico</span>

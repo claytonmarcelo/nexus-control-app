@@ -14,6 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "node scripts/test-navigation-e2e.js",
+    "test:routes": "node scripts/verify-all-routes.js",
     "optimize:images": "node scripts/convert-images.js"
   },
   "dependencies": {

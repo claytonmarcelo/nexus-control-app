@@ -129,11 +129,14 @@ export default function Users() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Gerenciar Usuários</h1>
-          <p className="text-nexus-400 mt-1">Administre os usuários do sistema</p>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Administração</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+            Gerenciar Usuários
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Controle de acessos, permissões e histórico da equipe</p>
         </div>
         <button onClick={handleCreate} className="btn-primary">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
           Novo Usuário
@@ -141,83 +144,124 @@ export default function Users() {
       </div>
 
       <div className="card">
-        <div className="p-6 border-b border-dark-border">
+        <div className="p-5 border-b" style={{ borderColor: 'var(--divider)' }}>
           <div className="relative max-w-md">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-nexus-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--accent-gold)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               type="text"
-              placeholder="Buscar usuários..."
+              placeholder="Buscar por nome ou email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input pl-12"
+              className="input pl-11"
             />
           </div>
         </div>
 
         {filteredUsers.length === 0 ? (
           <EmptyState
-            icon={<UsersIcon className="w-16 h-16" />}
+            icon={<UsersIcon className="w-12 h-12" />}
             title="Nenhum usuário encontrado"
-            description={search ? 'Tente alterar sua busca' : 'Nenhum usuário cadastrado'}
+            description={search ? 'Nenhum resultado corresponde à sua busca.' : 'Nenhum usuário cadastrado no momento.'}
             action={{ label: 'Criar primeiro usuário', onClick: handleCreate }}
           />
         ) : (
-          <div className="divide-y divide-dark-border">
+          <div className="divide-y" style={{ borderColor: 'var(--divider)' }}>
             {filteredUsers.map(targetUser => (
-              <div key={targetUser.id} className="p-6 hover:bg-dark-hover transition-colors">
+              <div
+                key={targetUser.id}
+                className="p-5 transition-colors"
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-hover)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; }}
+              >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-nexus-600/20 flex items-center justify-center flex-shrink-0">
-                    <UserIcon className="w-6 h-6 text-nexus-400" />
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                    style={{
+                      background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                      color: '#0d0d0d',
+                      boxShadow: '0 2px 8px var(--accent-gold-faint)',
+                    }}
+                  >
+                    {targetUser.nome?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-white truncate">{targetUser.nome}</h3>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{targetUser.nome}</h3>
                       <RoleBadge role={targetUser.nivel_acesso} isRoot={isRootAdmin(targetUser)} />
                       {targetUser.id === user.id && (
-                        <span className="px-2 py-0.5 text-xs font-medium bg-gray-600/20 text-gray-400 rounded-full">
+                        <span
+                          className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border"
+                          style={{
+                            backgroundColor: 'var(--accent-gold-faint)',
+                            color: 'var(--accent-gold)',
+                            borderColor: 'var(--accent-gold-border)',
+                          }}
+                        >
                           Você
                         </span>
                       )}
                     </div>
-                    <p className="text-nexus-400 text-sm mb-1">{targetUser.email}</p>
-                    <div className="flex items-center gap-4 text-sm text-nexus-500">
-                      <span>Criado em {formatDate(targetUser.criado_em)}</span>
+                    <p className="text-xs truncate mb-1" style={{ color: 'var(--text-muted)' }}>{targetUser.email}</p>
+                    <div className="flex items-center gap-3 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                      <span>Cadastrado em {formatDate(targetUser.criado_em)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
                     <button
                       onClick={() => setHistoryUser(targetUser)}
-                      className="p-2 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-600/10 transition-colors"
+                      className="p-2 rounded-lg transition-colors border"
+                      style={{
+                        backgroundColor: 'var(--color-success-bg)',
+                        color: 'var(--color-success)',
+                        borderColor: 'var(--color-success-border)',
+                      }}
                       aria-label="Histórico de compras"
                       title="Histórico de Compras"
                     >
-                      <ShoppingBagIcon className="w-5 h-5" />
+                      <ShoppingBagIcon className="w-4 h-4" />
                     </button>
                     {!isRootAdmin(targetUser) && (
                       <button
                         onClick={() => handlePermissionEdit(targetUser)}
-                        className="p-2 rounded-lg text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover transition-colors"
+                        className="p-2 rounded-lg transition-colors border"
+                        style={{
+                          backgroundColor: 'var(--accent-gold-faint)',
+                          color: 'var(--accent-gold)',
+                          borderColor: 'var(--accent-gold-border)',
+                        }}
                         aria-label="Gerenciar permissões"
+                        title="Permissões"
                       >
-                        <ShieldIcon className="w-5 h-5" />
+                        <ShieldIcon className="w-4 h-4" />
                       </button>
                     )}
                     {!isRootAdmin(targetUser) && (
                       <button
                         onClick={() => handleEdit(targetUser)}
-                        className="p-2 rounded-lg text-nexus-400 hover:text-nexus-300 hover:bg-dark-hover transition-colors"
+                        className="p-2 rounded-lg transition-colors border"
+                        style={{
+                          backgroundColor: 'var(--bg-elevated-2)',
+                          color: 'var(--text-secondary)',
+                          borderColor: 'var(--border-color)',
+                        }}
                         aria-label="Editar usuário"
+                        title="Editar"
                       >
-                        <EditIcon className="w-5 h-5" />
+                        <EditIcon className="w-4 h-4" />
                       </button>
                     )}
                     {targetUser.id !== user.id && !isRootAdmin(targetUser) && (
                       <button
                         onClick={() => handleDelete(targetUser)}
                         disabled={deletingUser === targetUser.id}
-                        className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-600/10 transition-colors disabled:opacity-50"
+                        className="p-2 rounded-lg transition-colors border disabled:opacity-50"
+                        style={{
+                          backgroundColor: 'var(--color-error-bg)',
+                          color: 'var(--color-error)',
+                          borderColor: 'var(--color-error-border)',
+                        }}
                         aria-label="Excluir usuário"
                       >
                         {deletingUser === targetUser.id ? (

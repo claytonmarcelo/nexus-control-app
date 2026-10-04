@@ -420,33 +420,74 @@ export default function AdminControlCenter() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-4">
-      <section className="relative overflow-hidden rounded-3xl border border-nexus-500/25 bg-gradient-to-br from-dark-card via-dark-card to-nexus-900/20 p-6 shadow-glass-lg sm:p-8">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-nexus-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-nexus-400/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-6 animate-fade-in pb-6">
+      {/* ── Header / Hero Banner Premium ── */}
+      <section
+        className="relative overflow-hidden rounded-3xl border p-6 sm:p-8 transition-all"
+        style={{
+          backgroundColor: 'var(--bg-elevated-1)',
+          borderColor: 'var(--accent-gold-border)',
+          boxShadow: 'var(--shadow-card), 0 0 24px rgba(212, 175, 55, 0.06)',
+        }}
+      >
+        <div
+          className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl opacity-25"
+          style={{ backgroundColor: 'var(--accent-gold)' }}
+        />
+        <div
+          className="pointer-events-none absolute -left-20 -bottom-20 h-64 w-64 rounded-full blur-3xl opacity-15"
+          style={{ backgroundColor: 'var(--accent-gold-light)' }}
+        />
+        <div className="relative z-10 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-700 dark:text-nexus-400">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-nexus-400/30 bg-nexus-500/10 shadow-gold">
-                <ControlIcon kind="shield" className="h-4 w-4" />
+            <div
+              className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-widest"
+              style={{
+                backgroundColor: 'var(--accent-gold-faint)',
+                borderColor: 'var(--accent-gold-border)',
+                color: 'var(--accent-gold)',
+              }}
+            >
+              <span className="flex h-4 w-4 items-center justify-center">
+                <ControlIcon kind="shield" className="h-3.5 w-3.5" />
               </span>
               Operação protegida
             </div>
-            <h1 className="font-display text-3xl font-bold text-text-primary sm:text-4xl dark:bg-gradient-to-r dark:from-white dark:via-nexus-200 dark:to-nexus-300 dark:bg-clip-text dark:text-transparent">
+            <h1
+              className="text-3xl font-bold tracking-tight sm:text-4xl"
+              style={{
+                fontFamily: 'var(--font-display)',
+                color: 'var(--text-primary)',
+              }}
+            >
               Admin Control Center
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary dark:text-nexus-300 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm leading-6 sm:text-base" style={{ color: 'var(--text-secondary)' }}>
               Controle os acessos, catálogo e pedidos do Nexus com uma visão única da operação.
             </p>
           </div>
-          <button type="button" onClick={() => loadControlData(true)} className="btn-secondary self-start xl:self-auto shadow-gold">
-            <ControlIcon kind="refresh" className="mr-2 h-5 w-5" />
+          <button
+            type="button"
+            onClick={() => loadControlData(true)}
+            className="btn-secondary self-start xl:self-auto shadow-sm"
+          >
+            <ControlIcon kind="refresh" className="mr-2 h-4 w-4" />
             Atualizar dados
           </button>
         </div>
       </section>
 
-      <nav className="glass flex max-w-full gap-1 overflow-x-auto rounded-2xl p-2 shadow-glass-lg" aria-label="Seções administrativas" role="tablist">
+      {/* ── Abas de Navegação Principal ── */}
+      <nav
+        className="flex max-w-full gap-2 overflow-x-auto rounded-2xl p-2 border backdrop-blur-md"
+        style={{
+          backgroundColor: 'var(--bg-elevated-1)',
+          borderColor: 'var(--border-color)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+        aria-label="Seções administrativas"
+        role="tablist"
+      >
         {TABS.map((tab) => {
           const active = activeTab === tab.key;
           return (
@@ -456,14 +497,28 @@ export default function AdminControlCenter() {
               role="tab"
               aria-selected={active}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                active
-                  ? 'bg-gradient-to-r from-nexus-600 to-nexus-500 text-white shadow-gold transform scale-105'
-                  : 'text-nexus-300 hover:bg-dark-hover hover:text-white hover:scale-102'
-              }`}
+              className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-5 py-2 text-sm font-semibold transition-all duration-200 border"
+              style={{
+                background: active ? 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))' : 'transparent',
+                color: active ? '#0d0d0d' : 'var(--text-secondary)',
+                borderColor: active ? 'var(--accent-gold-light)' : 'transparent',
+                boxShadow: active ? '0 4px 16px var(--accent-gold-glow)' : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }
+              }}
             >
               <ControlIcon kind={tab.icon} className="h-4 w-4" />
-              {tab.label}
+              <span>{tab.label}</span>
             </button>
           );
         })}
@@ -551,64 +606,148 @@ function OverviewSection({ users, items, orders, overview, pages, previewRole, r
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-        <section className="card p-6 xl:col-span-3">
+        <section
+          className="card p-6 xl:col-span-3 transition-all"
+          style={{
+            backgroundColor: 'var(--bg-elevated-1)',
+            borderColor: 'var(--border-color)',
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Pré-visualização por perfil</p>
-              <h2 className="mt-2 text-xl font-semibold text-white">Rotas visíveis na experiência</h2>
-              <p className="mt-1 text-sm text-nexus-400">Confira o que cada perfil pode encontrar na navegação.</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>
+                Pré-visualização por perfil
+              </p>
+              <h2
+                className="mt-2 text-xl font-bold tracking-tight"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Rotas visíveis na experiência
+              </h2>
+              <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Confira o que cada perfil pode encontrar na navegação.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2" aria-label="Alternar perfil visualizado">
-              {Object.entries(ROLE_META).map(([role, meta]) => (
-                <button
-                  key={role}
-                  type="button"
-                  onClick={() => onPreviewRoleChange(role)}
-                  aria-pressed={previewRole === role}
-                  className={`min-h-10 rounded-xl border px-3 text-sm font-medium transition-all ${
-                    previewRole === role ? meta.className : 'border-dark-border bg-dark-hover text-nexus-300 hover:text-white'
-                  }`}
-                >
-                  {meta.label}
-                </button>
-              ))}
+            <div className="flex flex-nowrap gap-2" aria-label="Alternar perfil visualizado">
+              {Object.entries(ROLE_META).map(([role, meta]) => {
+                const active = previewRole === role;
+                return (
+                  <button
+                    key={role}
+                    type="button"
+                    onClick={() => onPreviewRoleChange(role)}
+                    aria-pressed={active}
+                    className={`min-h-10 shrink-0 whitespace-nowrap rounded-xl border px-3 text-sm font-semibold transition-all ${
+                      active ? meta.className + ' shadow-sm' : ''
+                    }`}
+                    style={
+                      !active
+                        ? {
+                            backgroundColor: 'var(--bg-elevated-2)',
+                            borderColor: 'var(--border-color)',
+                            color: 'var(--text-secondary)',
+                          }
+                        : {}
+                    }
+                  >
+                    {meta.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-dark-border bg-dark-bg/60 p-4 sm:p-5">
-            <div className="flex flex-wrap items-center gap-3 border-b border-dark-border pb-4">
+          <div
+            className="mt-6 rounded-2xl border p-4 sm:p-5 transition-all"
+            style={{
+              backgroundColor: 'var(--bg-elevated-2)',
+              borderColor: 'var(--border-color)',
+            }}
+          >
+            <div
+              className="flex flex-wrap items-center gap-3 border-b pb-4"
+              style={{ borderColor: 'var(--border-color)' }}
+            >
               <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${ROLE_META[previewRole].className}`}>
                 Interface {ROLE_META[previewRole].label}
               </span>
-              <span className="text-sm text-nexus-400">{visiblePages.length} páginas liberadas</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                {visiblePages.length} páginas liberadas
+              </span>
             </div>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {visiblePages.map((page) => (
-                <div key={page.key} className="flex items-center gap-3 rounded-xl border border-dark-border bg-dark-card/80 p-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-nexus-500/10 text-nexus-300">
+                <div
+                  key={page.key}
+                  className="flex items-center gap-3 rounded-xl border p-3 transition-all hover:scale-[1.01]"
+                  style={{
+                    backgroundColor: 'var(--bg-elevated-1)',
+                    borderColor: 'var(--border-color)',
+                  }}
+                >
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border"
+                    style={{
+                      backgroundColor: 'var(--accent-gold-faint)',
+                      borderColor: 'var(--accent-gold-border)',
+                      color: 'var(--accent-gold)',
+                    }}
+                  >
                     <ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-white">{page.label}</span>
-                    <span className="block truncate text-xs text-nexus-400">{page.path || `/${page.key}`}</span>
+                    <span className="block truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {page.label}
+                    </span>
+                    <span className="block truncate text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+                      {page.path || `/${page.key}`}
+                    </span>
                   </span>
                   <span className="ml-auto h-2 w-2 rounded-full bg-emerald-400" aria-label="Liberada" />
                 </div>
               ))}
               {visiblePages.length === 0 && (
-                <p className="col-span-full rounded-xl border border-dashed border-dark-border p-6 text-center text-sm text-nexus-400">Nenhuma página liberada para este perfil.</p>
+                <p
+                  className="col-span-full rounded-xl border border-dashed p-6 text-center text-sm"
+                  style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}
+                >
+                  Nenhuma página liberada para este perfil.
+                </p>
               )}
             </div>
           </div>
         </section>
 
-        <section className="card p-6 xl:col-span-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Atalhos operacionais</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Ações prioritárias</h2>
-          <div className="mt-5 space-y-3">
-            <ActionShortcut icon="shield" title="Revisar acessos" text="Ajuste funções, bloqueios e permissões por página." action={() => onNavigate('acessos')} />
-            <ActionShortcut icon="box" title="Atualizar catálogo" text="Cadastre ou ajuste produtos disponíveis no carrinho." action={() => onNavigate('produtos')} />
-            <ActionShortcut icon="receipt" title="Acompanhar pagamentos" text="Monitore cada pedido e atualize o status de cobrança." action={() => onNavigate('pedidos')} />
+        <section
+          className="card p-6 xl:col-span-2 transition-all flex flex-col justify-between"
+          style={{
+            backgroundColor: 'var(--bg-elevated-1)',
+            borderColor: 'var(--border-color)',
+            boxShadow: 'var(--shadow-card)',
+          }}
+        >
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>
+              Atalhos operacionais
+            </p>
+            <h2
+              className="mt-2 text-xl font-bold tracking-tight"
+              style={{
+                fontFamily: 'var(--font-display)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              Ações prioritárias
+            </h2>
+            <div className="mt-5 space-y-3">
+              <ActionShortcut icon="shield" title="Revisar acessos" text="Ajuste funções, bloqueios e permissões por página." action={() => onNavigate('acessos')} />
+              <ActionShortcut icon="box" title="Atualizar catálogo" text="Cadastre ou ajuste produtos disponíveis no carrinho." action={() => onNavigate('produtos')} />
+              <ActionShortcut icon="receipt" title="Acompanhar pagamentos" text="Monitore cada pedido e atualize o status de cobrança." action={() => onNavigate('pedidos')} />
+            </div>
           </div>
         </section>
       </div>
@@ -648,22 +787,52 @@ function SystemRouteMap({ pages, roleViews }) {
   }, [pages, roleFilter, roleViews, search]);
 
   return (
-    <section className="glass relative overflow-hidden rounded-3xl border border-nexus-500/20 bg-dark-card/90 p-6 sm:p-8 shadow-glass-xl hover:border-nexus-500/30 transition-all duration-300">
+    <section
+      className="relative overflow-hidden rounded-3xl border p-6 sm:p-8 transition-all duration-300"
+      style={{
+        backgroundColor: 'var(--bg-elevated-1)',
+        borderColor: 'var(--accent-gold-border)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
       {/* Background Subtle Glow Accent */}
-      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-nexus-500/5 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-nexus-600/5 blur-3xl" />
+      <div
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-15 blur-3xl"
+        style={{ backgroundColor: 'var(--accent-gold)' }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full opacity-10 blur-3xl"
+        style={{ backgroundColor: 'var(--accent-gold-light)' }}
+      />
 
       {/* Header Container */}
-      <div className="relative z-10 flex flex-col gap-5 border-b border-dark-border/80 pb-6 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        className="relative z-10 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-center sm:justify-between"
+        style={{ borderColor: 'var(--border-color)' }}
+      >
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-nexus-500/25 via-nexus-500/10 to-transparent border border-nexus-500/30 text-nexus-300 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border"
+            style={{
+              backgroundColor: 'var(--accent-gold-faint)',
+              borderColor: 'var(--accent-gold-border)',
+              color: 'var(--accent-gold)',
+              boxShadow: '0 0 20px var(--accent-gold-glow)',
+            }}
+          >
             <ControlIcon kind="map" className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+            <h2
+              className="text-xl font-bold tracking-tight sm:text-2xl"
+              style={{
+                fontFamily: 'var(--font-display)',
+                color: 'var(--text-primary)',
+              }}
+            >
               Mapa de Rotas do Sistema
             </h2>
-            <p className="mt-1 text-xs text-nexus-400 sm:text-sm">
+            <p className="mt-1 text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
               Fonte de verdade para matriz de permissões, controle de acesso (RBAC) e navegação.
             </p>
           </div>
@@ -671,7 +840,14 @@ function SystemRouteMap({ pages, roleViews }) {
 
         {/* Counter Badge with Pulse Indicator */}
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-2 rounded-xl border border-nexus-500/30 bg-nexus-500/10 px-3.5 py-1.5 text-xs font-medium text-nexus-300 backdrop-blur-md">
+          <span
+            className="inline-flex items-center gap-2 rounded-xl border px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md"
+            style={{
+              backgroundColor: 'var(--accent-gold-faint)',
+              borderColor: 'var(--accent-gold-border)',
+              color: 'var(--accent-gold)',
+            }}
+          >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -685,15 +861,27 @@ function SystemRouteMap({ pages, roleViews }) {
       <div className="relative z-10 mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Role Filter Tabs */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-xs font-semibold uppercase tracking-wider text-nexus-500">Filtrar por:</span>
+          <span className="mr-1 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent-gold)' }}>
+            Filtrar por:
+          </span>
           <button
             type="button"
             onClick={() => setRoleFilter('all')}
-            className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+            className="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border"
+            style={
               roleFilter === 'all'
-                ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
-                : 'border border-dark-border bg-dark-bg/60 text-nexus-300 hover:border-nexus-500/30 hover:bg-dark-hover'
-            }`}
+                ? {
+                    background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                    color: '#0d0d0d',
+                    borderColor: 'var(--accent-gold-light)',
+                    boxShadow: '0 2px 10px var(--accent-gold-glow)',
+                  }
+                : {
+                    backgroundColor: 'var(--bg-elevated-2)',
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--text-secondary)',
+                  }
+            }
           >
             Todas ({pages.length})
           </button>
@@ -705,11 +893,21 @@ function SystemRouteMap({ pages, roleViews }) {
                 key={role}
                 type="button"
                 onClick={() => setRoleFilter(role)}
-                className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                className="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 border"
+                style={
                   active
-                    ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
-                    : 'border border-dark-border bg-dark-bg/60 text-nexus-300 hover:border-nexus-500/30 hover:bg-dark-hover'
-                }`}
+                    ? {
+                        background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                        color: '#0d0d0d',
+                        borderColor: 'var(--accent-gold-light)',
+                        boxShadow: '0 2px 10px var(--accent-gold-glow)',
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-elevated-2)',
+                        borderColor: 'var(--border-color)',
+                        color: 'var(--text-secondary)',
+                      }
+                }
               >
                 {meta.label} ({count})
               </button>
@@ -719,13 +917,13 @@ function SystemRouteMap({ pages, roleViews }) {
 
         {/* Real-time Search Input */}
         <div className="relative min-w-[220px] lg:w-64">
-          <ControlIcon kind="search" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-500" />
+          <ControlIcon kind="search" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--accent-gold)' }} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por rota ou caminho..."
-            className="input w-full pl-9 py-1.5 text-xs bg-dark-bg/80 border-dark-border focus:border-nexus-500/50"
+            className="input w-full pl-9 py-1.5 text-xs"
           />
         </div>
       </div>
@@ -740,35 +938,65 @@ function SystemRouteMap({ pages, roleViews }) {
           return (
             <article
               key={page.key}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-dark-border/80 bg-gradient-to-b from-dark-card to-dark-bg/70 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-nexus-500/40 hover:shadow-[0_8px_30px_rgba(212,175,55,0.12)]"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              style={{
+                backgroundColor: 'var(--bg-elevated-2)',
+                borderColor: 'var(--border-color)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent-gold-border)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+              }}
             >
               {/* Header: Icon + Path Badge */}
               <div className="flex items-center justify-between gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-nexus-500/10 border border-nexus-500/20 text-nexus-300 group-hover:scale-105 group-hover:bg-nexus-500/20 group-hover:border-nexus-500/40 transition-all duration-300">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all duration-300"
+                  style={{
+                    backgroundColor: 'var(--accent-gold-faint)',
+                    borderColor: 'var(--accent-gold-border)',
+                    color: 'var(--accent-gold)',
+                  }}
+                >
                   <ControlIcon kind={getPageIcon(page.key)} className="h-5 w-5" />
                 </span>
-                <code className="rounded-lg border border-nexus-500/20 bg-dark-bg/90 px-2.5 py-1 text-[11px] font-mono font-medium text-nexus-300 shadow-inner group-hover:border-nexus-500/40 transition-colors">
+                <code
+                  className="rounded-lg border px-2.5 py-1 text-[11px] font-mono font-semibold"
+                  style={{
+                    backgroundColor: 'var(--bg-elevated-1)',
+                    borderColor: 'var(--border-color)',
+                    color: 'var(--accent-gold)',
+                  }}
+                >
                   {page.path || `/${page.key}`}
                 </code>
               </div>
 
               {/* Title & Purpose Description */}
               <div className="my-4">
-                <h3 className="text-base font-bold text-white group-hover:text-nexus-200 transition-colors">
+                <h3
+                  className="text-base font-bold transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
                   {page.label}
                 </h3>
-                <p className="mt-1 text-xs text-nexus-400/90 leading-relaxed line-clamp-2">
+                <p className="mt-1 text-xs leading-relaxed line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
                   {PAGE_DESCRIPTIONS[page.key] || 'Página integrada à matriz de navegação do sistema.'}
                 </p>
               </div>
 
               {/* Matrix Role Badges */}
-              <div className="pt-3 border-t border-dark-border/60">
+              <div className="pt-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-nexus-500">
+                  <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--accent-gold)' }}>
                     Nível de Acesso
                   </span>
-                  <span className="text-[10px] font-medium text-nexus-400">
+                  <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
                     {allowedRolesCount === 3 ? 'Acesso total' : `${allowedRolesCount}/3 perfis`}
                   </span>
                 </div>
@@ -781,14 +1009,15 @@ function SystemRouteMap({ pages, roleViews }) {
                         className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium transition-all ${
                           allowed
                             ? meta.className
-                            : 'border-dark-border/40 bg-dark-bg/40 text-nexus-500/50'
+                            : 'border-transparent opacity-60'
                         }`}
+                        style={!allowed ? { backgroundColor: 'var(--bg-elevated-1)', color: 'var(--text-muted)' } : {}}
                         title={allowed ? `Acesso permitido para ${meta.label}` : `Acesso restrito para ${meta.label}`}
                       >
                         {allowed ? (
                           <ControlIcon kind="check" className="h-3 w-3 text-emerald-400 shrink-0" />
                         ) : (
-                          <ControlIcon kind="lock" className="h-3 w-3 text-nexus-500/50 shrink-0" />
+                          <ControlIcon kind="lock" className="h-3 w-3 shrink-0" />
                         )}
                         {meta.label}
                       </span>
@@ -801,12 +1030,25 @@ function SystemRouteMap({ pages, roleViews }) {
         })}
 
         {filteredPages.length === 0 && (
-          <div className="col-span-full rounded-2xl border border-dashed border-dark-border bg-dark-bg/40 p-8 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-nexus-500/10 text-nexus-400">
+          <div
+            className="col-span-full rounded-2xl border border-dashed p-8 text-center"
+            style={{
+              backgroundColor: 'var(--bg-elevated-2)',
+              borderColor: 'var(--border-color)',
+            }}
+          >
+            <span
+              className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border"
+              style={{
+                backgroundColor: 'var(--accent-gold-faint)',
+                borderColor: 'var(--accent-gold-border)',
+                color: 'var(--accent-gold)',
+              }}
+            >
               <ControlIcon kind="search" className="h-6 w-6" />
             </span>
-            <p className="mt-3 text-sm font-medium text-white">Nenhuma rota encontrada</p>
-            <p className="mt-1 text-xs text-nexus-400">Experimente ajustar o filtro de busca ou perfil selecionado.</p>
+            <p className="mt-3 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Nenhuma rota encontrada</p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>Experimente ajustar o filtro de busca ou perfil selecionado.</p>
           </div>
         )}
       </div>
@@ -838,25 +1080,35 @@ function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPer
       {/* ── Stats ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: 'Total de usuários', value: users.length, color: 'text-nexus-200', icon: 'users' },
-          { label: 'Contas ativas', value: activeCount, color: 'text-emerald-300', icon: 'check' },
-          { label: 'Administradores', value: adminCount, color: 'text-nexus-300', icon: 'shield' },
-          { label: 'Contas bloqueadas', value: users.length - activeCount, color: 'text-red-300', icon: 'lock' },
+          { label: 'Total de usuários', value: users.length, textColor: 'var(--accent-gold)', icon: 'users' },
+          { label: 'Contas ativas', value: activeCount, textColor: '#34d399', icon: 'check' },
+          { label: 'Administradores', value: adminCount, textColor: 'var(--accent-gold)', icon: 'shield' },
+          { label: 'Contas bloqueadas', value: users.length - activeCount, textColor: '#f87171', icon: 'lock' },
         ].map((stat) => (
-          <div key={stat.label} className="card p-4 flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-nexus-500/10 border border-nexus-500/20 text-nexus-300">
+          <div
+            key={stat.label}
+            className="card p-4 flex items-center gap-3 transition-all"
+            style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+          >
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border"
+              style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+            >
               <ControlIcon kind={stat.icon} className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <p className={`text-lg font-bold leading-tight ${stat.color}`}>{stat.value}</p>
-              <p className="text-[11px] text-nexus-500 truncate">{stat.label}</p>
+              <p className="text-lg font-bold leading-tight" style={{ fontFamily: 'var(--font-display)', color: stat.textColor }}>{stat.value}</p>
+              <p className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* ── Sub-navegação interna ── */}
-      <div className="flex gap-1 rounded-xl border border-dark-border bg-dark-bg/60 p-1 w-fit">
+      <div
+        className="flex gap-1 rounded-xl border p-1 w-fit"
+        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+      >
         {ACCESS_SUBTABS.map((tab) => {
           const active = accessSubTab === tab.key;
           return (
@@ -864,11 +1116,20 @@ function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPer
               key={tab.key}
               type="button"
               onClick={() => setAccessSubTab(tab.key)}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                active
-                  ? 'bg-gradient-to-r from-nexus-600 to-nexus-500 text-white shadow-gold'
-                  : 'text-nexus-400 hover:text-white hover:bg-dark-hover'
-              }`}
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 border"
+              style={active
+                ? {
+                    background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                    color: '#0d0d0d',
+                    borderColor: 'var(--accent-gold-light)',
+                    boxShadow: '0 2px 10px var(--accent-gold-glow)',
+                  }
+                : {
+                    backgroundColor: 'transparent',
+                    borderColor: 'transparent',
+                    color: 'var(--text-secondary)',
+                  }
+              }
               aria-selected={active}
             >
               <ControlIcon kind={tab.icon} className="h-4 w-4" />
@@ -925,15 +1186,24 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[380px_1fr]">
 
       {/* ── Coluna esquerda: Diretório de usuários ── */}
-      <section className="card flex flex-col min-h-0">
-        <div className="flex flex-col gap-3 border-b border-dark-border p-5">
+      <section
+        className="card flex flex-col min-h-0"
+        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+      >
+        <div
+          className="flex flex-col gap-3 border-b p-5"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Diretório</p>
-            <h2 className="mt-1 text-lg font-semibold text-white">Selecione um usuário</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>Diretório</p>
+            <h2
+              className="mt-1 text-lg font-bold"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}
+            >Selecione um usuário</h2>
           </div>
           <label className="relative">
             <span className="sr-only">Buscar usuário</span>
-            <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-400" />
+            <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--accent-gold)' }} />
             <input
               value={userSearch}
               onChange={(e) => onUserSearchChange(e.target.value)}
@@ -943,7 +1213,7 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
           </label>
         </div>
 
-        <div className="divide-y divide-dark-border overflow-y-auto max-h-[560px]">
+        <div className="overflow-y-auto max-h-[560px]" style={{ borderColor: 'var(--border-color)' }}>
           {users.length === 0 ? (
             <EmptyPanel icon="users" title="Nenhum usuário encontrado" text="Tente ajustar o filtro de busca." />
           ) : users.map((targetUser) => {
@@ -957,26 +1227,44 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
                 key={targetUser.id}
                 type="button"
                 onClick={() => handleSelectUser(targetUser.id)}
-                className={`w-full flex items-center gap-3 p-4 text-left transition-all duration-150 ${
-                  isSelected
-                    ? 'bg-nexus-500/10 border-l-2 border-nexus-500'
-                    : 'hover:bg-dark-hover/60 border-l-2 border-transparent'
-                }`}
+                className="w-full flex items-center gap-3 p-4 text-left transition-all duration-150 border-l-2"
+                style={{
+                  borderLeftColor: isSelected ? 'var(--accent-gold)' : 'transparent',
+                  backgroundColor: isSelected ? 'var(--accent-gold-faint)' : 'transparent',
+                  borderBottom: '1px solid var(--border-color)',
+                }}
                 id={`user-row-${targetUser.id}`}
                 aria-selected={isSelected}
               >
                 {/* Avatar */}
-                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nexus-500/20 to-nexus-700/10 border border-nexus-500/20 text-sm font-bold text-nexus-200">
+                <span
+                  className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-sm font-bold"
+                  style={{
+                    backgroundColor: 'var(--accent-gold-faint)',
+                    borderColor: 'var(--accent-gold-border)',
+                    color: 'var(--accent-gold)',
+                  }}
+                >
                   {initials(targetUser.nome)}
-                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-dark-card ${active ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 ${active ? 'bg-emerald-400' : 'bg-red-400'}`}
+                    style={{ borderColor: 'var(--bg-elevated-1)' }}
+                  />
                 </span>
                 {/* Info */}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={`font-semibold text-sm truncate ${isSelected ? 'text-nexus-200' : 'text-white'}`}>{targetUser.nome || 'Usuário sem nome'}</span>
-                    {root && <span className="rounded-full border border-nexus-400/40 bg-nexus-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-nexus-300">Raiz</span>}
+                    <span
+                      className="font-semibold text-sm truncate"
+                      style={{ color: isSelected ? 'var(--accent-gold)' : 'var(--text-primary)' }}
+                    >{targetUser.nome || 'Usuário sem nome'}</span>
+                    {root && (
+                      <span
+                        className="rounded-full border px-1.5 py-0.5 text-[10px] font-bold"
+                        style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+                      >Raiz</span>
+                    )}
                   </div>
-                  <p className="text-xs text-nexus-400 truncate">{targetUser.email}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{targetUser.email}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${roleMeta.className}`}>{roleMeta.label}</span>
                     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${active ? 'border-emerald-400/25 bg-emerald-400/8 text-emerald-300' : 'border-red-400/25 bg-red-400/8 text-red-300'}`}>
@@ -986,7 +1274,11 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
                   </div>
                 </div>
                 {/* Chevron indicator */}
-                <ControlIcon kind="chevron" className={`h-4 w-4 shrink-0 transition-colors ${isSelected ? 'text-nexus-400' : 'text-nexus-600'}`} />
+                <ControlIcon
+                  kind="chevron"
+                  className="h-4 w-4 shrink-0 transition-colors"
+                  style={{ color: isSelected ? 'var(--accent-gold)' : 'var(--text-muted)' }}
+                />
               </button>
             );
           })}
@@ -994,15 +1286,21 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
       </section>
 
       {/* ── Coluna direita: Editor inline de permissões ── */}
-      <section className="card flex flex-col min-h-0">
+      <section
+        className="card flex flex-col min-h-0"
+        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+      >
         {!selectedUser ? (
           <div className="flex flex-1 flex-col items-center justify-center p-12 text-center gap-4">
-            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-nexus-500/10 border border-nexus-500/20">
-              <ControlIcon kind="user" className="h-8 w-8 text-nexus-400" />
+            <span
+              className="flex h-16 w-16 items-center justify-center rounded-2xl border"
+              style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+            >
+              <ControlIcon kind="user" className="h-8 w-8" />
             </span>
             <div>
-              <p className="font-semibold text-white">Nenhum usuário selecionado</p>
-              <p className="mt-1 text-sm text-nexus-400">Selecione um usuário na lista ao lado para editar suas permissões.</p>
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Nenhum usuário selecionado</p>
+              <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>Selecione um usuário na lista ao lado para editar suas permissões.</p>
             </div>
           </div>
         ) : (
@@ -1029,24 +1327,38 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
   return (
     <div className="flex flex-col h-full">
       {/* Header do editor */}
-      <div className="flex items-center gap-4 border-b border-dark-border p-5">
-        <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-nexus-500/30 to-nexus-700/10 border border-nexus-500/30 text-sm font-bold text-nexus-200">
+      <div
+        className="flex items-center gap-4 border-b p-5"
+        style={{ borderColor: 'var(--border-color)' }}
+      >
+        <div
+          className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border text-sm font-bold"
+          style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+        >
           {initials(user.nome)}
-          <span className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-dark-card ${isUserActive(user) ? 'bg-emerald-400' : 'bg-red-400'}`} />
+          <span
+            className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 ${isUserActive(user) ? 'bg-emerald-400' : 'bg-red-400'}`}
+            style={{ borderColor: 'var(--bg-elevated-1)' }}
+          />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-bold text-white">{user.nome || 'Usuário'}</h2>
-            {rootUser && <span className="rounded-full border border-nexus-400/40 bg-nexus-500/10 px-2 py-0.5 text-[10px] font-semibold text-nexus-200">Raiz</span>}
-            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${permissionDraft.active ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-red-400/30 bg-red-400/10 text-red-200'}`}>
+            <h2 className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{user.nome || 'Usuário'}</h2>
+            {rootUser && (
+              <span
+                className="rounded-full border px-2 py-0.5 text-[10px] font-bold"
+                style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+              >Raiz</span>
+            )}
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${permissionDraft.active ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : 'border-red-400/30 bg-red-400/10 text-red-300'}`}>
               <span className={`h-1.5 w-1.5 rounded-full ${permissionDraft.active ? 'bg-emerald-400' : 'bg-red-400'}`} />
               {permissionDraft.active ? 'Liberado' : 'Bloqueado'}
             </span>
           </div>
-          <p className="text-xs text-nexus-400">{user.email}</p>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-xs text-nexus-500 hidden sm:block">
+          <span className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>
             Editando permissões individualmente
           </span>
         </div>
@@ -1055,20 +1367,26 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
       {/* Corpo do editor */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {rootUser ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-nexus-400/25 bg-nexus-500/10 p-8 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nexus-500/20 border border-nexus-500/30">
-              <ControlIcon kind="shield" className="h-6 w-6 text-nexus-300" />
+          <div
+            className="flex flex-col items-center justify-center gap-3 rounded-2xl border p-8 text-center"
+            style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)' }}
+          >
+            <span
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border"
+              style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+            >
+              <ControlIcon kind="shield" className="h-6 w-6" />
             </span>
             <div>
-              <p className="font-semibold text-white">Administrador Raiz Protegido</p>
-              <p className="mt-1 text-xs text-nexus-400 max-w-xs">As permissões deste administrador raiz são permanentes e não podem ser alteradas pelo painel de controle.</p>
+              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Administrador Raiz Protegido</p>
+              <p className="mt-1 text-xs max-w-xs" style={{ color: 'var(--text-secondary)' }}>As permissões deste administrador raiz são permanentes e não podem ser alteradas pelo painel de controle.</p>
             </div>
           </div>
         ) : (
           <>
             {/* Configurações da conta */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-nexus-500 mb-3">Configurações da conta</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--accent-gold)' }}>Configurações da conta</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <label>
                   <span className="label text-xs">Nível de acesso</span>
@@ -1084,10 +1402,13 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
                 </label>
                 <div>
                   <span className="label text-xs">Status da conta</span>
-                  <label className="flex min-h-[46px] cursor-pointer items-center justify-between rounded-xl border border-dark-border bg-dark-hover px-4 gap-2">
+                  <label
+                    className="flex min-h-[46px] cursor-pointer items-center justify-between rounded-xl border px-4 gap-2 transition-all"
+                    style={{ backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)' }}
+                  >
                     <span>
-                      <span className="block text-sm font-medium text-white">{permissionDraft.active ? 'Conta liberada' : 'Conta bloqueada'}</span>
-                      <span className="block text-[11px] text-nexus-400">Bloqueia toda a navegação</span>
+                      <span className="block text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{permissionDraft.active ? 'Conta liberada' : 'Conta bloqueada'}</span>
+                      <span className="block text-[11px]" style={{ color: 'var(--text-muted)' }}>Bloqueia toda a navegação</span>
                     </span>
                     <input
                       type="checkbox"
@@ -1112,11 +1433,11 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
             <div>
               <div className="flex items-end justify-between mb-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-nexus-500">Permissões de navegação</p>
-                  <p className="mt-0.5 text-[11px] text-nexus-400">Desative páginas para removê-las da experiência do usuário.</p>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Permissões de navegação</p>
+                  <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-secondary)' }}>Desative páginas para removê-las da experiência do usuário.</p>
                 </div>
                 {loadingPermissions && (
-                  <span className="flex items-center gap-1.5 text-[11px] text-nexus-400">
+                  <span className="flex items-center gap-1.5 text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                     <Spinner className="h-3 w-3" />Carregando…
                   </span>
                 )}
@@ -1127,20 +1448,27 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
                   return (
                     <label
                       key={page.key}
-                      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all duration-200 ${
-                        enabled
-                          ? 'border-nexus-500/30 bg-nexus-500/5 hover:border-nexus-500/50'
-                          : 'border-dark-border bg-dark-hover hover:border-nexus-500/20'
-                      }`}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all duration-200"
+                      style={enabled
+                        ? { backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)' }
+                        : { backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)' }
+                      }
                     >
-                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors ${
-                        enabled ? 'border-nexus-500/30 bg-nexus-500/15 text-nexus-300' : 'border-dark-border bg-dark-card text-nexus-500/50'
-                      }`}>
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors"
+                        style={enabled
+                          ? { backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }
+                          : { backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)', color: 'var(--text-muted)' }
+                        }
+                      >
                         <ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className={`block truncate text-sm font-medium ${enabled ? 'text-white' : 'text-nexus-400'}`}>{page.label}</span>
-                        <span className="block truncate text-[11px] text-nexus-500">{page.path || `/${page.key}`}</span>
+                        <span
+                          className="block truncate text-sm font-semibold"
+                          style={{ color: enabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                        >{page.label}</span>
+                        <span className="block truncate text-[11px] font-mono" style={{ color: 'var(--text-muted)' }}>{page.path || `/${page.key}`}</span>
                       </span>
                       <input
                         type="checkbox"
@@ -1162,8 +1490,11 @@ function UserPermissionEditor({ user, pages, permissionDraft, loadingPermissions
 
       {/* Footer com ações */}
       {!rootUser && (
-        <div className="flex items-center justify-between gap-3 border-t border-dark-border p-5">
-          <p className="text-xs text-nexus-500 hidden sm:block">Alterações aplicadas imediatamente no servidor.</p>
+        <div
+          className="flex items-center justify-between gap-3 border-t p-5"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
+          <p className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>Alterações aplicadas imediatamente no servidor.</p>
           <button
             type="button"
             onClick={onSave}
@@ -1241,18 +1572,24 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
       </div>
 
       {/* Matriz RBAC */}
-      <section className="card overflow-hidden">
+      <section
+        className="card overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+      >
         {/* Header */}
-        <div className="flex flex-col gap-4 border-b border-dark-border p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          className="flex flex-col gap-4 border-b p-5 sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Matriz de acesso</p>
-            <h2 className="mt-1.5 text-xl font-semibold text-white">Controle Global por Perfil</h2>
-            <p className="mt-0.5 text-sm text-nexus-400">
+            <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>Matriz de acesso</p>
+            <h2 className="mt-1.5 text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Controle Global por Perfil</h2>
+            <p className="mt-0.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
               Visão consolidada de quais perfis têm acesso a cada página do sistema.
             </p>
           </div>
           <label className="relative sm:w-64">
-            <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-nexus-400" />
+            <ControlIcon kind="search" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'var(--accent-gold)' }} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -1263,16 +1600,24 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
         </div>
 
         {/* Filtro de role */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-dark-border px-5 py-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-nexus-500 mr-1">Filtrar por perfil:</span>
+        <div
+          className="flex flex-wrap items-center gap-2 border-b px-5 py-3"
+          style={{ borderColor: 'var(--border-color)' }}
+        >
+          <span className="text-xs font-bold uppercase tracking-wider mr-1" style={{ color: 'var(--accent-gold)' }}>Filtrar por perfil:</span>
           <button
             type="button"
             onClick={() => setRoleFilter('all')}
-            className={`rounded-xl px-3 py-1 text-xs font-medium transition-all ${
-              roleFilter === 'all'
-                ? 'bg-nexus-500 text-dark-bg font-semibold shadow-gold'
-                : 'border border-dark-border bg-dark-hover text-nexus-300 hover:text-white'
-            }`}
+            className="rounded-xl px-3 py-1 text-xs font-semibold transition-all border"
+            style={roleFilter === 'all'
+              ? {
+                  background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                  color: '#0d0d0d',
+                  borderColor: 'var(--accent-gold-light)',
+                  boxShadow: '0 2px 8px var(--accent-gold-glow)',
+                }
+              : { backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }
+            }
           >
             Todos os perfis ({pages.length} páginas)
           </button>
@@ -1281,11 +1626,13 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
               key={role}
               type="button"
               onClick={() => setRoleFilter(role)}
-              className={`rounded-xl px-3 py-1 text-xs font-medium transition-all ${
-                roleFilter === role
-                  ? meta.className + ' font-semibold'
-                  : 'border border-dark-border bg-dark-hover text-nexus-300 hover:text-white'
+              className={`rounded-xl px-3 py-1 text-xs font-semibold transition-all border ${
+                roleFilter === role ? meta.className : ''
               }`}
+              style={roleFilter !== role
+                ? { backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }
+                : {}
+              }
             >
               {meta.label}
             </button>
@@ -1296,8 +1643,11 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-dark-border">
-                <th className="py-3 pl-5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-nexus-400 w-[220px]">
+              <tr className="border-b" style={{ borderColor: 'var(--border-color)' }}>
+                <th
+                  className="py-3 pl-5 pr-4 text-left text-xs font-bold uppercase tracking-wider w-[220px]"
+                  style={{ color: 'var(--accent-gold)' }}
+                >
                   Página / Rota
                 </th>
                 {Object.entries(ROLE_META).map(([role, meta]) => (
@@ -1308,15 +1658,15 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
                     </span>
                   </th>
                 ))}
-                <th className="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider text-nexus-400 whitespace-nowrap">
+                <th className="py-3 px-4 text-center text-xs font-bold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--accent-gold)' }}>
                   Cobertura
                 </th>
-                <th className="py-3 px-5 text-right text-xs font-semibold uppercase tracking-wider text-nexus-400 whitespace-nowrap">
+                <th className="py-3 px-5 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap" style={{ color: 'var(--accent-gold)' }}>
                   Todos os usuários
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-dark-border/60">
+            <tbody>
               {filteredPages
                 .filter((page) => {
                   if (roleFilter === 'all') return true;
@@ -1334,17 +1684,23 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
                   return (
                     <tr
                       key={page.key}
-                      className="group transition-colors hover:bg-dark-hover/40"
+                      className="group transition-colors"
+                      style={{ borderBottom: '1px solid var(--border-color)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-hover)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; }}
                     >
                       {/* Página */}
                       <td className="py-3.5 pl-5 pr-4">
                         <div className="flex items-center gap-3">
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-nexus-500/10 border border-nexus-500/20 text-nexus-300">
+                          <span
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border"
+                            style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+                          >
                             <ControlIcon kind={getPageIcon(page.key)} className="h-4 w-4" />
                           </span>
                           <div>
-                            <p className="font-medium text-white">{page.label}</p>
-                            <code className="text-[10px] text-nexus-500 font-mono">{page.path || `/${page.key}`}</code>
+                            <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{page.label}</p>
+                            <code className="text-[10px] font-mono" style={{ color: 'var(--text-muted)' }}>{page.path || `/${page.key}`}</code>
                           </div>
                         </div>
                       </td>
@@ -1357,8 +1713,9 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
                             className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border mx-auto transition-all ${
                               allowed
                                 ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-400'
-                                : 'border-dark-border/50 bg-dark-bg/40 text-nexus-600/50'
+                                : 'opacity-50'
                             }`}
+                            style={!allowed ? { backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)', color: 'var(--text-muted)' } : {}}
                           >
                             {allowed
                               ? <ControlIcon kind="check" className="h-4 w-4" />
@@ -1371,15 +1728,20 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
                       {/* Cobertura */}
                       <td className="py-3.5 px-4">
                         <div className="flex flex-col items-center gap-1">
-                          <span className={`text-xs font-semibold ${coveragePct === 100 ? 'text-emerald-300' : coveragePct >= 66 ? 'text-nexus-300' : 'text-amber-300'}`}>
+                          <span className={`text-xs font-semibold ${coveragePct === 100 ? 'text-emerald-400' : coveragePct >= 66 ? '' : 'text-amber-400'}`}
+                            style={coveragePct >= 66 && coveragePct < 100 ? { color: 'var(--accent-gold)' } : {}}
+                          >
                             {allowedCount}/{Object.keys(ROLE_META).length}
                           </span>
-                          <div className="w-16 h-1.5 rounded-full bg-dark-border overflow-hidden">
+                          <div
+                            className="w-16 h-1.5 rounded-full overflow-hidden"
+                            style={{ backgroundColor: 'var(--border-color)' }}
+                          >
                             <div
                               className={`h-full rounded-full transition-all ${
-                                coveragePct === 100 ? 'bg-emerald-400' : coveragePct >= 66 ? 'bg-nexus-400' : 'bg-amber-400'
+                                coveragePct === 100 ? 'bg-emerald-400' : coveragePct >= 66 ? '' : 'bg-amber-400'
                               }`}
-                              style={{ width: `${coveragePct}%` }}
+                              style={{ width: `${coveragePct}%`, background: coveragePct >= 66 && coveragePct < 100 ? 'var(--accent-gold)' : undefined }}
                             />
                           </div>
                         </div>
@@ -1418,8 +1780,11 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
         </div>
 
         {/* Legenda */}
-        <div className="flex flex-wrap items-center gap-4 border-t border-dark-border px-5 py-3 text-xs text-nexus-400">
-          <span className="font-semibold uppercase tracking-wider text-nexus-500">Legenda:</span>
+        <div
+          className="flex flex-wrap items-center gap-4 border-t px-5 py-3 text-xs"
+          style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+        >
+          <span className="font-bold uppercase tracking-wider" style={{ color: 'var(--accent-gold)' }}>Legenda:</span>
           <span className="flex items-center gap-1.5">
             <span className="flex h-5 w-5 items-center justify-center rounded border border-emerald-400/30 bg-emerald-400/10 text-emerald-400">
               <ControlIcon kind="check" className="h-3 w-3" />
@@ -1427,13 +1792,16 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
             Acesso permitido
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="flex h-5 w-5 items-center justify-center rounded border border-dark-border/50 bg-dark-bg/40 text-nexus-600/50">
+            <span
+              className="flex h-5 w-5 items-center justify-center rounded border opacity-50"
+              style={{ backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}
+            >
               <ControlIcon kind="lock" className="h-3 w-3" />
             </span>
             Acesso restrito
           </span>
-          <span className="ml-auto text-nexus-500">
-            Configurações individuais por usuário disponíveis na aba <strong className="text-nexus-400">Controle Individual</strong>.
+          <span className="ml-auto" style={{ color: 'var(--text-muted)' }}>
+            Configurações individuais por usuário disponíveis na aba <strong style={{ color: 'var(--text-secondary)' }}>Controle Individual</strong>.
           </span>
         </div>
       </section>
@@ -1444,12 +1812,19 @@ function GlobalAccessPanel({ pages, users, batchSaving, globalPermissionOverride
 
 function ProductsSection({ items, deletingProductId, seedingCatalog, onSeed, onCreate, onEdit, onDelete }) {
   return (
-    <section className="card" role="tabpanel">
-      <div className="flex flex-col gap-4 border-b border-dark-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+    <section
+      className="card"
+      role="tabpanel"
+      style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+    >
+      <div
+        className="flex flex-col gap-4 border-b p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+        style={{ borderColor: 'var(--border-color)' }}
+      >
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Catálogo do carrinho</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Produtos e estoque</h2>
-          <p className="mt-1 text-sm text-nexus-400">{items.length} produtos cadastrados para venda.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>Catálogo do carrinho</p>
+          <h2 className="mt-2 text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Produtos e estoque</h2>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{items.length} produtos cadastrados para venda.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -1468,20 +1843,36 @@ function ProductsSection({ items, deletingProductId, seedingCatalog, onSeed, onC
         </div>
       </div>
 
-      <div className="divide-y divide-dark-border">
+      <div>
         {items.map((product) => (
-          <article key={product.id} className="flex flex-col gap-4 p-5 transition-colors hover:bg-dark-hover/60 sm:flex-row sm:items-center sm:p-6">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-nexus-400/20 bg-nexus-500/10 text-nexus-300"><ControlIcon kind="box" className="h-6 w-6" /></span>
+          <article
+            key={product.id}
+            className="flex flex-col gap-4 p-5 transition-all sm:flex-row sm:items-center sm:p-6"
+            style={{ borderBottom: '1px solid var(--border-color)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-hover)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; }}
+          >
+            <span
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border"
+              style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+            >
+              <ControlIcon kind="box" className="h-6 w-6" />
+            </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="truncate font-semibold text-white">{product.nome}</h3>
-                {product.categoria && <span className="rounded-full bg-dark-card px-2 py-1 text-[11px] text-nexus-400">{product.categoria}</span>}
+                <h3 className="truncate font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{product.nome}</h3>
+                {product.categoria && (
+                  <span
+                    className="rounded-full border px-2 py-0.5 text-[11px] font-semibold"
+                    style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+                  >{product.categoria}</span>
+                )}
               </div>
-              {product.descricao && <p className="mt-1 line-clamp-2 text-sm text-nexus-400">{product.descricao}</p>}
+              {product.descricao && <p className="mt-1 line-clamp-2 text-sm" style={{ color: 'var(--text-secondary)' }}>{product.descricao}</p>}
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                <span className="font-semibold text-nexus-200">{formatCurrency(product.valor_venda)}</span>
-                <span className={toNumber(product.estoque) > 0 ? 'text-emerald-300' : 'text-red-300'}>Estoque: {product.estoque ?? 0}</span>
-                {product.criador_nome && <span className="text-nexus-500">Por {product.criador_nome}</span>}
+                <span className="font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--accent-gold)' }}>{formatCurrency(product.valor_venda)}</span>
+                <span className={toNumber(product.estoque) > 0 ? 'text-emerald-400' : 'text-red-400'}>Estoque: {product.estoque ?? 0}</span>
+                {product.criador_nome && <span style={{ color: 'var(--text-muted)' }}>Por {product.criador_nome}</span>}
               </div>
             </div>
             <div className="flex shrink-0 gap-2">
@@ -1508,17 +1899,27 @@ function ProductsSection({ items, deletingProductId, seedingCatalog, onSeed, onC
 
 function OrdersSection({ orders, orderDrafts, savingOrderId, expandedOrderId, onDraftChange, onSave, onExpandedChange }) {
   return (
-    <section className="card" role="tabpanel">
-      <div className="flex flex-col gap-2 border-b border-dark-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+    <section
+      className="card"
+      role="tabpanel"
+      style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+    >
+      <div
+        className="flex flex-col gap-2 border-b p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+        style={{ borderColor: 'var(--border-color)' }}
+      >
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-nexus-400">Operação financeira</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">Pedidos e pagamentos</h2>
-          <p className="mt-1 text-sm text-nexus-400">Monitore a cobrança e o processamento de cada compra.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>Operação financeira</p>
+          <h2 className="mt-2 text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Pedidos e pagamentos</h2>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>Monitore a cobrança e o processamento de cada compra.</p>
         </div>
-        <span className="w-fit rounded-full border border-dark-border bg-dark-hover px-3 py-1.5 text-sm text-nexus-300">{orders.length} pedidos</span>
+        <span
+          className="w-fit rounded-full border px-3 py-1.5 text-sm font-semibold"
+          style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+        >{orders.length} pedidos</span>
       </div>
 
-      <div className="divide-y divide-dark-border">
+      <div>
         {orders.map((order) => {
           const draft = {
             status_pagamento: order.status_pagamento || 'pendente',
@@ -1528,19 +1929,23 @@ function OrdersSection({ orders, orderDrafts, savingOrderId, expandedOrderId, on
           const expanded = String(expandedOrderId) === String(order.id);
           const orderItems = getOrderItems(order);
           return (
-            <article key={order.id} className="p-5 sm:p-6">
+            <article
+              key={order.id}
+              className="p-5 sm:p-6"
+              style={{ borderBottom: '1px solid var(--border-color)' }}
+            >
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-white">Pedido #{order.codigo || order.numero || order.id}</h3>
+                    <h3 className="font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Pedido #{order.codigo || order.numero || order.id}</h3>
                     <StatusPill status={draft.status_pagamento} />
                     <StatusPill status={draft.status_pedido} type="order" />
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-nexus-400">
+                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
                     <span>{getOrderCustomer(order)}</span>
                     <span>{formatDate(order.criado_em || order.created_at || order.data_criacao)}</span>
                     <span className="capitalize">{order.forma_pagamento || order.metodo_pagamento || 'Pagamento não informado'}</span>
-                    <strong className="text-nexus-200">{formatCurrency(order.total ?? order.valor_total ?? order.total_geral)}</strong>
+                    <strong style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-display)' }}>{formatCurrency(order.total ?? order.valor_total ?? order.total_geral)}</strong>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:w-[410px]">
@@ -1561,17 +1966,29 @@ function OrdersSection({ orders, orderDrafts, savingOrderId, expandedOrderId, on
                 </div>
               </div>
               {expanded && (
-                <div className="mt-5 rounded-2xl border border-dark-border bg-dark-bg/60 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-nexus-400">Itens do pedido</p>
+                <div
+                  className="mt-5 rounded-2xl border p-4"
+                  style={{ backgroundColor: 'var(--bg-elevated-2)', borderColor: 'var(--accent-gold-border)' }}
+                >
+                  <p className="text-xs font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--accent-gold)' }}>Itens do pedido</p>
                   <div className="mt-3 space-y-2">
                     {orderItems.map((item, index) => (
-                      <div key={`${item.id || item.item_id || item.nome}-${index}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-dark-card px-3 py-2.5 text-sm">
-                        <span className="text-white">{item.nome || item.item_nome || item.produto_nome || 'Produto'}</span>
-                        <span className="text-nexus-400">{item.quantidade || 1} × {formatCurrency(item.preco_unitario ?? item.valor_unitario ?? item.preco)}</span>
-                        <strong className="text-nexus-200">{formatCurrency(item.subtotal ?? item.total ?? toNumber(item.quantidade || 1) * toNumber(item.preco_unitario ?? item.valor_unitario ?? item.preco))}</strong>
+                      <div
+                        key={`${item.id || item.item_id || item.nome}-${index}`}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm"
+                        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+                      >
+                        <span style={{ color: 'var(--text-primary)' }}>{item.nome || item.item_nome || item.produto_nome || 'Produto'}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{item.quantidade || 1} × {formatCurrency(item.preco_unitario ?? item.valor_unitario ?? item.preco)}</span>
+                        <strong style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-display)' }}>{formatCurrency(item.subtotal ?? item.total ?? toNumber(item.quantidade || 1) * toNumber(item.preco_unitario ?? item.valor_unitario ?? item.preco))}</strong>
                       </div>
                     ))}
-                    {orderItems.length === 0 && <p className="rounded-xl bg-dark-card p-3 text-sm text-nexus-400">Itens detalhados não disponíveis para este pedido.</p>}
+                    {orderItems.length === 0 && (
+                      <p
+                        className="rounded-xl border p-3 text-sm"
+                        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+                      >Itens detalhados não disponíveis para este pedido.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -1585,20 +2002,76 @@ function OrdersSection({ orders, orderDrafts, savingOrderId, expandedOrderId, on
 }
 
 function MetricCard({ label, value, detail, icon, accent = 'gold' }) {
-  const colors = {
-    gold: 'border-nexus-500/20 bg-nexus-500/10 text-nexus-300',
-    amber: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
-    green: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  const accentStyles = {
+    gold: {
+      border: 'var(--accent-gold-border)',
+      bg: 'var(--accent-gold-faint)',
+      color: 'var(--accent-gold)',
+      glow: 'var(--accent-gold-glow)',
+    },
+    amber: {
+      border: 'rgba(245, 158, 11, 0.3)',
+      bg: 'rgba(245, 158, 11, 0.08)',
+      color: '#f59e0b',
+      glow: 'rgba(245, 158, 11, 0.15)',
+    },
+    green: {
+      border: 'rgba(16, 185, 129, 0.3)',
+      bg: 'rgba(16, 185, 129, 0.08)',
+      color: '#10b981',
+      glow: 'rgba(16, 185, 129, 0.15)',
+    },
   };
+  const theme = accentStyles[accent] || accentStyles.gold;
+
   return (
-    <div className="card p-5">
+    <div
+      className="card p-5 group relative overflow-hidden transition-all duration-300"
+      style={{
+        backgroundColor: 'var(--bg-elevated-1)',
+        borderColor: 'var(--border-color)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--accent-gold-border)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15), 0 0 16px var(--accent-gold-glow)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--border-color)';
+        e.currentTarget.style.transform = '';
+        e.currentTarget.style.boxShadow = '';
+      }}
+    >
+      {/* Decorative top gold stripe on hover */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)' }}
+      />
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-nexus-400">{label}</p>
-          <p className="mt-2 truncate text-2xl font-bold text-white">{value}</p>
-          <p className="mt-1 text-xs text-nexus-500">{detail}</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</p>
+          <p
+            className="mt-2 truncate text-2xl font-extrabold tracking-tight"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--text-primary)',
+            }}
+          >
+            {value}
+          </p>
+          <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>{detail}</p>
         </div>
-        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${colors[accent]}`}><ControlIcon kind={icon} className="h-5 w-5" /></span>
+        <span
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all duration-300"
+          style={{
+            backgroundColor: theme.bg,
+            borderColor: theme.border,
+            color: theme.color,
+            boxShadow: `0 2px 10px ${theme.glow}`,
+          }}
+        >
+          <ControlIcon kind={icon} className="h-5 w-5" />
+        </span>
       </div>
     </div>
   );
@@ -1606,10 +2079,40 @@ function MetricCard({ label, value, detail, icon, accent = 'gold' }) {
 
 function ActionShortcut({ icon, title, text, action }) {
   return (
-    <button type="button" onClick={action} className="group flex w-full items-center gap-3 rounded-xl border border-dark-border bg-dark-hover p-4 text-left transition-all hover:border-nexus-500/40 hover:bg-nexus-500/10">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark-card text-nexus-300 transition-colors group-hover:bg-nexus-500/15"><ControlIcon kind={icon} className="h-5 w-5" /></span>
-      <span className="min-w-0 flex-1"><span className="block font-medium text-white">{title}</span><span className="mt-0.5 block text-sm text-nexus-400">{text}</span></span>
-      <ControlIcon kind="chevron" className="h-4 w-4 text-nexus-500" />
+    <button
+      type="button"
+      onClick={action}
+      className="group flex w-full items-center gap-3.5 rounded-xl border p-4 text-left transition-all duration-200"
+      style={{
+        backgroundColor: 'var(--bg-elevated-2)',
+        borderColor: 'var(--border-color)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--accent-gold-border)';
+        e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+        e.currentTarget.style.transform = 'translateY(-1px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--border-color)';
+        e.currentTarget.style.backgroundColor = 'var(--bg-elevated-2)';
+        e.currentTarget.style.transform = '';
+      }}
+    >
+      <span
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors"
+        style={{
+          backgroundColor: 'var(--accent-gold-faint)',
+          borderColor: 'var(--accent-gold-border)',
+          color: 'var(--accent-gold)',
+        }}
+      >
+        <ControlIcon kind={icon} className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{title}</span>
+        <span className="mt-0.5 block text-xs" style={{ color: 'var(--text-secondary)' }}>{text}</span>
+      </span>
+      <ControlIcon kind="chevron" className="h-4 w-4 transition-transform group-hover:translate-x-1" style={{ color: 'var(--accent-gold)' }} />
     </button>
   );
 }
@@ -1617,32 +2120,42 @@ function ActionShortcut({ icon, title, text, action }) {
 function StatusPill({ status, type = 'payment' }) {
   const normalized = normalizeStatus(status);
   const classes = normalized === 'confirmado' || normalized === 'aprovado' || normalized === 'pago' || normalized === 'concluido'
-    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200'
+    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
     : normalized === 'recusado' || normalized === 'cancelado' || normalized === 'falhou' || normalized === 'estornado'
-      ? 'border-red-400/30 bg-red-400/10 text-red-200'
+      ? 'border-red-400/30 bg-red-400/10 text-red-300'
       : normalized === 'processando'
-        ? 'border-sky-400/30 bg-sky-400/10 text-sky-200'
-        : 'border-amber-400/30 bg-amber-400/10 text-amber-200';
-  return <span className={`rounded-full border px-2 py-1 text-[11px] font-semibold ${classes}`}>{formatStatus(status, type)}</span>;
+        ? 'border-sky-400/30 bg-sky-400/10 text-sky-300'
+        : 'border-amber-400/30 bg-amber-400/10 text-amber-300';
+  return <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${classes}`}>{formatStatus(status, type)}</span>;
 }
 
 function EmptyPanel({ icon, title, text, actionLabel, onAction }) {
   return (
-    <div className="flex flex-col items-center justify-center p-10 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-nexus-500/10 text-nexus-300"><ControlIcon kind={icon} className="h-7 w-7" /></span>
-      <h3 className="mt-4 font-semibold text-white">{title}</h3>
-      <p className="mt-1 max-w-sm text-sm text-nexus-400">{text}</p>
-      {actionLabel && <button type="button" onClick={onAction} className="btn-primary mt-5">{actionLabel}</button>}
+    <div className="flex flex-col items-center justify-center p-10 text-center animate-fade-in">
+      <span
+        className="flex h-14 w-14 items-center justify-center rounded-2xl border"
+        style={{
+          backgroundColor: 'var(--accent-gold-faint)',
+          borderColor: 'var(--accent-gold-border)',
+          color: 'var(--accent-gold)',
+          boxShadow: '0 4px 16px rgba(212,175,55,0.08)',
+        }}
+      >
+        <ControlIcon kind={icon} className="h-7 w-7" />
+      </span>
+      <h3 className="mt-4 font-bold text-base" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{title}</h3>
+      <p className="mt-1 max-w-sm text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
+      {actionLabel && <button type="button" onClick={onAction} className="btn-primary mt-5 text-xs">{actionLabel}</button>}
     </div>
   );
 }
 
 function AccessDenied() {
   return (
-    <div className="card mx-auto max-w-xl p-8 text-center">
-      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-400/10 text-red-300"><ControlIcon kind="shield" className="h-7 w-7" /></span>
-      <h1 className="mt-5 text-2xl font-bold text-white">Acesso administrativo necessário</h1>
-      <p className="mt-2 text-nexus-400">Este centro de controle está disponível apenas para administradores.</p>
+    <div className="card mx-auto max-w-xl p-8 text-center" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}>
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-400/10 border border-red-400/20 text-red-300"><ControlIcon kind="shield" className="h-7 w-7" /></span>
+      <h1 className="mt-5 text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Acesso administrativo necessário</h1>
+      <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>Este centro de controle está disponível apenas para administradores.</p>
     </div>
   );
 }
@@ -1650,12 +2163,12 @@ function AccessDenied() {
 function ControlCenterSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
-      <div className="h-48 rounded-3xl border border-dark-border bg-dark-card" />
-      <div className="h-14 rounded-2xl border border-dark-border bg-dark-card" />
+      <div className="h-44 rounded-3xl border" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }} />
+      <div className="h-14 rounded-2xl border" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[0, 1, 2, 3].map((index) => <div key={index} className="h-32 rounded-2xl border border-dark-border bg-dark-card" />)}
+        {[0, 1, 2, 3].map((index) => <div key={index} className="h-32 rounded-2xl border" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }} />)}
       </div>
-      <div className="h-96 rounded-2xl border border-dark-border bg-dark-card" />
+      <div className="h-96 rounded-2xl border" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }} />
     </div>
   );
 }

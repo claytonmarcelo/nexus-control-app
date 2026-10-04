@@ -1,7 +1,6 @@
-
 /**
  * OrderStepper - Componente visual para rastreamento de pedidos
- * Exibe timeline neumórfica dos status do pedido com animações suaves
+ * Exibe timeline premium dos status do pedido com animações suaves e elegância Luxury Tech
  */
 
 export default function OrderStepper({ status = 'pendente', createdAt: _createdAt = new Date() }) {
@@ -28,16 +27,23 @@ export default function OrderStepper({ status = 'pendente', createdAt: _createdA
 
   return (
     <div className="w-full">
-      {/* Timeline Horizontal */}
-      <div className="relative">
-        {/* Background Line */}
-        <div className="absolute top-8 left-0 right-0 h-1 bg-dark-border rounded-full"></div>
+      {/* Timeline Horizontal (Desktop & Tablet) */}
+      <div className="relative hidden sm:block py-4">
+        {/* Background Track */}
+        <div
+          className="absolute top-11 left-8 right-8 h-1 rounded-full"
+          style={{ backgroundColor: 'var(--border-color)' }}
+        />
 
         {/* Progress Line */}
         <div
-          className="absolute top-8 left-0 h-1 bg-gradient-to-r from-nexus-500 to-nexus-400 rounded-full transition-all duration-500"
-          style={{ width: `${(currentIndex / (steps.length - 1)) * 100}%` }}
-        ></div>
+          className="absolute top-11 left-8 h-1 rounded-full transition-all duration-500"
+          style={{
+            width: `calc(${(currentIndex / (steps.length - 1)) * 100}% - 4rem)`,
+            background: 'linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light))',
+            boxShadow: '0 0 12px var(--accent-gold-glow)',
+          }}
+        />
 
         {/* Steps */}
         <div className="relative flex justify-between items-start">
@@ -46,41 +52,58 @@ export default function OrderStepper({ status = 'pendente', createdAt: _createdA
             const isCurrent = index === currentIndex;
 
             return (
-              <div key={step.id} className="flex flex-col items-center flex-1">
+              <div key={step.id} className="flex flex-col items-center flex-1 px-1">
                 {/* Circle Node */}
                 <div
-                  className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isCurrent
-                      ? 'neumorphic scale-125 shadow-lg'
-                      : isActive
-                        ? 'bg-nexus-600 border-2 border-nexus-500'
-                        : 'bg-dark-card border-2 border-dark-border'
+                  className={`relative w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                    isCurrent ? 'scale-110 shadow-lg' : ''
                   }`}
+                  style={{
+                    backgroundColor: isCurrent
+                      ? 'var(--accent-gold)'
+                      : isActive
+                      ? 'var(--accent-gold-faint)'
+                      : 'var(--bg-elevated-1)',
+                    border: isCurrent
+                      ? '2px solid var(--accent-gold-light)'
+                      : isActive
+                      ? '1px solid var(--accent-gold-border)'
+                      : '1px solid var(--border-color)',
+                    color: isCurrent
+                      ? '#0d0d0d'
+                      : isActive
+                      ? 'var(--accent-gold)'
+                      : 'var(--text-muted)',
+                    boxShadow: isCurrent ? '0 0 20px var(--accent-gold-glow)' : 'none',
+                  }}
                 >
-                  <span
-                    className={`text-2xl transition-all duration-300 ${
-                      isActive ? 'text-white' : 'text-nexus-400'
-                    }`}
-                  >
+                  <span className="text-xl font-bold">
                     {step.icon}
                   </span>
 
-                  {/* Pulse Animation for Current */}
+                  {/* Pulse Ring for Current */}
                   {isCurrent && (
-                    <div className="absolute inset-0 rounded-full border-2 border-nexus-500 animate-pulse"></div>
+                    <div
+                      className="absolute -inset-1 rounded-2xl animate-ping opacity-25"
+                      style={{ border: '2px solid var(--accent-gold)' }}
+                    />
                   )}
                 </div>
 
                 {/* Labels */}
-                <div className="mt-4 text-center">
+                <div className="mt-3 text-center">
                   <p
-                    className={`text-sm font-semibold transition-colors duration-300 ${
-                      isActive ? 'text-white' : 'text-nexus-400'
-                    }`}
+                    className="text-xs font-bold uppercase tracking-wider transition-colors duration-300"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                    }}
                   >
                     {step.label}
                   </p>
-                  <p className="text-xs text-nexus-400 mt-1">{step.description}</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                    {step.description}
+                  </p>
                 </div>
               </div>
             );
@@ -89,52 +112,82 @@ export default function OrderStepper({ status = 'pendente', createdAt: _createdA
       </div>
 
       {/* Current Status Card */}
-      <div className="mt-8 glass rounded-xl p-4 border border-nexus-500/30">
-        <div className="flex items-center gap-3">
-          <div className="text-3xl">{steps[currentIndex].icon}</div>
-          <div>
-            <p className="text-sm text-nexus-400">Status Atual</p>
-            <p className="text-lg font-semibold text-white">{steps[currentIndex].label}</p>
-            <p className="text-xs text-nexus-400 mt-1">{steps[currentIndex].description}</p>
-          </div>
+      <div
+        className="mt-6 rounded-2xl p-5 border flex items-center gap-4 transition-all"
+        style={{
+          backgroundColor: 'var(--bg-elevated-1)',
+          borderColor: 'var(--accent-gold-border)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+        }}
+      >
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+          style={{
+            backgroundColor: 'var(--accent-gold-faint)',
+            border: '1px solid var(--accent-gold-border)',
+          }}
+        >
+          {steps[currentIndex].icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>
+            Status Atual do Pedido
+          </p>
+          <p className="text-base font-bold truncate mt-0.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+            {steps[currentIndex].label}
+          </p>
+          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-secondary)' }}>
+            {steps[currentIndex].description}
+          </p>
         </div>
       </div>
 
-      {/* Timeline Vertical (Mobile) */}
-      <div className="md:hidden mt-6 space-y-4">
+      {/* Timeline Vertical (Mobile < 640px) */}
+      <div className="sm:hidden mt-6 space-y-3">
         {steps.map((step, index) => {
           const isActive = index <= currentIndex;
           const isCurrent = index === currentIndex;
 
           return (
-            <div key={step.id} className="flex gap-4">
-              {/* Vertical Line and Circle */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    isCurrent
-                      ? 'bg-nexus-600 scale-125 shadow-lg'
-                      : isActive
-                        ? 'bg-nexus-600 border-2 border-nexus-500'
-                        : 'bg-dark-card border-2 border-dark-border'
-                  }`}
-                >
-                  <span className="text-lg">{step.icon}</span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`w-1 h-8 mt-2 ${
-                      index < currentIndex ? 'bg-nexus-500' : 'bg-dark-border'
-                    }`}
-                  ></div>
-                )}
+            <div
+              key={step.id}
+              className="flex items-center gap-3 p-3 rounded-xl border transition-all"
+              style={{
+                backgroundColor: isCurrent ? 'var(--accent-gold-faint)' : 'var(--bg-elevated-1)',
+                borderColor: isCurrent ? 'var(--accent-gold-border)' : 'var(--border-color)',
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                style={{
+                  backgroundColor: isCurrent ? 'var(--accent-gold)' : 'var(--bg-hover)',
+                  color: isCurrent ? '#0d0d0d' : isActive ? 'var(--accent-gold)' : 'var(--text-muted)',
+                  border: isCurrent ? 'none' : '1px solid var(--border-color)',
+                }}
+              >
+                {step.icon}
               </div>
 
-              {/* Content */}
-              <div className="pt-1">
-                <p className="text-sm font-semibold text-white">{step.label}</p>
-                <p className="text-xs text-nexus-400">{step.description}</p>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-xs font-bold uppercase tracking-wide truncate"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                  }}
+                >
+                  {step.label}
+                </p>
+                <p className="text-[11px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {step.description}
+                </p>
               </div>
+
+              {isActive && (
+                <span className="text-xs font-bold" style={{ color: 'var(--accent-gold)' }}>
+                  ✓
+                </span>
+              )}
             </div>
           );
         })}

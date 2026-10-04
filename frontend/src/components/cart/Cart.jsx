@@ -162,16 +162,16 @@ export default function Cart() {
     return (
       <section className="mx-auto flex min-h-[56vh] max-w-xl items-center justify-center animate-fade-in">
         <div className="glass w-full rounded-3xl p-8 text-center shadow-glass-lg sm:p-12">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-nexus-500/30 bg-nexus-600/15 text-nexus-300">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border" style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}>
             <CartIcon className="h-8 w-8" />
           </div>
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Seu pedido</p>
-          <h1 className="mt-3 font-display text-3xl font-semibold text-white">Seu carrinho está vazio</h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-nexus-400">
+          <p className="mt-6 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Seu pedido</p>
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Seu carrinho está vazio</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
             Explore o catálogo e adicione os produtos e serviços que deseja.
           </p>
           <Link to="/itens" className="btn-primary mt-8">
-            <BoxIcon className="h-5 w-5" />
+            <BoxIcon className="h-4 w-4" />
             Ver catálogo
           </Link>
         </div>
@@ -184,22 +184,22 @@ export default function Cart() {
       <section className="space-y-6 animate-fade-in">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Seleção atual</p>
-            <h1 className="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">Seu carrinho</h1>
-            <p className="mt-2 text-sm text-nexus-400">
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Seleção atual</p>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Seu Carrinho</h1>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
               {totalItems} {totalItems === 1 ? 'item selecionado' : 'itens selecionados'} para o seu pedido.
             </p>
           </div>
           <button type="button" onClick={handleClearCart} className="btn-ghost w-full gap-2 sm:w-auto">
-            <TrashIcon className="h-5 w-5" />
+            <TrashIcon className="h-4 w-4" />
             Limpar carrinho
           </button>
         </header>
 
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="glass overflow-hidden rounded-3xl shadow-glass">
-            <div className="border-b border-dark-border px-5 py-4 sm:px-6">
-              <h2 className="font-display text-lg font-semibold text-white">Itens selecionados</h2>
+            <div className="border-b px-5 py-4 sm:px-6" style={{ borderColor: 'var(--divider)' }}>
+              <h2 className="text-base font-bold uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Itens selecionados</h2>
             </div>
             <ul className="divide-y divide-dark-border" aria-label="Itens do carrinho">
               {items.map((item) => (
@@ -227,7 +227,7 @@ export default function Cart() {
                           {item.fabricante && (
                             <p className="text-[11px] font-medium uppercase tracking-widest text-nexus-500">{item.fabricante}</p>
                           )}
-                          <h3 className="truncate font-medium text-white">{item.nome}</h3>
+                          <h3 className="truncate font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.nome}</h3>
                           {item.tipo === 'aluguel' ? (
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                               <span className="cart-rental-badge">
@@ -318,7 +318,7 @@ export default function Cart() {
                           <p className="text-xs uppercase tracking-wide text-nexus-500">
                             {item.tipo === 'aluguel' ? `Total (${item.dias_aluguel} dias)` : 'Subtotal'}
                           </p>
-                          <p className="mt-1 font-display text-lg font-semibold text-white">
+                          <p className="mt-1 text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
                             {formatCurrency(getItemSubtotal(item))}
                           </p>
                         </div>
@@ -336,16 +336,24 @@ export default function Cart() {
             <dl className="mt-6 space-y-4 text-sm">
               <div className="flex items-center justify-between gap-4 text-nexus-400">
                 <dt>Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'})</dt>
-                <dd className="font-medium text-white">{formatCurrency(subtotal)}</dd>
+                <dd className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(subtotal)}</dd>
               </div>
               <div className="flex items-center justify-between gap-4 text-nexus-400">
                 <dt>Entrega</dt>
                 <dd className="font-medium text-nexus-300">Grátis</dd>
               </div>
-              <div className="border-t border-dark-border pt-4">
+              <div className="border-t pt-4" style={{ borderColor: 'var(--divider)' }}>
                 <div className="flex items-end justify-between gap-4">
-                  <dt className="font-display text-lg font-semibold text-white">Total geral</dt>
-                  <dd className="font-display text-2xl font-semibold text-gourmet-champagne">
+                  <dt className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Total geral</dt>
+                  <dd
+                    className="text-2xl font-bold"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
                     {formatCurrency(subtotal)}
                   </dd>
                 </div>

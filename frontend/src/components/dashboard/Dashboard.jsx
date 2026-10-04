@@ -75,14 +75,31 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">{getWelcomeMessage()}, {user?.nome}</h1>
-          <p className="text-nexus-400 mt-1">Acompanhe suas atividades e gerencie seus itens</p>
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-2"
+            style={{ color: 'var(--accent-gold)', letterSpacing: '0.12em' }}
+          >
+            {getWelcomeMessage()}
+          </p>
+          <h1
+            className="text-3xl font-bold leading-tight"
+            style={{
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-display)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            {user?.nome}
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Acompanhe suas atividades e gerencie seus itens
+          </p>
         </div>
         {isCliente && (
           <Link to="/itens" className="btn-primary">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Novo Item
@@ -123,71 +140,108 @@ export default function Dashboard() {
         
         <div className="space-y-4">
           <div className="card p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <ZapIcon className="w-5 h-5 text-nexus-400" />
+            <h2
+              className="text-sm font-semibold mb-4 flex items-center gap-2"
+              style={{
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              <ZapIcon className="w-4 h-4" style={{ color: 'var(--accent-gold)' }} />
               Ações Rápidas
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {isCliente && (
-                <Link to="/itens" className="block p-4 rounded-xl bg-dark-hover border border-dark-border hover:border-nexus-500/50 transition-all group">
+                <Link
+                  to="/itens"
+                  className="block p-3.5 rounded-xl border transition-all group"
+                  style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.3)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-nexus-600/20 flex items-center justify-center group-hover:bg-nexus-600/40 transition-colors">
-                      <PlusIcon className="w-5 h-5 text-nexus-400" />
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--accent-gold)' }}>
+                      <PlusIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium text-white">Solicitar novo item</p>
-                      <p className="text-sm text-nexus-400">Crie uma nova requisição</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Solicitar novo item</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Crie uma nova requisição</p>
                     </div>
                   </div>
                 </Link>
               )}
               {isFuncionario && (
-                <Link to="/itens" className="block p-4 rounded-xl bg-dark-hover border border-dark-border hover:border-nexus-500/50 transition-all group">
+                <Link
+                  to="/itens"
+                  className="block p-3.5 rounded-xl border transition-all group"
+                  style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center group-hover:bg-green-600/40 transition-colors">
-                      <EditIcon className="w-5 h-5 text-green-400" />
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}>
+                      <EditIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium text-white">Gerenciar itens</p>
-                      <p className="text-sm text-nexus-400">Visualize e atualize itens</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Gerenciar itens</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Visualize e atualize itens</p>
                     </div>
                   </div>
                 </Link>
               )}
               {isAdmin && (
                 <>
-                  <Link to="/usuarios" className="block p-4 rounded-xl bg-dark-hover border border-dark-border hover:border-purple-500/50 transition-all group">
+                  <Link
+                    to="/usuarios"
+                    className="block p-3.5 rounded-xl border transition-all group"
+                    style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(139,92,246,0.3)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-600/20 flex items-center justify-center group-hover:bg-purple-600/40 transition-colors">
-                        <UsersIcon className="w-5 h-5 text-purple-400" />
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}>
+                        <UsersIcon className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-white">Gerenciar usuários</p>
-                        <p className="text-sm text-nexus-400">Adicione, edite ou remova usuários</p>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Gerenciar usuários</p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Adicione, edite ou remova usuários</p>
                       </div>
                     </div>
                   </Link>
-                  <Link to="/itens" className="block p-4 rounded-xl bg-dark-hover border border-dark-border hover:border-nexus-500/50 transition-all group">
+                  <Link
+                    to="/itens"
+                    className="block p-3.5 rounded-xl border transition-all group"
+                    style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.3)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-nexus-600/20 flex items-center justify-center group-hover:bg-nexus-600/40 transition-colors">
-                        <BoxIcon className="w-5 h-5 text-nexus-400" />
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(212,175,55,0.08)', color: 'var(--accent-gold)' }}>
+                        <BoxIcon className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-white">Gerenciar todos os itens</p>
-                        <p className="text-sm text-nexus-400">Controle total do inventário</p>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Gerenciar todos os itens</p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Controle total do inventário</p>
                       </div>
                     </div>
                   </Link>
                 </>
               )}
-              <Link to="/perfil" className="block p-4 rounded-xl bg-dark-hover border border-dark-border hover:border-nexus-500/50 transition-all group">
+              <Link
+                to="/perfil"
+                className="block p-3.5 rounded-xl border transition-all group"
+                style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-color-strong)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-600/20 flex items-center justify-center group-hover:bg-gray-600/40 transition-colors">
-                    <UserCircleIcon className="w-5 h-5 text-gray-400" />
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--bg-elevated-2)', color: 'var(--text-secondary)' }}>
+                    <UserCircleIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Meu perfil</p>
-                    <p className="text-sm text-nexus-400">Atualize suas informações</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Meu perfil</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Atualize suas informações</p>
                   </div>
                 </div>
               </Link>
@@ -195,17 +249,33 @@ export default function Dashboard() {
           </div>
 
           <div className="card p-6">
-            <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <InfoIcon className="w-5 h-5 text-nexus-400" />
-              Seu Nível de Acesso
+            <h2
+              className="text-sm font-semibold mb-4 flex items-center gap-2"
+              style={{
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-display)',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              <InfoIcon className="w-4 h-4" style={{ color: 'var(--accent-gold)' }} />
+              Nível de Acesso
             </h2>
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-dark-hover">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getRoleColor(user?.nivel_acesso)}`}>
-                <RoleIcon role={user?.nivel_acesso} className="w-6 h-6 text-white" />
+            <div
+              className="flex items-center gap-3 p-3.5 rounded-xl"
+              style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}
+            >
+              <div
+                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${getRoleColor(user?.nivel_acesso)}`}
+              >
+                <RoleIcon role={user?.nivel_acesso} className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-medium text-white capitalize">{getRoleLabel(user?.nivel_acesso)}</p>
-                <p className="text-sm text-nexus-400">{getRoleDescription(user?.nivel_acesso)}</p>
+                <p className="text-sm font-semibold capitalize" style={{ color: 'var(--text-primary)' }}>
+                  {getRoleLabel(user?.nivel_acesso)}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {getRoleDescription(user?.nivel_acesso)}
+                </p>
               </div>
             </div>
           </div>

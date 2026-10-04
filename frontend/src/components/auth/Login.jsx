@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useModal } from '../../contexts/ModalContext';
+import ThemeToggle from '../ui/ThemeToggle';
+import NexusLogo from '../ui/NexusLogo';
 import api from '../../services/api';
 import { PASSWORD_POLICY_MESSAGE, validatePassword } from '../../utils/password';
 
@@ -26,17 +28,18 @@ function Login() {
 
   return (
     <div className="auth-page">
-      {/* Floating Theme Toggle */}
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="auth-theme-toggle"
-        aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
-        title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
-      >
-        <span className="auth-theme-icon">{theme === 'dark' ? '☼' : '☾'}</span>
-        <span className="auth-theme-text">{theme === 'dark' ? 'Claro' : 'Escuro'}</span>
-      </button>
+      {/* Return to landing page */}
+      <Link to="/" className="auth-back-link" aria-label="Voltar para a página inicial">
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>Início</span>
+      </Link>
+
+      {/* Floating Modern Theme Toggle */}
+      <div className="auth-theme-toggle-wrap">
+        <ThemeToggle variant="pill" id="login-theme-toggle" />
+      </div>
 
       <div className="auth-circle-container">
         {/* Animated 3D Flip Container */}
@@ -140,16 +143,13 @@ function LoginForm({ onNavigate }) {
   return (
     <div className="fp-content">
       <div className="auth-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D4AF37' }}>
-          <rect x="5" y="11" width="14" height="10" rx="2" />
-          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-          <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none" />
-        </svg>
+        <NexusLogo className="w-6 h-6" />
       </div>
 
       <div className="auth-form-header">
         <h1 className="auth-form-title">Nexus Control</h1>
-        <p className="auth-form-subtitle">Bem-vindo de volta! Faça login para continuar</p>
+        <span className="auth-form-tag">ENTERPRISE ACCESS</span>
+        <p className="auth-form-subtitle">Acesso corporativo seguro à plataforma</p>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="fp-form">
@@ -302,6 +302,7 @@ function RegisterForm({ onNavigate }) {
 
       <div className="auth-form-header">
         <h1 className="auth-form-title">Criar Conta</h1>
+        <span className="auth-form-tag">NOVO USUÁRIO</span>
         <p className="auth-form-subtitle">Cadastre-se e comece a gerenciar seus itens</p>
       </div>
 
@@ -541,6 +542,7 @@ function ForgotForm({ onNavigate }) {
 
       <div className="auth-form-header">
         <h1 className="auth-form-title">{titles[step]}</h1>
+        <span className="auth-form-tag">RECUPERAÇÃO</span>
         <p className="auth-form-subtitle">{subtitles[step]}</p>
       </div>
 

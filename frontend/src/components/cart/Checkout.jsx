@@ -196,18 +196,29 @@ export default function Checkout() {
             </section>
 
             <section className="glass overflow-hidden rounded-3xl shadow-glass">
-              <div className="flex items-center gap-3 border-b border-dark-border px-5 py-4 sm:px-6">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-nexus-500/30 bg-nexus-600/15 text-sm font-semibold text-nexus-300">2</span>
+              <div className="flex items-center gap-3 border-b px-5 py-4 sm:px-6" style={{ borderColor: 'var(--divider)' }}>
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
+                  style={{
+                    backgroundColor: 'var(--accent-gold-faint)',
+                    color: 'var(--accent-gold)',
+                    border: '1px solid var(--accent-gold-border)',
+                  }}
+                >
+                  2
+                </span>
                 <div>
-                  <h2 className="font-display text-lg font-semibold text-white">Resumo do pedido</h2>
-                  <p className="text-sm text-nexus-400">{totalItems} {totalItems === 1 ? 'item selecionado' : 'itens selecionados'}</p>
+                  <h2 className="text-base font-bold uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+                    Resumo do pedido
+                  </h2>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{totalItems} {totalItems === 1 ? 'item selecionado' : 'itens selecionados'}</p>
                 </div>
               </div>
-              <ul className="divide-y divide-dark-border">
+              <ul className="divide-y" style={{ borderColor: 'var(--divider)' }}>
                 {items.map((item) => (
                   <li key={item.id} className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-white">{item.nome}</p>
+                      <p className="truncate font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.nome}</p>
                       {item.tipo === 'aluguel' ? (
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <span className="cart-rental-badge" style={{ fontSize: '0.65rem' }}>
@@ -216,10 +227,10 @@ export default function Checkout() {
                           <span className="text-xs text-nexus-500">{formatCurrency(item.preco_unitario)}</span>
                         </div>
                       ) : (
-                        <p className="mt-1 text-sm text-nexus-400">{item.quantidade} × {formatCurrency(item.preco_unitario)}</p>
+                        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>{item.quantidade} × {formatCurrency(item.preco_unitario)}</p>
                       )}
                     </div>
-                    <p className="shrink-0 font-medium text-nexus-300">{formatCurrency(getItemSubtotal(item))}</p>
+                    <p className="shrink-0 font-semibold text-sm" style={{ color: 'var(--accent-gold)' }}>{formatCurrency(getItemSubtotal(item))}</p>
                   </li>
                 ))}
               </ul>
@@ -227,20 +238,30 @@ export default function Checkout() {
           </div>
 
           <aside className="glass rounded-3xl p-5 shadow-glass sm:p-6 xl:sticky xl:top-24">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Total do pedido</p>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--accent-gold)' }}>Total do pedido</p>
             <div className="mt-6 space-y-4 text-sm">
               <div className="flex items-center justify-between gap-4 text-nexus-400">
                 <span>Subtotal</span>
-                <span className="font-medium text-white">{formatCurrency(subtotal)}</span>
+                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between gap-4 text-nexus-400">
                 <span>Entrega</span>
-                <span className="font-medium text-nexus-300">Grátis</span>
+                <span className="font-medium text-emerald-400">Grátis</span>
               </div>
-              <div className="border-t border-dark-border pt-4">
+              <div className="border-t pt-4" style={{ borderColor: 'var(--divider)' }}>
                 <div className="flex items-end justify-between gap-4">
-                  <span className="font-display text-lg font-semibold text-white">Total geral</span>
-                  <span className="font-display text-2xl font-semibold text-gourmet-champagne">{formatCurrency(subtotal)}</span>
+                  <span className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Total geral</span>
+                  <span
+                    className="text-2xl font-bold"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      background: 'linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold-dark))',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    {formatCurrency(subtotal)}
+                  </span>
                 </div>
               </div>
             </div>

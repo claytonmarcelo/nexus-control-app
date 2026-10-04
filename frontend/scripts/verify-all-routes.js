@@ -1,6 +1,11 @@
 import puppeteer from 'puppeteer-core';
+import fs from 'fs';
 
-const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const CHROME_PATH = process.env.CHROME_PATH || 
+  (fs.existsSync('C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe') 
+    ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
+    : 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe');
+
 
 const mockUser = {
   id: 1,

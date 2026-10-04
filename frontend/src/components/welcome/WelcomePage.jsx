@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import ThemeToggle from '../ui/ThemeToggle';
 
 /* ─── Animated Particles Background ─── */
 function ParticleField() {
@@ -251,14 +252,7 @@ export default function WelcomePage() {
             </div>
           </div>
           <div className="welcome-nav-actions">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="welcome-theme-btn"
-              aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
-            >
-              {theme === 'dark' ? '☼' : '☾'}
-            </button>
+            <ThemeToggle variant="pill" id="welcome-theme-toggle" />
             <Link to="/login" className="welcome-access-btn" id="welcome-access-btn">
               <span>Acessar</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
