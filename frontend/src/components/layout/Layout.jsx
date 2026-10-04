@@ -6,6 +6,12 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useCart } from '../../contexts/CartContext';
 import ThemeToggle from '../ui/ThemeToggle';
 
+const ROLE_META = {
+  admin:      { label: 'Administrador', color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.25)' },
+  funcionario:{ label: 'Funcionário',   color: '#10b981', bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.25)' },
+  cliente:    { label: 'Cliente',       color: '#d4af37', bg: 'rgba(212,175,55,0.10)', border: 'rgba(212,175,55,0.25)' },
+};
+
 export default function Layout() {
   const { user, logout, isAdmin, canAccess } = useAuth();
   const { confirm } = useModal();
@@ -199,9 +205,19 @@ export default function Layout() {
                   >
                     {user?.nome?.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user?.nome?.split(' ')[0]}
-                  </span>
+                  <div className="hidden sm:flex flex-col leading-none gap-0.5">
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-primary)', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user?.nome?.split(' ')[0]}
+                    </span>
+                    {(() => {
+                      const rm = ROLE_META[user?.nivel_acesso] || ROLE_META.cliente;
+                      return (
+                        <span className="text-[9px] font-bold tracking-wide" style={{ color: rm.color }}>
+                          {rm.label}
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--text-muted)' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -257,7 +273,20 @@ export default function Layout() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{user?.nome}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    {(() => {
+                      const rm = ROLE_META[user?.nivel_acesso] || ROLE_META.cliente;
+                      return (
+                        <span
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase"
+                          style={{ color: rm.color, backgroundColor: rm.bg, border: `1px solid ${rm.border}` }}
+                        >
+                          {rm.label}
+                        </span>
+                      );
+                    })()}
+                    <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</span>
+                  </div>
                 </div>
                 <button
                   onClick={() => {
