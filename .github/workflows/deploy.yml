@@ -99,6 +99,15 @@ jobs:
         run: npm run build
 
       # Deploy Condicional via SSH (só roda quando EC2_HOST e EC2_SSH_KEY existem)
+      #
+      # A execução usa o MESMO script do caminho documentado (deploy-aws.sh) para que
+      # CI e atualização manual na EC2 não divirjam. O script já trata de: git
+      # fetch/reset, npm ci com devDependencies (necessário porque o build roda `tsc`,
+      # que é devDependency), build do backend, migrações + seed idempotentes via
+      # `node dist/utils/*.js`, poda de devDependencies, build do frontend, sync com
+      # Nginx, `pm2 reload --env production` e health check em /api/health.
+      # Qualquer falha faz o passo fechar com erro em vez de deixar o serviço no ar
+      # com código antigo.
       - name: 🚀 Deploy na AWS EC2 (via SSH)
         if: ${{ env.EC2_HOST != '' && env.EC2_SSH_KEY != '' }}
         uses: appleboy/ssh-action@v1.0.3
@@ -107,35 +116,27 @@ jobs:
           username: ${{ env.EC2_USER != '' && env.EC2_USER || 'ubuntu' }}
           key: ${{ env.EC2_SSH_KEY }}
           port: ${{ env.EC2_PORT != '' && env.EC2_PORT || 22 }}
+          script_stop: true
           script: |
             set -e
             echo "=== Atualizando Nexus Control na AWS EC2 ==="
-            cd ~/nexus-control-app || cd /home/ubuntu/nexus-control-app || cd /var/www/nexus-control-app
-            git fetch origin main
-            git reset --hard origin/main
-            
-            # Backend
-            cd backend
-            npm ci --omit=dev || npm install --omit=dev
-            npm run build
-            npm run db:migrate || true
-            npm run db:seed || true
-            
-            # Frontend
-            cd ../frontend
-            npm ci || npm install
-            npm run build
-            
-            # Nginx sync (se aplicável)
-            if [ -d "/var/www/html" ]; then
-              sudo cp -r dist/* /var/www/html/ 2>/dev/null || true
+
+            APP_DIR=""
+            for CANDIDATE in "$HOME/nexus-control-app" /home/ubuntu/nexus-control-app /var/www/nexus-control-app; do
+              if [ -f "$CANDIDATE/deploy-aws.sh" ]; then
+                APP_DIR="$CANDIDATE"
+                break
+              fi
+            done
+
+            if [ -z "$APP_DIR" ]; then
+              echo "❌ deploy-aws.sh não encontrado em nenhum diretório conhecido."
+              echo "   Clone o repositório em ~/nexus-control-app antes do primeiro deploy:"
+              echo "   git clone <repo> ~/nexus-control-app"
+              exit 1
             fi
-            if [ -d "/var/www/nexus-control" ]; then
-              sudo cp -r dist/* /var/www/nexus-control/ 2>/dev/null || true
-            fi
-            
-            # Reiniciar processo
-            cd ../backend
-            pm2 reload ecosystem.config.cjs --env production || pm2 reload nexus-backend || pm2 restart all || pm2 start dist/server.js --name "nexus-backend"
-            pm2 save || true
+
+            echo "📍 Diretório da aplicação: $APP_DIR"
+            cd "$APP_DIR"
+            bash deploy-aws.sh
             echo "=== Deploy concluído com sucesso! ==="

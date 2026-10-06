@@ -190,7 +190,13 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
   `.page-transition`, que antes não tinham CSS nenhum), tons por tipo de erro,
   `prefers-reduced-motion` respeitado e rota `/acesso-negado`.
 - Banco: schema atualizado com colunas/tabelas aditivas; dados preservados.
-- Deploy: bundles `frontend/dist` e `backend/dist` atualizados para AWS.
+- Deploy: bundles `frontend/dist` e `backend/dist` atualizados para AWS. O GitHub Actions
+  passou a executar o **mesmo** `deploy-aws.sh` do caminho manual (o script inline do
+  workflow instalava sem devDependencies e morria no `tsc`, além de mascarar erro de
+  migração com `|| true`), com `script_stop` e health check obrigatório; o script ganhou
+  `PATH` robusto para SSH não-interativo. Ensaio real de deploy em produção (schema
+  isolado, `NODE_ENV=production`, poda de devDeps, boot e smoke das rotas) validado em
+  2026-10-06.
 - Infra local: stack Docker (`docker compose up -d --build`) sobe MySQL + API +
   Web com migrações e seed no boot; validada em 2026-10-06.
 - Documentação técnica centralizada em `docs/`, com os relatórios de fase em

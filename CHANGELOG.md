@@ -22,11 +22,69 @@ a história detalhada por marcos também pode ser lida em
   `integration` 22, `security` 10), rodados de verdade nesta data — build TypeScript limpo.
 - Frontend: **58 testes verdes** (49 anteriores + 9 das páginas de erro),
   `npm run build` OK, **ESLint sem erros** (lint limpo para o CI).
-- Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
-  corrigido e pronto para publicar na AWS.
-- Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a próxima entrada.
+- Deploy: `backend/dist` e `frontend/dist` atualizados; o workflow de deploy agora executa
+  o **mesmo** `deploy-aws.sh` do caminho manual (uma única fonte de verdade) e a
+  documentação do passo a passo na EC2 foi corrigida — ver a entrada mais recente.
+- Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a entrada
+  "Prontidão de portfólio: Docker + README fiel ao código".
 - Documentação: os 9 relatórios de `docs/reports/` revisados contra o código — ver a
   entrada "Revisão dos relatórios".
+
+---
+
+## 2026-10-06 · Pipeline de atualização na AWS deixado à prova de falha
+
+Auditoria do caminho "push no GitHub → EC2 rodando a versão nova", com **ensaio completo de
+deploy em produção** (clone limpo, schema MySQL isolado, `NODE_ENV=production`, poda de
+devDependencies, boot, health check e smoke das rotas). O ensaio passou em tudo e mostrou
+quatro pontos que fariam a atualização real quebrar ou falhar em silêncio, mais dois textos de
+documentação que mentiam para quem segue o checklist. **Nenhuma linha de
+código de negócio foi tocada** — só CI, script de deploy e documentação.
+
+- **`.github/workflows/deploy.yml` (bug que quebraria o deploy)**: o passo SSH tinha uma
+  sequência própria que começava com `npm ci --omit=dev` e depois rodava `npm run build`.
+  Como o `build` é `tsc` e TypeScript é **devDependency**, o binário não existia e o build
+  morria no Actions; além disso `npm run db:migrate || true` e `db:seed || true` escondiam
+  qualquer erro de banco, e não havia verificação nenhuma de que o servidor subiu. O passo
+  agora localiza o repositório na instância e chama `bash deploy-aws.sh` (com
+  `script_stop: true`), então CI e deploy manual são exatamente o mesmo roteiro, e uma
+  falha faz o workflow vermelho em vez de deixar código antigo no ar.
+- **`deploy-aws.sh` (robustez em SSH não-interativo)**: bloco de `PATH` antes dos pré-voos,
+  acrescentando `/usr/local/bin`, `/opt/node/bin`, `~/.npm-global/bin` e versões do nvm. Sem
+  isso, um SSH do GitHub Actions pode não enxergar `pm2` (instalado via `npm -g`), o script
+  entraria no ramo "PM2 não encontrado" e o health check morreria por um motivo fictício.
+- **`INSTRUCOES_ATUALIZACAO_AWS.md` · Método 2**: o passo a passo manual tinha o mesmo bug do
+  CI (`npm install --omit=dev` antes do build) e fechava com `pm2 restart all`, que derruba o
+  processo em vez de recarregar a quente. Reescrito na ordem correta — `npm ci` (com devDeps)
+  → build → `node dist/utils/migrate.js` → `node dist/utils/seed.js` → `npm prune --omit=dev`
+  → frontend → `pm2 reload ecosystem.config.cjs --env production` → `curl /api/health` — e o
+  Método 1 ganhou os pré-voos, a poda, o health check e a nota de paridade com o CI.
+- **`INSTRUCOES_ATUALIZACAO_AWS.md` · novo Método 3**: tabela dos secrets do GitHub Actions
+  (`EC2_HOST`, `EC2_SSH_KEY`, `EC2_USER`, `EC2_PORT`) com a armadilha que mais dá erro na AWS
+  Academy — o usuário SSH da Amazon Linux é `ec2-user`, não o `ubuntu` usado como padrão, e o
+  `EC2_HOST` precisa ser atualizado a cada start do laboratório porque o IP público muda.
+- **`DEPLOY_CHECKLIST.md`**: nova seção sobre a **armadilha do `#` no dotenv** (descoberta no
+  ensaio: um `DB_PASS=Algo#2026` chega ao processo como `Algo`, e o MySQL devolve
+  `ER_ACCESS_DENIED_ERROR ... (using password: YES)` — parece senha errada, é senha truncada),
+  a exigência de produção de `DB_PASS` preenchido, os critérios reais do boot seguro
+  (`JWT_SECRET`/`JWT_REFRESH_SECRET` com ≥ 32 caracteres, diferentes e sem prefixo de exemplo;
+  `DB_HOST`/`DB_USER`/`DB_PASS`/`DB_NAME` obrigatórios), a correção da política de senha do
+  `ROOT_ADMIN_PASSWORD` (**5 ou 6 dígitos + exatamente 1 símbolo**, regex
+  `/^\d{5,6}[^A-Za-z0-9\s]$/` — o texto dizia "exatamente 6 dígitos"), e a seção de comandos
+  alinhada ao `deploy-aws.sh`.
+- **`backend/.env.example` e `backend/.env.production.example`**: os modelos que viram o
+  `.env` da EC2 agora avisam do `#` do dotenv logo na entrada e repetem a política de senha
+  correta (5–6 dígitos + 1 símbolo, com exemplos válidos e inválidos). São **só comentários**:
+  nenhum valor mudou, e a leitura pelos dois dotenv (o da máquina e o do processo) foi
+  conferida depois da edição.
+
+**Validação do ensaio**: migrações + seed idempotentes a partir de schema vazio; boot após a
+poda de devDeps; `/api/health` → `{"status":"ok","database":"ok"}`; `/` e a nova
+`/acesso-negado` respondendo 200 `text/html` pelo fallback SPA do Express; 404 JSON contract
+preservado em rota de API desconhecida; login + `/auth/me` + `/itens` + `/pedidos` +
+`/usuarios` com JWT (e 401 sem token); frontend de `npm ci` limpo com build OK e **58 testes
+verdes**; conferência automática de rotas → *59 rotas no backend, 47 chamadas distintas no
+frontend, nenhuma chamada órfã*.
 
 ---
 

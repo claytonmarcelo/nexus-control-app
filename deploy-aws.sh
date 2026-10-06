@@ -25,6 +25,30 @@ echo "=================================================================="
 echo ""
 echo "📍 Diretório da aplicação: $APP_DIR"
 
+# ── PATH robusto para SSH não-interativo ────────────────────────────────────
+# Quando o deploy vem do GitHub Actions (appleboy/ssh-action), o shell não é de
+# login e não lê ~/.bashrc por inteiro: node e binários de `npm install -g`
+# (caso do pm2) podem não estar no PATH, e o deploy falharia por um motivo que
+# não existe de verdade. Isto apenas acresce caminhos já instalados.
+for EXTRA_PATH in /usr/local/bin /usr/bin /opt/node/bin "$HOME/.npm-global/bin"; do
+  if [ -d "$EXTRA_PATH" ]; then
+    PATH="$EXTRA_PATH:$PATH"
+  fi
+done
+if [ -d "$HOME/.nvm/versions/node" ]; then
+  for NODE_INSTALL in "$HOME/.nvm/versions/node"/*; do
+    if [ -d "$NODE_INSTALL/bin" ]; then
+      PATH="$NODE_INSTALL/bin:$PATH"
+    fi
+  done
+fi
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  set +e
+  . "$HOME/.nvm/nvm.sh" >/dev/null 2>&1
+  set -e
+fi
+export PATH
+
 # ── Pré-voos ──────────────────────────────────────────────────────────────
 if ! command -v node >/dev/null 2>&1; then
   echo "❌ Node.js não encontrado. Instale Node 20.19+ antes de continuar."

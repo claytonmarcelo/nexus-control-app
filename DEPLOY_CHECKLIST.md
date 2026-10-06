@@ -16,14 +16,42 @@ Este documento lista todas as variáveis de ambiente que precisam ser configurad
   - ❌ Nunca reutilize o JWT_SECRET nem use valores de exemplo
 
 - **`ROOT_ADMIN_PASSWORD`**: Senha do administrador raiz (conta pessoal real)
-  - ⚠️ Deve seguir a política atual da aplicação: exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres)
+  - ⚠️ Deve seguir a política atual da aplicação: **5 ou 6 dígitos seguidos de exatamente 1 símbolo** (6 ou 7 caracteres no total), validada pela regex `/^\d{5,6}[^A-Za-z0-9\s]$/`
+  - ✅ Válidas: `12345@`, `123456$`; ❌ inválidas: `1234@` (4 dígitos), `1234567@` (7 dígitos), `12345a` (letra não conta como símbolo)
   - ❌ NUNCA reutilize uma senha pessoal nem compartilhe o valor
   - ✅ Esta é a sua conta pessoal de administrador - não compartilhe
 
 - **`DB_PASS`**: Senha do banco de dados MySQL
   - ⚠️ **CRÍTICO**: Use uma senha forte para o MySQL
   - ❌ NUNCA deixe em branco ou use valores óbvios
+  - ⚠️ Em `NODE_ENV=production` o servidor **nem sobe** com `DB_PASS` vazio: o `backend/src/config/database.js` lança `Configuração de banco obrigatória em produção: DB_PASS`
+  - ⚠️ Se a senha contiver `#`, `;` ou espaços, **escreva entre aspas** no `.env` — veja a armadilha do dotenv logo abaixo
   - ✅ Configure tanto no MySQL quanto nesta variável
+
+## 🕳️ Armadilha do `.env`: o caractere `#` corta a senha em silêncio
+
+O `dotenv` interpreta `#` como **início de comentário** quando o valor não está entre aspas.
+Isso já derrubou um deploy de teste aqui: `DB_PASS=Senha#Forte2026` chega ao processo como
+`Senha`, e o MySQL responde `ER_ACCESS_DENIED_ERROR ... (using password: YES)` — um erro que
+parece credencial errada, mas é a senha truncada.
+
+```dotenv
+# ❌ PERIGOSO — tudo depois do # é descartado
+DB_PASS=Senha#Forte2026
+ROOT_ADMIN_PASSWORD=123456#
+
+# ✅ CORRETO — aspas preservam o valor literal
+DB_PASS="Senha#Forte2026"
+ROOT_ADMIN_PASSWORD="123456#"
+```
+
+Regras práticas:
+
+- Cite **`DB_PASS`, `ROOT_ADMIN_PASSWORD`, `SMTP_PASS`, `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`, `JWT_SECRET` e `JWT_REFRESH_SECRET`** sempre que o valor contiver `#`, `;`, `$`, espaços ou qualquer caractere de pontuação.
+- As aspas **não** fazem parte do valor: o processo recebe `Senha#Forte2026`.
+- Para segredos gerados aleatoriamente, o caminho mais seguro é usar só letras+números (sem `#`), por exemplo a saída de `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` — 64 caracteres hex, compatível com a guarda de produção do JWT (mínimo 32).
+- Se aparecer erro de autenticação no MySQL ou no login do admin logo após editar o `.env`, confira primeiro o que o processo realmente recebeu:
+  `node -e "require('dotenv').config({path:'backend/.env'}); console.log(JSON.stringify(process.env.DB_PASS))"`
 
 ## 🔧 Variáveis de Configuração Obrigatórias
 
@@ -80,31 +108,44 @@ Após configurar, cadastre no painel do Mercado Pago o webhook apontando para: `
 
 Antes de iniciar o deploy na AWS Academy:
 
-- [ ] Alterar `JWT_SECRET` para valor seguro e aleatório
+- [ ] Alterar `JWT_SECRET` para valor seguro e aleatório (mínimo 32 caracteres — necessário para o boot em produção)
 - [ ] Alterar `JWT_REFRESH_SECRET` para valor seguro e diferente do JWT_SECRET
-- [ ] Definir `ROOT_ADMIN_PASSWORD` com senha forte
-- [ ] Configurar `DB_PASS` com senha forte do MySQL
+- [ ] Definir `ROOT_ADMIN_PASSWORD` com senha forte dentro da política (5–6 dígitos + 1 símbolo)
+- [ ] Configurar `DB_PASS` com senha forte do MySQL (sem valor vazio: o servidor não sobe em produção)
+- [ ] Colocar aspas em qualquer valor de `.env` que contenha `#`, `;`, `$` ou espaços (armadilha do dotenv)
 - [ ] Definir `NODE_ENV=production`
 - [ ] Configurar `FRONTEND_URL` com URL real da instância AWS
 - [ ] Configurar `API_URL` com a origem pública da API
-- [ ] Configurar `VITE_API_URL` com URL real da API backend
+- [ ] Configurar `VITE_API_URL` com URL real da API backend (opcional: em IP público da EC2 o frontend cai na mesma origem `/api`)
 - [ ] Configurar `DB_CONNECTION_LIMIT=5` (recurso limitado AWS Academy)
 - [ ] Opcional: Configurar variáveis SMTP se recuperação de senha for necessária
 - [ ] Opcional: Configurar `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `PUBLIC_URL` apenas para pagamentos automáticos (deixe em branco no modo manual Pix/crédito)
 - [ ] Garantir que o diretório `backend/logs/` exista no servidor para os logs do PM2 (o `deploy-aws.sh` cria automaticamente)
 - [ ] Verificar que não há valores de exemplo nas variáveis críticas
+- [ ] Instalar dependências **com** devDependencies antes do build (`npm ci`) e podar depois (`npm prune --omit=dev`) — o build usa `tsc`, que é devDependency
+- [ ] Rodar `bash deploy-aws.sh` (ou o workflow `🚀 Deploy para AWS Academy / Produção`) e conferir o health check `/api/health` = 200
 
 ## 🚀 Comandos de Deploy
 
-### Backend
+### Caminho recomendado (backend + frontend + banco + PM2 + health check)
+
+```bash
+cd ~/nexus-control-app
+bash deploy-aws.sh
+```
+
+O mesmo script é executado pelo GitHub Actions no push da branch `main` quando os secrets
+`EC2_HOST` e `EC2_SSH_KEY` existem. Detalhes passo a passo em `INSTRUCOES_ATUALIZACAO_AWS.md`.
+
+### Backend (passo a passo, equivalente ao que o script faz)
 ```bash
 cd backend
-npm ci
+npm ci                    # instala TAMBÉM as devDeps (o build roda tsc)
 npm run build
-npm run db:migrate
-npm run db:seed
-npm prune --omit=dev
-NODE_ENV=production npm start
+node dist/utils/migrate.js   # migrações idempotentes
+node dist/utils/seed.js      # catálogo oficial + admin raiz (só INSERT/UPDATE)
+npm prune --omit=dev      # poda depois do build, nunca antes
+pm2 reload ecosystem.config.cjs --env production
 ```
 
 ### Frontend
@@ -113,6 +154,7 @@ cd frontend
 npm ci
 npm run build
 # Serve os arquivos estáticos em dist/ com nginx ou similar
+# (se o Nginx não estiver configurado, o próprio Express serve o SPA em /)
 ```
 
 ## 📝 Notas Importantes
@@ -127,4 +169,9 @@ npm run build
 
 5. **Encerramento gracioso (PM2)**: O backend trata `SIGINT`/`SIGTERM`, fecha o pool MySQL e sai com código adequado. O `ecosystem.config.cjs` está configurado com `wait_ready`, `kill_timeout` e `listen_timeout`, então um `pm2 reload` não derruba requisições em andamento nem o Mercado Pago webhook. Garanta que `backend/logs/` exista no servidor (o `deploy-aws.sh` cria automaticamente).
 
-6. **Verificação de Segurança**: O backend valida automaticamente se as variáveis críticas foram alteradas dos valores de exemplo ao iniciar em modo `production`. Se a validação falhar, o servidor não iniciará.
+6. **Verificação de Segurança (boot em produção)**: o backend se recusa a subir em `NODE_ENV=production` quando a configuração está errada, e o erro diz exatamente o que falta:
+   - `JWT_SECRET` / `JWT_REFRESH_SECRET`: ausentes, menores que 32 caracteres, iguais entre si, ou começando com prefixo de exemplo (`replace_with_`, `your_`, `change_in_production`, `test_`, `sua_`, `gere_`) → `backend/src/config/jwt.js` lança o erro antes de qualquer rota existir.
+   - `DB_HOST` / `DB_USER` / `DB_PASS` / `DB_NAME`: qualquer um em branco → `Configuração de banco obrigatória em produção: DB_PASS` (ou o nome da variável faltante), lançado por `backend/src/config/database.js`.
+   - O `deploy-aws.sh` falha ainda mais cedo se `backend/.env` não existir, e no fim exige `/api/health` = 200; assim um deploy nunca fica "no ar" silenciosamente com configuração inválida.
+
+7. **IP dinâmico da AWS Academy**: o Express aceita origens `localhost`, `*.amazonaws.com` e IPv4, então trocar o IP público da EC2 não exige editar `FRONTEND_URL`. O frontend em host não-local usa a mesma origem `/api`, então o build funciona sem `VITE_API_URL`.
