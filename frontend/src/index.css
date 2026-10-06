@@ -1856,6 +1856,24 @@ html[data-theme='light'] .bg-dark-bg.text-nexus-400 {
   background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
   animation: pulseSoft 4s ease-in-out infinite;
 }
+
+/* ─── pulseSoft de verdade ───────────────────────────────────────────────
+   O keyframe existe no tailwind.config.js, mas o Tailwind só o emite quando
+   a classe `animate-pulse-soft` é usada em algum JSX. Aqui ele é referenciado
+   em CSS puro, então não chegava ao bundle e nada pulsava. Declarado local-
+   mente com a propriedade independente `scale` (e não `transform`) para não
+   sobrescrever o translate(-50%, -50%) que centraliza o .welcome-orb-3. */
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; scale: 1; }
+  50%      { opacity: 0.8; scale: 1.02; }
+}
+
+/* Indicador "ao vivo" do badge: um ponto de 6 px precisa de mais curso que o
+   pulseSoft para ser percebido, então ele tem keyframe próprio com brilho. */
+@keyframes welcome-badge-pulse {
+  0%, 100% { opacity: 1; scale: 1; box-shadow: 0 0 0 0 var(--accent-gold-glow); }
+  50%      { opacity: 0.55; scale: 1.6; box-shadow: 0 0 0 4px transparent; }
+}
 .welcome-hero-content {
   position: relative;
   z-index: 2;
@@ -1884,7 +1902,16 @@ html[data-theme='light'] .bg-dark-bg.text-nexus-400 {
   height: 6px;
   border-radius: 50%;
   background: var(--accent-gold);
-  animation: pulseSoft 2s ease-in-out infinite;
+  animation: welcome-badge-pulse 2s ease-in-out infinite;
+}
+
+/* Movimento infinito é opcional: quem pede menos movimento vê o ponto aceso,
+   só que parado. */
+@media (prefers-reduced-motion: reduce) {
+  .welcome-badge-dot,
+  .welcome-orb-3 {
+    animation: none;
+  }
 }
 .welcome-title {
   font-family: var(--font-display);

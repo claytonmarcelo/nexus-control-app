@@ -30,6 +30,38 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Bug fix: o ponto dourado do badge da Welcome voltou a pulsar
+
+Consequência de auditar as animações ao fazer as páginas de erro. O Tailwind 3 só
+emite um `@keyframes` do `theme.extend` quando a classe utility (`animate-*`) é
+usada em algum JSX — **referenciar o nome em CSS puro não força a emissão**. Como
+`animate-pulse-soft` nunca foi usado, o `keyframes pulseSoft` do
+`tailwind.config.js` **não chegava ao bundle**, e as duas regras que o chamavam em
+CSS puro ficavam paradas: `.welcome-badge-dot` (o ponto "ao vivo" do badge
+*Plataforma Corporativa de TI*) e `.welcome-orb-3` (o brilho central do hero).
+
+- `@keyframes pulseSoft` **declarado localmente** em `frontend/src/index.css`, do
+  lado do uso — mesmo comportamento do token (opacity 1 → 0,8).
+- Escalado com a propriedade independente `scale`, e **não** com `transform`: o
+  `.welcome-orb-3` depende de `transform: translate(-50%, -50%)` para ficar
+  centralizado, e um keyframe que escrevesse `transform` iria arrastar o orb para
+  fora do lugar. Verificado no navegador: durante a animação o `transform`
+  calculado continua `matrix(1, 0, 0, 1, -203, -300)` enquanto `scale` oscila.
+- O ponto de 6 px ganhou keyframe próprio, `welcome-badge-pulse` (opacity +
+  `scale` 1 → 1,6 + halo `box-shadow` champagne): o `pulseSoft` original é sutil
+  demais para uma bolinha de 6 px.
+- `@media (prefers-reduced-motion: reduce)` desliga as duas animações — quem pede
+  menos movimento vê o ponto aceso, só que parado.
+- **Não mexido:** `.welcome-orb-1/-2` usam `animation: float`, que tem o mesmo
+  problema (o keyframe não é emitido). Corrigi-lo adicionaria movimento a dois
+  orbs que hoje estão estáticos — mudança visual além do pedido, então ficou como
+  observação.
+- Validação: `npm run build` (os dois keyframes aparecem no `dist`), **58 testes
+  verdes**, ESLint limpo, e conferido no navegador em `localhost:5199` com
+  `getAnimations()` + `getComputedStyle` na página real.
+
+---
+
 ## 2026-10-06 · Páginas de erro personalizadas (404 · 403 · 500) com animação
 
 As páginas de erro **já existiam** em código, mas estavam **sem estilo nenhum**: o
