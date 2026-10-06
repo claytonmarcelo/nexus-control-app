@@ -37,7 +37,11 @@ a história detalhada por marcos também pode ser lida em
     no backend — nenhuma mudança destrutiva.
   - Validação: `vitest` do Dashboard (4/4 verdes), ESLint limpo, e checagem na
     API confirmou `/itens?limit=100` → 200 (total 107) e `/pedidos/me?limit=100`
-    → 200 (57 pedidos).
+    → 200 (57 pedidos). Confirmado visualmente no navegador: "Itens no Catálogo
+    107" e "Meus Pedidos 57".
+  - `OrdersSummaryWidget`: rótulo "pedidos realizados" (que mostrava apenas a
+    prévia de `maxItems + 2` e contradiz o KPI de 57) corrigido para
+    "pedidos recentes", coerente com a lista parcial exibida.
 
 ---
 

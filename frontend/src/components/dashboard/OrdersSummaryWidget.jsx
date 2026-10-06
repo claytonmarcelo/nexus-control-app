@@ -136,7 +136,7 @@ export default function OrdersSummaryWidget({ maxItems = 3, showAll = false }) {
             Meus Pedidos
           </h2>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {orders.length} {orders.length === 1 ? 'pedido realizado' : 'pedidos realizados'}
+            {orders.length} {orders.length === 1 ? 'pedido recente' : 'pedidos recentes'}
           </p>
         </div>
         {orders.length > maxItems && !showAll && (
