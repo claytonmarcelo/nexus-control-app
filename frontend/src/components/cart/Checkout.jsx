@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useModal } from '../../contexts/ModalContext';
-import { checkoutService, paymentService } from '../../services/services';
+import { checkoutService, paymentService, itemService } from '../../services/services';
 
 const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -17,7 +17,7 @@ const INITIAL_CARD = {
 };
 
 export default function Checkout() {
-  const { items, totalItems, subtotal, clearCart, getItemSubtotal } = useCart();
+  const { items, totalItems, subtotal, clearCart, removeItem, getItemSubtotal } = useCart();
   const { toast } = useModal();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('pix');
@@ -156,10 +156,51 @@ export default function Checkout() {
       });
       setCountdown(4);
     } catch (error) {
-      toast({
-        message: error.response?.data?.message || 'Não foi possível registrar seu pedido. Tente novamente.',
-        variant: 'danger',
-      });
+      const status = error.response?.status;
+      const message = error.response?.data?.message || '';
+
+      // O backend recusa (400) quando algum item do carrinho salvo no navegador
+      // não existe mais no catálogo. A regra continua no backend; aqui apenas
+      // confirmamos item a item e removemos do carrinho os realmente inexistentes
+      // (HTTP 404), preservando os válidos e evitando remover por engano em falha
+      // transitória de rede.
+      const isMissingItem = status === 400 && /n[ãa]o (foram|foi) encontrado/i.test(message);
+
+      if (isMissingItem) {
+        const resolved = await Promise.all(
+          items.map(async (item) => {
+            const id = Number(item.item_id || String(item.id).split('-')[0]);
+            if (!Number.isInteger(id) || id <= 0) return { cartId: item.id, missing: true };
+            try {
+              await itemService.getById(id);
+              return { cartId: item.id, missing: false };
+            } catch (err) {
+              return { cartId: item.id, missing: err.response?.status === 404 };
+            }
+          })
+        );
+
+        const missingCartIds = resolved.filter((entry) => entry.missing).map((entry) => entry.cartId);
+        missingCartIds.forEach((cartId) => removeItem(cartId));
+
+        if (missingCartIds.length) {
+          const singular = missingCartIds.length === 1;
+          toast({
+            message:
+              `${missingCartIds.length} ${singular ? 'item' : 'itens'} do carrinho ` +
+              `${singular ? 'não está' : 'não estão'} mais ${singular ? 'disponível' : 'disponíveis'} no catálogo ` +
+              `e ${singular ? 'foi removido' : 'foram removidos'}. Revise o pedido e tente novamente.`,
+            variant: 'warning',
+          });
+        } else {
+          toast({ message: message || 'Não foi possível registrar seu pedido. Tente novamente.', variant: 'danger' });
+        }
+      } else {
+        toast({
+          message: message || 'Não foi possível registrar seu pedido. Tente novamente.',
+          variant: 'danger',
+        });
+      }
     } finally {
       setSubmitting(false);
     }

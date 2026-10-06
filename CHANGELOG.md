@@ -21,6 +21,30 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Checkout resiliente a itens removidos do catálogo
+
+- `fix(checkout): remove itens obsoletos do carrinho em vez de travar no 400`
+  - No teste de navegação apareceu um `400 (Bad Request)` no
+    `POST /api/pedidos/checkout`. A causa não era o fluxo em si (com um carrinho
+    válido o checkout cria o pedido com **201**), e sim o carrinho guardado no
+    `localStorage` do navegador: quando ele contém um item que **não existe mais**
+    no catálogo/banco, o backend responde corretamente
+    *"Um ou mais itens não foram encontrados no banco"* e o navegador loga o 400.
+    O usuário ficava preso, com um item órfão no carrinho e um erro pouco claro.
+  - A **regra de negócio permanece no backend** (valida a existência de cada
+    item). No frontend (`Checkout.jsx`), ao receber esse 400 específico, agora o
+    app confere item a item via `itemService.getById` e **remove do carrinho
+    apenas os realmente inexistentes (HTTP 404)**, preservando os válidos e sem
+    remover nada em falha transitória de rede. Mostra um aviso claro ("N itens não
+    estão mais disponíveis no catálogo e foram removidos. Revise o pedido e tente
+    novamente.") e, se o carrinho esvazia, redireciona para `/carrinho`.
+  - Validação: 49 testes frontend verdes, ESLint limpo, `npm run build` OK e
+    checagem no navegador — carrinho com item válido → **201** ("Pedido #233
+    registrado"); carrinho com item obsoleto → item removido automaticamente e
+    aviso exibido, sem travar.
+
+---
+
 ## 2026-10-06 · Remove tema duplicado do menu do usuário
 
 - `refactor(tema): remove o switch dark/light redundante do drawer do usuário`
