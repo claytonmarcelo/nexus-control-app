@@ -12,15 +12,53 @@ a história detalhada por marcos também pode ser lida em
 > direto no modal de sucesso. Com o gateway **Mercado Pago** configurado
 > (`MP_ACCESS_TOKEN`), o **Pix** passa a gerar o QR real e a liberação vem do
 > webhook (único caminho que fica pendente). A regra de liberação fica sempre no
-> backend, nunca no frontend.
+> backend, nunca no frontend. Um pedido que ainda esteja **pendente** pode ser
+> concluído pelo próprio dono a partir do alerta no perfil
+> (`POST /pedidos/:id/pagamento`), que confirma na hora no modo simulado.
 
 ## Estado atual (2026-10-06)
 
-- Backend: **86 testes verdes**, build TypeScript limpo.
+- Backend: **90 testes verdes**, build TypeScript limpo.
 - Frontend: **49 testes verdes**, `npm run build` OK, **ESLint sem erros** (lint
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
+
+---
+
+## 2026-10-06 · Retomar pagamento pendente agora confirma o pedido
+
+- `fix(pagamento): alerta de pagamento pendente conclui o pedido em modo simulado`
+  - Em **`/perfil` → Alertas**, o alerta `pagamento_pendente` abre o checkout do
+    próprio pedido (`/checkout?pedido=ID`). Ao retomar um pedido que ainda estava
+    `pendente` (legado, criado antes do checkout confirmar na hora), a tela só
+    oferecia **"Já paguei — verificar"**, que apenas **consulta** o status
+    (`GET /pagamentos/pedido/:id`) e **nunca confirma**. Resultado: o pedido
+    continuava pendente e o alerta não sumia — o caminho que o usuário relatou.
+  - **Backend** (`orderController.ts` + `routes/orders.ts`): novo endpoint
+    `POST /pedidos/:id/pagamento` (rota autenticada, `validateOrderId`). Regra
+    100% no backend, no estilo do checkout:
+    - Aceita o **dono** do pedido ou **admin/staff**; senão **403**.
+    - Pedido **já confirmado** → responde sucesso idempotente (sem efeito colateral).
+    - **Sem gateway** (modo simulado da academia) → confirma **na hora** via
+      `aplicarStatusPagamento(CONFIRMADO)` (`provider: 'fake'` para Pix,
+      `'manual'` para Cartão), pela mesma trilha atômica: libera o pedido, inicia
+      os aluguéis e registra o evento. Devolve o pedido atualizado com `pagamento.status = 'confirmado'`.
+    - **Com gateway Mercado Pago** ativo → **não** auto-confirma: mantém `pendente`
+      e orienta a usar "Já paguei — verificar" (a liberação vem do webhook).
+    - Estados terminais (recusado/cancelado/falha/estornado) → **409** (exigem novo pedido).
+  - **Frontend** (`Checkout.jsx`, `services.js`): no modo retomada (`?pedido=ID`) e
+    sem QR real, o overlay de pendência passa a mostrar um botão **"Pagar agora"**
+    (chama `checkoutService.payOrder(id)`), que reflete o `confirmado` retornado e
+    abre o modal de sucesso — encerrando em `/perfil` com o alerta resolvido. O
+    fluxo de checkout normal (sem retomada) está inalterado.
+  - Testes: `businessRules.test.js` ganha um `describe` cobrindo o endpoint — dono
+    confirma e aluguel inicia; terceiros recebem **403**; repetição é idempotente;
+    com `MP_ACCESS_TOKEN` definido **não** auto-confirma. **90 testes backend
+    verdes**, `tsc` limpo. Frontend: **49 testes**, ESLint limpo, `build` OK.
+  - Observação de validação: o caminho E2E no navegador exige sessão logada e um
+    pedido legado pendente; a confirmação em si é exercitada de forma determinística
+    pelos novos testes de integração do backend.
 
 ---
 

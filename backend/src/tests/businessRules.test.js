@@ -151,6 +151,82 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
     });
   });
 
+  describe('Retomada de pagamento pelo dono (POST /pedidos/:id/pagamento, §7)', () => {
+    const originalMpToken = process.env.MP_ACCESS_TOKEN;
+    let cliente;
+    let pedidoId;
+    let aluguelId;
+
+    beforeEach(() => {
+      // Garante o modo simulado (sem gateway) para exercitar a confirmação na hora.
+      delete process.env.MP_ACCESS_TOKEN;
+    });
+    afterAll(() => {
+      if (originalMpToken === undefined) delete process.env.MP_ACCESS_TOKEN;
+      else process.env.MP_ACCESS_TOKEN = originalMpToken;
+    });
+
+    test('dono confirma pedido pendente em modo simulado e o aluguel inicia', async () => {
+      cliente = await criarCliente();
+      const criado = await checkoutAluguel(cliente, rentalItemId);
+      pedidoId = criado.body.data.id;
+      expect(criado.body.data.status_pagamento).toBe('pendente');
+
+      const resposta = await request(app)
+        .post(`/api/pedidos/${pedidoId}/pagamento`)
+        .set('Authorization', `Bearer ${cliente.token}`)
+        .send({});
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.data.status_pagamento).toBe('confirmado');
+      expect(resposta.body.data.pagamento.status).toBe('confirmado');
+
+      const alugueis = await alugueisDoUsuario(cliente.id);
+      expect(alugueis.length).toBe(1);
+      expect(alugueis[0].status).toBe('ativo');
+      expect(alugueis[0].data_inicio).not.toBeNull();
+      aluguelId = alugueis[0].id;
+    });
+
+    test('outro usuário não pode pagar pedido de terceiros (403)', async () => {
+      const outro = await criarCliente();
+      const novo = await checkoutAluguel(outro, rentalItemId);
+      const resposta = await request(app)
+        .post(`/api/pedidos/${novo.body.data.id}/pagamento`)
+        .set('Authorization', `Bearer ${cliente.token}`)
+        .send({});
+      expect(resposta.status).toBe(403);
+    });
+
+    test('confirmação repetida é idempotente e não duplica o aluguel', async () => {
+      const segunda = await request(app)
+        .post(`/api/pedidos/${pedidoId}/pagamento`)
+        .set('Authorization', `Bearer ${cliente.token}`)
+        .send({});
+      expect(segunda.status).toBe(200);
+      expect(segunda.body.data.status_pagamento).toBe('confirmado');
+      const alugueis = await alugueisDoUsuario(cliente.id);
+      expect(alugueis.length).toBe(1);
+      expect(alugueis[0].id).toBe(aluguelId);
+    });
+
+    test('com gateway configurado NÃO auto-confirma: aguarda o provedor', async () => {
+      process.env.MP_ACCESS_TOKEN = 'TEST-TOKEN-NAO-USADO';
+      try {
+        const clienteGw = await criarCliente();
+        const criado = await checkoutAluguel(clienteGw, rentalItemId);
+        const resposta = await request(app)
+          .post(`/api/pedidos/${criado.body.data.id}/pagamento`)
+          .set('Authorization', `Bearer ${clienteGw.token}`)
+          .send({});
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.data.status_pagamento).toBe('pendente');
+        expect(resposta.body.data.pagamento.status).not.toBe('confirmado');
+      } finally {
+        delete process.env.MP_ACCESS_TOKEN;
+      }
+    });
+  });
+
   describe('Dias excedentes e regularização (§9-§11)', () => {
     let cliente;
     let aluguelId;

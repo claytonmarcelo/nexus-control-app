@@ -150,6 +150,11 @@ export const checkoutService = {
     return response.data.data;
   },
 
+  async payOrder(id, data = {}) {
+    const response = await api.post(`/pedidos/${id}/pagamento`, data);
+    return response.data.data;
+  },
+
   async getUserOrdersByAdmin(userId, params = {}) {
     const response = await api.get(`/pedidos/user/${userId}`, { params });
     return response.data.data;

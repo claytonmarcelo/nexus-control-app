@@ -142,6 +142,83 @@ export const checkout = async (req, res) => {
         sendError(res, 'Erro ao processar checkout', 500);
     }
 };
+/**
+ * Retomada de pagamento (Checkout `/checkout?pedido=ID`, a partir do alerta
+ * "pagamento_pendente" no perfil): o dono do pedido — ou um admin/staff —
+ * solicita a conclusão de um pedido que ainda está pendente.
+ *
+ * A regra continua integralmente no backend: só confirmamos NA HORA quando NÃO
+ * há gateway real configurado (modo fake/simulado da academia, em que o Pix já
+ * é confirmado no próprio checkout). Com o Mercado Pago ativo, a liberação vem
+ * do provedor via webhook, então jamais auto-confirmamos por aqui. O frontend
+ * apenas dispara a intenção; quem decide a liberação é este endpoint.
+ */
+export const payOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const order = await findOrderById(id);
+        if (!order) {
+            return sendError(res, 'Pedido não encontrado', 404);
+        }
+        const isOwner = String(order.usuario_id) === String(req.user.id);
+        const isStaff = req.user.nivel_acesso === 'admin' || req.user.nivel_acesso === 'funcionario';
+        if (!isOwner && !isStaff) {
+            return sendError(res, 'Acesso negado', 403);
+        }
+        // Pagamento já liberado: idempotente, devolve o sucesso sem efeitos colaterais.
+        if (order.status_pagamento === STATUS_PAGAMENTO.CONFIRMADO) {
+            return sendSuccess(res, {
+                ...order,
+                pagamento: {
+                    provedor: order.payment_provider || 'fake',
+                    status: STATUS_PAGAMENTO.CONFIRMADO,
+                    mensagem: 'Pagamento confirmado! Seu pedido já está em processamento.',
+                },
+            }, 'Pagamento já confirmado');
+        }
+        // Estados terminais (recusado/cancelado/falha/estornado) exigem um novo
+        // pedido; esta tela só conclui pedidos em aberto.
+        if (!['pendente', 'processando'].includes(order.status_pagamento)) {
+            return sendError(res, 'Este pedido não pode ser pago nesta tela. Refaça o pedido a partir do carrinho.', 409);
+        }
+        // Gateway real ativo: a confirmação depende do provedor/webhook, nunca daqui.
+        if (isMercadoPagoConfigurado()) {
+            return sendSuccess(res, {
+                ...order,
+                pagamento: {
+                    provedor: order.payment_provider || 'mercadopago',
+                    status: order.status_pagamento,
+                    mensagem: 'Assim que o pagamento for confirmado pelo banco, liberamos seu pedido automaticamente. Use "Já paguei — verificar".',
+                },
+            }, 'Aguardando confirmação do gateway');
+        }
+        // Modo simulado (sem gateway): confirma na hora pela mesma trilha atômica
+        // do checkout — libera o pedido, inicia os aluguéis e registra o evento.
+        const provider = order.metodo_pagamento === 'cartao' ? 'manual' : 'fake';
+        const confirmado = await aplicarStatusPagamento({
+            pedidoId: Number(order.id),
+            status_pagamento: STATUS_PAGAMENTO.CONFIRMADO,
+            provider,
+            registradoPor: isStaff ? req.user.id : null,
+        });
+        if (!confirmado.sucesso) {
+            return sendError(res, 'Não foi possível confirmar o pagamento agora. Tente novamente.', 400);
+        }
+        const fresh = await findOrderById(id);
+        sendSuccess(res, {
+            ...(fresh || order),
+            pagamento: {
+                provedor: provider,
+                status: STATUS_PAGAMENTO.CONFIRMADO,
+                mensagem: 'Pagamento confirmado! Seu pedido já está em processamento.',
+            },
+        }, 'Pagamento confirmado');
+    }
+    catch (error) {
+        console.error('Erro ao retomar pagamento do pedido:', error);
+        sendError(res, 'Erro ao confirmar pagamento', 500);
+    }
+};
 export const getOrderById = async (req, res) => {
     try {
         const { id } = req.params;

@@ -36,6 +36,7 @@ export default function Checkout() {
   const [completedOrder, setCompletedOrder] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [countdown, setCountdown] = useState(4);
   const [resuming, setResuming] = useState(isResumed);
 
@@ -273,6 +274,29 @@ export default function Checkout() {
     }
   };
 
+  // Retomada de um pedido pendente em modo simulado: solicita ao backend a
+  // conclusão do pagamento. É o backend que decide liberar (na hora, sem
+  // gateway) — aqui apenas disparamos a intenção e refletimos o resultado.
+  const handlePayNow = async () => {
+    if (!completedOrder || paying) return;
+    setPaying(true);
+    try {
+      const order = await checkoutService.payOrder(completedOrder.id);
+      setCompletedOrder(order);
+      setPaymentStatus({
+        status_pagamento: order?.status_pagamento || 'pendente',
+        mensagem: order?.pagamento?.mensagem,
+      });
+      if (order?.status_pagamento !== 'confirmado') {
+        toast({ message: order?.pagamento?.mensagem || 'Ainda não identificamos seu pagamento.', variant: 'info' });
+      }
+    } catch {
+      toast({ message: 'Não foi possível confirmar o pagamento agora. Tente novamente.', variant: 'warning' });
+    } finally {
+      setPaying(false);
+    }
+  };
+
   const handleLeaveCheckout = () => {
     if (isResumed) {
       navigate('/perfil', { replace: true });
@@ -438,6 +462,9 @@ export default function Checkout() {
           confirmed={confirmed}
           countdown={countdown}
           checking={checkingPayment}
+          canPayNow={isResumed}
+          paying={paying}
+          onPayNow={handlePayNow}
           onVerify={handleVerifyPayment}
           onLeave={handleLeaveCheckout}
           onCopyPix={handleCopyPix}
@@ -558,11 +585,18 @@ function CreditCardForm({ card, onChange }) {
   );
 }
 
-function PaymentOverlay({ order, status, confirmed, countdown, checking, onVerify, onLeave, onCopyPix }) {
+function PaymentOverlay({ order, status, confirmed, countdown, checking, canPayNow, paying, onPayNow, onVerify, onLeave, onCopyPix }) {
   const orderReference = order?.id;
   const payment = order?.pagamento || {};
   const progress = Math.min(100, Math.max(0, ((4 - countdown) / 4) * 100));
-  const mensagem = status?.mensagem || payment.mensagem || 'Assim que o pagamento for confirmado, liberamos seu pedido automaticamente.';
+  // Retomada de um pedido pendente sem gateway real: oferecemos "Pagar agora"
+  // em vez de apenas esperar, pois é o backend quem confirma ao ser acionado.
+  const payNowMode = canPayNow && !payment.qr_code_base64;
+  const mensagem = status?.mensagem
+    || payment.mensagem
+    || (payNowMode
+      ? 'Este pedido ainda está com o pagamento pendente. Toque em "Pagar agora" para concluir.'
+      : 'Assim que o pagamento for confirmado, liberamos seu pedido automaticamente.');
 
   if (confirmed) {
     return (
@@ -593,7 +627,9 @@ function PaymentOverlay({ order, status, confirmed, countdown, checking, onVerif
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/15 text-amber-300">
             <ClockIcon className="h-8 w-8 animate-pulse" />
           </div>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Aguardando confirmação</p>
+          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">
+            {payNowMode ? 'Pagamento pendente' : 'Aguardando confirmação'}
+          </p>
           <h2 id="payment-pending-title" className="mt-2 font-display text-2xl font-semibold text-white">Pedido #{orderReference} registrado</h2>
           <p className="mt-3 text-sm leading-6 text-nexus-300">{mensagem}</p>
         </div>
@@ -624,16 +660,25 @@ function PaymentOverlay({ order, status, confirmed, countdown, checking, onVerif
         ) : null}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <button type="button" onClick={onVerify} disabled={checking} className="btn-primary gap-2 px-6 py-3">
-            {checking ? <SpinnerIcon className="h-5 w-5 animate-spin" /> : <RefreshIcon className="h-5 w-5" />}
-            {checking ? 'Verificando…' : 'Já paguei — verificar'}
-          </button>
+          {payNowMode ? (
+            <button type="button" onClick={onPayNow} disabled={paying} className="btn-primary gap-2 px-6 py-3">
+              {paying ? <SpinnerIcon className="h-5 w-5 animate-spin" /> : <LockIcon className="h-5 w-5" />}
+              {paying ? 'Confirmando pagamento…' : 'Pagar agora'}
+            </button>
+          ) : (
+            <button type="button" onClick={onVerify} disabled={checking} className="btn-primary gap-2 px-6 py-3">
+              {checking ? <SpinnerIcon className="h-5 w-5 animate-spin" /> : <RefreshIcon className="h-5 w-5" />}
+              {checking ? 'Verificando…' : 'Já paguei — verificar'}
+            </button>
+          )}
           <button type="button" onClick={onLeave} className="btn-secondary gap-2 px-6 py-3">
-            Concluir agora
+            {payNowMode ? 'Voltar ao perfil' : 'Concluir agora'}
           </button>
         </div>
         <p className="mt-4 text-center text-xs text-nexus-500">
-          Esta tela atualiza sozinha: você não precisa ficar pagando de novo.
+          {payNowMode
+            ? 'Modo de demonstração: a liberação é confirmada no servidor ao tocar em "Pagar agora".'
+            : 'Esta tela atualiza sozinha: você não precisa ficar pagando de novo.'}
         </p>
       </div>
     </div>

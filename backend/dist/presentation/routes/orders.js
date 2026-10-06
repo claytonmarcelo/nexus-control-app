@@ -1,11 +1,13 @@
 import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { validateCheckout, validateOrderId, validatePagination, validateUpdateOrderStatus } from '../middleware/orderValidation.js';
-import { checkout, getOrderById, getUserOrders, getAllOrders, updateOrder, deleteOrderById, getUserOrdersByAdmin } from '../controllers/orderController.js';
+import { checkout, payOrder, getOrderById, getUserOrders, getAllOrders, updateOrder, deleteOrderById, getUserOrdersByAdmin } from '../controllers/orderController.js';
 const router = express.Router();
 // Rotas públicas (requerem autenticação)
 router.post('/checkout', authenticate, validateCheckout, checkout);
 router.get('/me', authenticate, validatePagination, getUserOrders);
+// Retomada de pagamento de um pedido pendente (dono ou staff; regra no backend).
+router.post('/:id/pagamento', authenticate, validateOrderId, payOrder);
 // Rotas admin
 router.get('/', authenticate, authorize('admin'), validatePagination, getAllOrders);
 router.get('/user/:userId', authenticate, authorize('admin'), validatePagination, getUserOrdersByAdmin);
