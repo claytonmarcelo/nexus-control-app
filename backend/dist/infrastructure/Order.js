@@ -1,8 +1,40 @@
 import pool from '../config/database.js';
+import { criarAlugueisDoPedido } from './Aluguel.js';
 export const createOrder = async ({ usuario_id, items, total, metodo_pagamento, status_pagamento = 'pendente' }) => {
     const itemsJSON = JSON.stringify(items);
     const [result] = await pool.execute(`INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento, status_pagamento, criado_em) VALUES (?, ?, ?, ?, ?, NOW())`, [usuario_id, itemsJSON, total, metodo_pagamento, status_pagamento]);
     return { id: result.insertId, usuario_id, items, total, metodo_pagamento, status_pagamento };
+};
+/**
+ * Criação atômica do pedido com seus aluguéis (§49): se a inserção dos
+ * aluguéis falhar, o pedido não fica "metade pago/metade liberado".
+ */
+export const createOrderWithRentals = async ({ usuario_id, items, total, metodo_pagamento, status_pagamento = 'pendente' }) => {
+    const connection = await pool.getConnection();
+    let transactionStarted = false;
+    try {
+        await connection.beginTransaction();
+        transactionStarted = true;
+        const [result] = await connection.execute(`INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento, status_pagamento, criado_em) VALUES (?, ?, ?, ?, ?, NOW())`, [usuario_id, JSON.stringify(items), total, metodo_pagamento, status_pagamento]);
+        const pedido = { id: result.insertId, usuario_id, items, total, metodo_pagamento, status_pagamento };
+        await criarAlugueisDoPedido(pedido, connection);
+        await connection.commit();
+        transactionStarted = false;
+        return pedido;
+    }
+    catch (error) {
+        if (transactionStarted)
+            await connection.rollback();
+        throw error;
+    }
+    finally {
+        connection.release();
+    }
+};
+/** Anexa a referência do gateway ao pedido (idempotência do webhook). */
+export const anexarPagamentoProvedor = async (orderId, { provider, providerPaymentId }) => {
+    const [result] = await pool.execute(`UPDATE pedidos SET payment_provider = ?, provider_payment_id = ? WHERE id = ? AND provider_payment_id IS NULL`, [provider, providerPaymentId, orderId]);
+    return result.affectedRows > 0;
 };
 export const findOrderById = async (id) => {
     const [rows] = await pool.execute(`SELECT * FROM pedidos WHERE id = ?`, [id]);
@@ -35,7 +67,7 @@ export const findAllOrders = async ({ page = 1, limit = 20 } = {}) => {
     }));
     return { orders, total: countRows[0].total };
 };
-export const updateOrderStatus = async (id, { status_pagamento, metodo_pagamento }) => {
+export const updateOrderStatus = async (id, { status_pagamento = undefined, metodo_pagamento = undefined } = {}) => {
     const updates = [];
     const values = [];
     if (status_pagamento !== undefined) {

@@ -42,7 +42,7 @@ export class UserRepository {
 
   async findAuthState(id) {
     const [rows] = await this.database.execute(
-      `SELECT id, nome, email, nivel_acesso, ativo FROM usuarios WHERE id = ?`,
+      `SELECT id, nome, email, nivel_acesso, ativo, status_conta FROM usuarios WHERE id = ?`,
       [id]
     );
     return rows[0] ? new User(rows[0]) : null;

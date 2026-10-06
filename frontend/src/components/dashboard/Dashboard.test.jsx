@@ -5,7 +5,7 @@ import Dashboard from '../dashboard/Dashboard';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { ModalProvider } from '../../contexts/ModalContext';
-import { itemService, userService, checkoutService } from '../../services/services';
+import { itemService, userService, checkoutService, alertService } from '../../services/services';
 
 vi.mock('../../contexts/AuthContext', () => ({
   AuthProvider: ({ children }) => children,
@@ -36,6 +36,11 @@ vi.mock('../../services/services', () => ({
   },
   healthService: {
     check: vi.fn(),
+  },
+  alertService: {
+    getMyAlerts: vi.fn(),
+    getMyEvents: vi.fn(),
+    getUserEvents: vi.fn(),
   },
 }));
 
@@ -71,11 +76,19 @@ const mockEmptyData = () => {
   userService.getAll.mockResolvedValue({ users: [] });
   checkoutService.getAllOrders.mockResolvedValue({ orders: [] });
   checkoutService.getMyOrders.mockResolvedValue({ orders: [] });
+  alertService.getMyAlerts.mockResolvedValue({
+    alerts: [],
+    resumo: { possui_debitos: false, total_debitos: 0, tem_alertas: false, pode_desativar_sem_confirmar: true },
+  });
 };
 
 describe('Dashboard Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    alertService.getMyAlerts.mockResolvedValue({
+      alerts: [],
+      resumo: { possui_debitos: false, total_debitos: 0, tem_alertas: false, pode_desativar_sem_confirmar: true },
+    });
     useAuth.mockReturnValue({
       user: { ...mockUser },
       isAdmin: false,

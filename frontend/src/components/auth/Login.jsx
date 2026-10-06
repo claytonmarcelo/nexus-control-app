@@ -244,11 +244,14 @@ function LoginForm({ onNavigate }) {
 }
 
 function RegisterForm({ onNavigate }) {
-  const [formData, setFormData] = useState({ nome: '', email: '', senha: '', confirm: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', senha: '', confirm: '', senha_conta_desativada: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showRecoveryPassword, setShowRecoveryPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [needsRecoveryVerification, setNeedsRecoveryVerification] = useState(false);
+  const [recoveredHistory, setRecoveredHistory] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -274,18 +277,37 @@ function RegisterForm({ onNavigate }) {
     setLoading(true);
 
     try {
-      await register({
+      const payload = {
         nome: formData.nome.trim(),
         email: formData.email.trim().toLowerCase(),
         senha: formData.senha,
-      });
+      };
+      if (needsRecoveryVerification && formData.senha_conta_desativada) {
+        payload.senha_conta_desativada = formData.senha_conta_desativada;
+      }
+      const result = await register(payload);
+      if (result?.recuperou_historico) {
+        setRecoveredHistory(true);
+        setError('');
+      }
       navigate('/dashboard');
     } catch (err) {
       const validationErrors = err.response?.data?.errors;
+      const verificacaoDesativada = validationErrors?.verificacao_conta_desativada === true;
+      if (verificacaoDesativada) {
+        setNeedsRecoveryVerification(true);
+      }
       const validationMessage = Array.isArray(validationErrors)
         ? validationErrors.map(({ msg }) => msg).filter(Boolean).join('. ')
         : '';
-      setError(validationMessage || err.response?.data?.message || err.message || 'Erro ao criar conta');
+      setError(
+        validationMessage
+        || err.response?.data?.message
+        || err.message
+        || (verificacaoDesativada
+            ? 'Encontramos uma conta desativada com este e-mail. Confirme a senha da conta anterior para recuperar seu histórico.'
+            : 'Erro ao criar conta'),
+      );
     } finally {
       setLoading(false);
     }
@@ -308,6 +330,11 @@ function RegisterForm({ onNavigate }) {
 
       <form onSubmit={handleSubmit} noValidate className="fp-form">
         {error && <p className="auth-field-error" role="alert">{error}</p>}
+        {recoveredHistory && (
+          <p className="auth-field-error" role="status" style={{ color: '#D4AF37' }}>
+            Sua conta anterior foi recuperada com sucesso. Seu histórico voltou a contar.
+          </p>
+        )}
 
         <div className="auth-field">
           <div className="auth-input-wrap">
@@ -426,6 +453,49 @@ function RegisterForm({ onNavigate }) {
             </button>
           </div>
         </div>
+
+        {needsRecoveryVerification && (
+          <div className="auth-field">
+            <div
+              className="mb-2 rounded-lg px-3 py-2 text-[11px] leading-relaxed"
+              style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.35)', color: '#e2c97a' }}
+              role="status"
+            >
+              Encontramos uma conta desativada com este e-mail. Confirme a senha da conta anterior para
+              recuperar o histórico. Prefere começar do zero? Cadastre-se com outro e-mail.
+            </div>
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 7h16M4 12h10M4 17h16" />
+                  <circle cx="18" cy="12" r="2.5" />
+                </svg>
+              </span>
+              <input
+                id="register-senha-antiga"
+                type={showRecoveryPassword ? 'text' : 'password'}
+                name="senha_conta_desativada"
+                value={formData.senha_conta_desativada}
+                onChange={handleChange}
+                className="auth-input auth-input--padded"
+                placeholder="Senha da conta anterior"
+                aria-label="Senha da conta anterior"
+                autoComplete="current-password"
+                maxLength={7}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="auth-eye-btn"
+                onClick={() => setShowRecoveryPassword(!showRecoveryPassword)}
+                aria-label={showRecoveryPassword ? 'Ocultar senha anterior' : 'Mostrar senha anterior'}
+              >
+                <EyeIcon visible={showRecoveryPassword} />
+              </button>
+            </div>
+          </div>
+        )}
 
         <button type="submit" className="auth-submit-btn" disabled={loading} aria-label="Cadastrar">
           {loading ? 'Criando conta...' : 'CRIAR MINHA CONTA'}

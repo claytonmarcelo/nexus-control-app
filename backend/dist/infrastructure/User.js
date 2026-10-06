@@ -17,14 +17,31 @@ export const findUserByEmail = async (email) => {
 };
 export const findUserById = async (id, includePassword = false) => {
     const fields = includePassword
-        ? 'id, nome, email, senha, nivel_acesso, ativo, criado_em'
-        : 'id, nome, email, nivel_acesso, ativo, criado_em';
+        ? 'id, nome, email, senha, nivel_acesso, ativo, status_conta, desativado_em, email_original, criado_em'
+        : 'id, nome, email, nivel_acesso, ativo, status_conta, desativado_em, email_original, criado_em';
     const [rows] = await pool.execute(`SELECT ${fields} FROM usuarios WHERE id = ?`, [id]);
     return rows[0] || null;
 };
-export const findAllUsers = async () => {
-    const [rows] = await pool.execute(`SELECT id, nome, email, nivel_acesso, ativo, criado_em FROM usuarios ORDER BY criado_em DESC`);
+export const findAllUsers = async ({ status_conta = null, q = null } = {}) => {
+    const conditions = [];
+    const values = [];
+    if (status_conta) {
+        conditions.push('status_conta = ?');
+        values.push(status_conta);
+    }
+    if (q) {
+        // Escapa curingas do LIKE para busca literal segura por nome/e-mail.
+        const like = `%${String(q).replace(/[%_\\]/g, '\\$&')}%`;
+        conditions.push('(nome LIKE ? OR email LIKE ? OR email_original LIKE ?)');
+        values.push(like, like, like);
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const [rows] = await pool.query(`SELECT id, nome, email, nivel_acesso, ativo, status_conta, desativado_em, email_original, ultimo_login, criado_em FROM usuarios ${where} ORDER BY criado_em DESC`, values);
     return rows;
+};
+/** Registra o último acesso; base de dados da regra de inatividade e do painel administrativo. */
+export const registrarLogin = async (id) => {
+    await pool.execute('UPDATE usuarios SET ultimo_login = NOW() WHERE id = ?', [id]);
 };
 /**
  * Lightweight user lookup used by the authentication middleware.  Resolving

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
-import { itemService, userService } from '../../services/services';
+import { itemService, userService, alertService } from '../../services/services';
 import { checkoutService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
 import StatCard from '../ui/StatCard';
@@ -222,9 +222,19 @@ export default function Dashboard() {
     valorTotalPedidos: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [alertsData, setAlertsData] = useState(null);
 
   const role = user?.nivel_acesso || 'cliente';
   const roleMeta = ROLE_META[role] || ROLE_META.cliente;
+
+  useEffect(() => {
+    if (!user || !(isCliente || isFuncionario)) return;
+    let cancelled = false;
+    alertService.getMyAlerts()
+      .then((data) => { if (!cancelled) setAlertsData(data || null); })
+      .catch(() => { /* silencioso: o banner simplesmente não aparece */ });
+    return () => { cancelled = true; };
+  }, [user, isCliente, isFuncionario]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -347,6 +357,8 @@ export default function Dashboard() {
           </Link>
         </div>
 
+        <AlertsBanner data={alertsData} onDismiss={() => setAlertsData(null)} />
+
         {/* Métricas reais do cliente */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
@@ -461,6 +473,8 @@ export default function Dashboard() {
             Acessar Catálogo
           </Link>
         </div>
+
+        <AlertsBanner data={alertsData} onDismiss={() => setAlertsData(null)} />
 
         {/* Métricas operacionais */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -826,5 +840,62 @@ function RoleIcon({ role, className, style }) {
     <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
+  );
+}
+
+function AlertsBanner({ data, onDismiss }) {
+  const alerts = data?.alerts ?? [];
+  const resumo = data?.resumo ?? {};
+  if (alerts.length === 0) return null;
+
+  const urgente = alerts.find((a) => a.severidade === 'urgente');
+  const atencao = alerts.find((a) => a.severidade === 'atencao');
+  const principal = urgente || atencao || alerts[0];
+
+  const accentColor = urgente ? '#ef4444' : atencao ? '#f59e0b' : '#d4af37';
+  const accentBg = urgente ? 'rgba(239,68,68,0.08)' : atencao ? 'rgba(245,158,11,0.08)' : 'rgba(212,175,55,0.08)';
+  const accentBorder = urgente ? 'rgba(239,68,68,0.35)' : atencao ? 'rgba(245,158,11,0.35)' : 'rgba(212,175,55,0.35)';
+
+  return (
+    <div
+      className="relative flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between"
+      style={{ borderColor: accentBorder, backgroundColor: accentBg }}
+      role="region"
+      aria-label="Alertas recentes da sua conta"
+    >
+      <div className="flex items-start gap-3 min-w-0">
+        <span
+          className="mt-1 h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: accentColor, boxShadow: `0 0 12px ${accentColor}` }}
+          aria-hidden="true"
+        />
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: accentColor }}>
+            {urgente ? 'Requer atenção imediata' : atencao ? 'Vale a pena revisar' : 'Aviso'} · {alerts.length} {alerts.length === 1 ? 'item' : 'itens'}
+            {resumo.possui_debitos ? ` · ${formatCurrency(resumo.total_debitos)} em aberto` : ''}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+            {principal.mensagem}
+          </p>
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <Link to="/perfil" className="btn-secondary text-xs gap-2 px-3 py-2">
+          Ver centro de alertas
+        </Link>
+        {onDismiss && (
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label="Dispensar este aviso"
+            className="rounded-full p-2 text-text-secondary hover:text-white hover:bg-dark-hover transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

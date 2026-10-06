@@ -559,22 +559,34 @@ describe('DELETE /api/usuarios/me', () => {
     expect(response.status).toBe(403);
   });
 
-  it('deletes the account and its order while preserving catalog items', async () => {
-    const response = await request(app)
+  it('desativates the account while preserving orders and catalog ownership', async () => {
+    // Regra nova (§1/§2/§90): contas com pendências só são desativadas após
+    // confirmação explícita, e o histórico (pedidos, itens) é preservado.
+    const comPendencias = await request(app)
       .delete('/api/usuarios/me')
       .set('Authorization', `Bearer ${client.token}`)
       .send({ senha_atual: '123456#' });
+    expect(comPendencias.status).toBe(409);
+    expect(comPendencias.body.errors.obrigacoes.possui_obrigacoes).toBe(true);
+
+    const response = await request(app)
+      .delete('/api/usuarios/me')
+      .set('Authorization', `Bearer ${client.token}`)
+      .send({ senha_atual: '123456#', confirmar_obrigacoes: true });
 
     expect(response.status).toBe(200);
-    expect(response.body.message).toBe('Conta excluída com sucesso');
+    expect(response.body.message).toMatch(/desativada com sucesso/);
 
-    const [users] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [client.id]);
+    const [users] = await pool.execute('SELECT * FROM usuarios WHERE id = ?', [client.id]);
     const [items] = await pool.execute('SELECT criado_por FROM itens WHERE id = ?', [itemId]);
     const [orders] = await pool.execute('SELECT id FROM pedidos WHERE id = ?', [orderId]);
-    expect(users).toHaveLength(0);
+    expect(users).toHaveLength(1);
+    expect(users[0].status_conta).toBe('desativada');
+    expect(users[0].ativo).toBe(0);
+    expect(users[0].email_original).toBe(client.email);
     expect(items).toHaveLength(1);
-    expect(items[0].criado_por).toBe(rootAdminId);
-    expect(orders).toHaveLength(0);
+    expect(items[0].criado_por).toBe(client.id);
+    expect(orders).toHaveLength(1);
   });
 });
 

@@ -176,10 +176,38 @@ const initDatabase = async () => {
         console.warn('⚠️ Inicialização do banco de dados:', error.message);
     }
 };
+/**
+ * Varreduras periódicas das regras de negócio (§47/§61): vencimento de aluguéis
+ * e avisos de inatividade comercial. Rodam uma vez após a migração e depois em
+ * intervalo fixo — nunca por request do cliente.
+ */
+const MANUTENCAO_INTERVALO_MS = 6 * 60 * 60 * 1000;
+const executarManutencao = async () => {
+    try {
+        const { marcarAlugueisVencidos } = await import('./infrastructure/Aluguel.js');
+        const { marcarAvisosDeInatividade } = await import('./infrastructure/Conta.js');
+        const vencidos = await marcarAlugueisVencidos();
+        const inatividade = await marcarAvisosDeInatividade();
+        if (vencidos.vencidos > 0 || inatividade.avisados > 0 || inatividade.reativados > 0) {
+            console.log(`[Manutenção] ${vencidos.vencidos} aluguel(es) vencido(s); ${inatividade.avisados} aviso(s) de inatividade; ${inatividade.reativados} conta(s) reativada(s).`);
+        }
+    }
+    catch (error) {
+        console.warn('[Manutenção] Varredura não aplicada agora:', error.message);
+    }
+};
+const iniciarManutencaoPeriodica = () => {
+    executarManutencao();
+    const timer = setInterval(executarManutencao, MANUTENCAO_INTERVALO_MS);
+    if (typeof timer.unref === 'function')
+        timer.unref();
+};
 if (process.env.NODE_ENV !== 'test') {
     const server = app.listen(PORT, () => {
         console.log(`Servidor Nexus Control rodando na porta ${PORT}`);
-        initDatabase().catch((error) => {
+        initDatabase().then(() => {
+            iniciarManutencaoPeriodica();
+        }).catch((error) => {
             console.error('Falha ao inicializar o banco em produção:', error.message);
             server.close(() => process.exit(1));
         });

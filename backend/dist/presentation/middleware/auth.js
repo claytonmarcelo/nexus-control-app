@@ -21,7 +21,12 @@ export const authenticate = async (req, res, next) => {
             return sendError(res, 'Usuário não encontrado', 401);
         }
         if (!userAuthState.ativo) {
-            return sendError(res, 'Conta desativada ou não encontrada', 401);
+            // Mensagem amigável e sem detalhes internos (§67/§73): conta desativada a pedido
+            // do cliente orienta novo cadastro; demais bloqueios remetem ao administrador.
+            const mensagem = userAuthState.status_conta === 'desativada'
+                ? 'Esta conta está desativada. Caso queira voltar a utilizar o Nexus, realize um novo cadastro.'
+                : 'Sua conta está temporariamente indisponível. Entre em contato com o administrador do sistema.';
+            return sendError(res, mensagem, 401);
         }
         // Usar nivel_acesso do banco, não do token (para refletir mudanças imediatas)
         req.user = {

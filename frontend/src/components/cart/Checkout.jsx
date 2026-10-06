@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useModal } from '../../contexts/ModalContext';
-import { checkoutService } from '../../services/services';
+import { checkoutService, paymentService } from '../../services/services';
 
 const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -24,11 +24,11 @@ export default function Checkout() {
   const [card, setCard] = useState(INITIAL_CARD);
   const [submitting, setSubmitting] = useState(false);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
   const [countdown, setCountdown] = useState(4);
 
-  const fallbackPixCopyPaste = useMemo(() => (
-    `00020126360014BR.GOV.BCB.PIX0114NEXUSCONTROL520400005303986540${subtotal.toFixed(2).replace('.', '')}5802BR5913NEXUS CONTROL6009SAO PAULO62070503***6304`
-  ), [subtotal]);
+  const confirmed = paymentStatus?.status_pagamento === 'confirmado';
 
   useEffect(() => {
     if (!items.length && !completedOrder) {
@@ -36,8 +36,26 @@ export default function Checkout() {
     }
   }, [items.length, completedOrder, navigate]);
 
+  // Polling do status do pagamento: a liberação é decidida pelo backend
+  // (webhook do gateway ou confirmação do administrador) — nunca pelo cliente.
+  const pollTimer = useRef(null);
   useEffect(() => {
-    if (!completedOrder) return undefined;
+    if (!completedOrder || confirmed) return undefined;
+
+    pollTimer.current = window.setInterval(async () => {
+      try {
+        const status = await paymentService.getStatus(completedOrder.id);
+        setPaymentStatus(status);
+      } catch {
+        // Falha transitável de rede: o próximo tick tenta de novo.
+      }
+    }, 8000);
+
+    return () => window.clearInterval(pollTimer.current);
+  }, [completedOrder, confirmed]);
+
+  useEffect(() => {
+    if (!confirmed) return undefined;
 
     const redirectTimer = window.setTimeout(() => {
       if (countdown <= 1) {
@@ -50,7 +68,7 @@ export default function Checkout() {
     }, 1000);
 
     return () => window.clearTimeout(redirectTimer);
-  }, [completedOrder, countdown, clearCart, navigate]);
+  }, [confirmed, countdown, clearCart, navigate]);
 
   const updateCard = (field, value) => {
     if (field === 'number') {
@@ -87,9 +105,13 @@ export default function Checkout() {
     return null;
   };
 
-  const handleCopyPix = async () => {
+  const handleCopyPix = async (code) => {
+    if (!code) {
+      toast({ message: 'O código Pix será gerado logo após a criação do pedido.', variant: 'info' });
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(fallbackPixCopyPaste);
+      await navigator.clipboard.writeText(code);
       toast({ message: 'Código Pix copiado para a área de transferência.', variant: 'success' });
     } catch {
       toast({ message: 'Não foi possível copiar automaticamente. Selecione o código para copiá-lo.', variant: 'warning' });
@@ -117,7 +139,9 @@ export default function Checkout() {
         items: items.map(item => ({
           item_id: Number(item.item_id || String(item.id).split('-')[0]),
           quantidade: Number(item.quantidade),
-          preco: Number(item.preco_unitario)
+          preco: Number(item.preco_unitario),
+          tipo: item.tipo || 'compra',
+          dias_aluguel: item.tipo === 'aluguel' ? item.dias_aluguel : undefined,
         })),
         total: Number(subtotal),
         metodo_pagamento: backendPaymentMethod
@@ -126,15 +150,40 @@ export default function Checkout() {
       const order = await checkoutService.create(checkoutData);
 
       setCompletedOrder(order);
+      setPaymentStatus({
+        status_pagamento: order?.status_pagamento || 'pendente',
+        mensagem: order?.pagamento?.mensagem,
+      });
       setCountdown(4);
     } catch (error) {
       toast({
-        message: error.response?.data?.message || 'Não foi possível confirmar seu pagamento. Tente novamente.',
+        message: error.response?.data?.message || 'Não foi possível registrar seu pedido. Tente novamente.',
         variant: 'danger',
       });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleVerifyPayment = async () => {
+    if (!completedOrder || checkingPayment) return;
+    setCheckingPayment(true);
+    try {
+      const status = await paymentService.getStatus(completedOrder.id);
+      setPaymentStatus(status);
+      if (status.status_pagamento !== 'confirmado') {
+        toast({ message: status.mensagem || 'Ainda não identificamos seu pagamento.', variant: 'info' });
+      }
+    } catch {
+      toast({ message: 'Não foi possível verificar o pagamento agora. Tente novamente em instantes.', variant: 'warning' });
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
+
+  const handleLeaveCheckout = () => {
+    clearCart();
+    navigate('/dashboard', { replace: true });
   };
 
   if (!items.length && !completedOrder) {
@@ -189,7 +238,7 @@ export default function Checkout() {
               </div>
 
               {paymentMethod === 'pix' ? (
-                <PixPayment copyPaste={fallbackPixCopyPaste} onCopy={handleCopyPix} />
+                <PixNotice />
               ) : (
                 <CreditCardForm card={card} onChange={updateCard} />
               )}
@@ -277,7 +326,18 @@ export default function Checkout() {
         </form>
       </section>
 
-      {completedOrder && <SuccessOverlay order={completedOrder} countdown={countdown} />}
+      {completedOrder && (
+        <PaymentOverlay
+          order={completedOrder}
+          status={paymentStatus}
+          confirmed={confirmed}
+          countdown={countdown}
+          checking={checkingPayment}
+          onVerify={handleVerifyPayment}
+          onLeave={handleLeaveCheckout}
+          onCopyPix={handleCopyPix}
+        />
+      )}
     </>
   );
 }
@@ -306,29 +366,17 @@ function PaymentOption({ active, icon, title, description, onClick }) {
   );
 }
 
-function PixPayment({ copyPaste, onCopy }) {
+function PixNotice() {
   return (
     <div className="mt-6 rounded-2xl border border-nexus-500/20 bg-nexus-600/[0.07] p-4 sm:p-5">
-      <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
-        <div className="shrink-0 rounded-2xl bg-white p-3 shadow-champagne" aria-label="Representação visual do QR Code Pix">
-          <QrCodePlaceholder />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-white">Pague com Pix</h3>
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-nexus-600/20 text-nexus-300">
+          <PixIcon className="h-5 w-5" />
+        </span>
+        <div>
+          <h3 className="font-medium text-white">Pagamento via Pix</h3>
           <p className="mt-1 text-sm leading-6 text-nexus-400">
-            Aponte a câmera para o QR Code ou copie o código abaixo no aplicativo do seu banco.
-          </p>
-          <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-nexus-400" htmlFor="pix-copy-paste">Pix Copia e Cola</label>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <input id="pix-copy-paste" readOnly value={copyPaste} className="neumorphic-inner min-w-0 flex-1 border border-dark-border px-3 py-2.5 text-xs text-white outline-none" />
-            <button type="button" onClick={onCopy} className="btn-secondary shrink-0 gap-2 px-4 py-2.5">
-              <CopyIcon className="h-4 w-4" />
-              Copiar
-            </button>
-          </div>
-          <p className="mt-3 flex items-center gap-2 text-xs text-nexus-500">
-            <CheckIcon className="h-4 w-4 text-nexus-400" />
-            Código gerado para este ambiente de pagamento.
+            O QR Code oficial será gerado após a criação do pedido. A liberação acontece automaticamente assim que o pagamento for confirmado.
           </p>
         </div>
       </div>
@@ -405,53 +453,86 @@ function CreditCardForm({ card, onChange }) {
   );
 }
 
-function SuccessOverlay({ order, countdown }) {
-  const orderReference = order?.pedido?.numero || order?.pedido?.id || order?.numero || order?.id;
+function PaymentOverlay({ order, status, confirmed, countdown, checking, onVerify, onLeave, onCopyPix }) {
+  const orderReference = order?.id;
+  const payment = order?.pagamento || {};
   const progress = Math.min(100, Math.max(0, ((4 - countdown) / 4) * 100));
+  const mensagem = status?.mensagem || payment.mensagem || 'Assim que o pagamento for confirmado, liberamos seu pedido automaticamente.';
 
-  return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="payment-success-title">
-      <div className="glass w-full max-w-md rounded-3xl p-7 text-center shadow-glass-lg sm:p-9 animate-scale-in">
-        <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full border border-green-400/30 bg-green-500/15 text-green-300 shadow-[0_0_36px_rgba(74,222,128,0.18)]">
-          <SuccessIcon className="h-10 w-10" />
-        </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Pagamento confirmado</p>
-        <h2 id="payment-success-title" className="mt-3 font-display text-2xl font-semibold text-white">Pedido recebido com sucesso!</h2>
-        <p className="mt-3 text-sm leading-6 text-nexus-300">Seu pedido está sendo processado. Em breve você receberá as próximas atualizações.</p>
-        {orderReference && <p className="mt-4 text-xs text-nexus-500">Pedido #{orderReference}</p>}
-        <div className="mt-7">
-          <p className="text-sm text-nexus-400">Redirecionando automaticamente em <span className="font-semibold text-nexus-300">{countdown}s</span></p>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-dark-hover">
-            <div className="h-full rounded-full bg-gradient-to-r from-nexus-600 to-nexus-300 transition-all duration-1000" style={{ width: `${progress}%` }} />
+  if (confirmed) {
+    return (
+      <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="payment-success-title">
+        <div className="glass w-full max-w-md rounded-3xl p-7 text-center shadow-glass-lg sm:p-9 animate-scale-in">
+          <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full border border-green-400/30 bg-green-500/15 text-green-300 shadow-[0_0_36px_rgba(74,222,128,0.18)]">
+            <SuccessIcon className="h-10 w-10" />
+          </div>
+          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Pagamento confirmado</p>
+          <h2 id="payment-success-title" className="mt-3 font-display text-2xl font-semibold text-white">Pedido liberado com sucesso!</h2>
+          <p className="mt-3 text-sm leading-6 text-nexus-300">Seu pedido está em processamento e você receberá as próximas atualizações no centro de alertas.</p>
+          {orderReference && <p className="mt-4 text-xs text-nexus-500">Pedido #{orderReference}</p>}
+          <div className="mt-7">
+            <p className="text-sm text-nexus-400">Redirecionando automaticamente em <span className="font-semibold text-nexus-300">{countdown}s</span></p>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-dark-hover">
+              <div className="h-full rounded-full bg-gradient-to-r from-nexus-600 to-nexus-300 transition-all duration-1000" style={{ width: `${progress}%` }} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function QrCodePlaceholder() {
-  const size = 21;
-  const cells = [];
-
-  const finderCell = (row, column, top, left) => {
-    const y = row - top;
-    const x = column - left;
-    if (x < 0 || x > 6 || y < 0 || y > 6) return null;
-    return x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4);
-  };
-
-  for (let row = 0; row < size; row += 1) {
-    for (let column = 0; column < size; column += 1) {
-      const finder = finderCell(row, column, 0, 0) ?? finderCell(row, column, 0, 14) ?? finderCell(row, column, 14, 0);
-      const dark = finder ?? ((row * 11 + column * 7 + row * column) % 5 < 2 && row !== 6 && column !== 6);
-      if (dark) {
-        cells.push(<rect key={`${row}-${column}`} x={column} y={row} width="1" height="1" fill="#121212" />);
-      }
-    }
+    );
   }
 
-  return <svg viewBox="0 0 21 21" className="h-32 w-32 rounded-sm" aria-hidden="true">{cells}</svg>;
+  return (
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="payment-pending-title">
+      <div className="glass w-full max-w-lg rounded-3xl p-6 shadow-glass-lg sm:p-8 animate-scale-in">
+        <div className="text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-amber-400/30 bg-amber-500/15 text-amber-300">
+            <ClockIcon className="h-8 w-8 animate-pulse" />
+          </div>
+          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-nexus-400">Aguardando confirmação</p>
+          <h2 id="payment-pending-title" className="mt-2 font-display text-2xl font-semibold text-white">Pedido #{orderReference} registrado</h2>
+          <p className="mt-3 text-sm leading-6 text-nexus-300">{mensagem}</p>
+        </div>
+
+        {payment.qr_code_base64 ? (
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl border border-nexus-500/20 bg-nexus-600/[0.07] p-5 sm:flex-row sm:items-start">
+            <img
+              src={`data:image/png;base64,${payment.qr_code_base64}`}
+              alt="QR Code Pix do pagamento"
+              className="h-40 w-40 rounded-xl bg-white p-2"
+            />
+            <div className="min-w-0 flex-1 text-center sm:text-left">
+              <h3 className="font-medium text-white">Pague com Pix</h3>
+              <p className="mt-1 text-sm text-nexus-400">Aponte a câmera do seu banco para o QR Code ou use o copia e cola.</p>
+              {payment.qr_code && (
+                <button type="button" onClick={() => onCopyPix(payment.qr_code)} className="btn-secondary mt-3 gap-2 px-4 py-2 text-xs">
+                  <CopyIcon className="h-4 w-4" />
+                  Copiar código Pix
+                </button>
+              )}
+              {payment.ticket_url && (
+                <a href={payment.ticket_url} target="_blank" rel="noreferrer" className="mt-3 block text-xs font-medium text-nexus-300 hover:text-nexus-200">
+                  Abrir comprovante do Pix
+                </a>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <button type="button" onClick={onVerify} disabled={checking} className="btn-primary gap-2 px-6 py-3">
+            {checking ? <SpinnerIcon className="h-5 w-5 animate-spin" /> : <RefreshIcon className="h-5 w-5" />}
+            {checking ? 'Verificando…' : 'Já paguei — verificar'}
+          </button>
+          <button type="button" onClick={onLeave} className="btn-secondary gap-2 px-6 py-3">
+            Concluir agora
+          </button>
+        </div>
+        <p className="mt-4 text-center text-xs text-nexus-500">
+          Esta tela atualiza sozinha: você não precisa ficar pagando de novo.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function PixIcon({ className }) {
@@ -489,10 +570,19 @@ function CopyIcon({ className }) {
   );
 }
 
-function CheckIcon({ className }) {
+function ClockIcon({ className }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m5 12 4 4L19 6" />
+      <circle cx="12" cy="12" r="9" strokeWidth="1.8" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function RefreshIcon({ className }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 4v6h6M20 20v-6h-6M5.5 15a7.5 7.5 0 0 0 13-2.5M18.5 9a7.5 7.5 0 0 0-13 2.5" />
     </svg>
   );
 }

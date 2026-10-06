@@ -1,5 +1,6 @@
-import { createUser, findUserByEmail, findAllUsers, findUserById, updateUser, deleteUser, deleteOwnUserAccount, updatePassword } from '../../infrastructure/User.js';
+import { createUser, findUserByEmail, findAllUsers, findUserById, updateUser, deleteUser, updatePassword } from '../../infrastructure/User.js';
 import { USER_ROLES, verifyPassword } from '../../infrastructure/User.js';
+import { desativarConta, obterObrigacoesConta, STATUS_CONTA } from '../../infrastructure/Conta.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import { isRootAdmin, ROOT_ADMIN_EMAIL } from '../../config/access.js';
 import { getUserPermissions, setUserPermissions } from '../../infrastructure/Permission.js';
@@ -54,7 +55,15 @@ export const create = async (req, res) => {
 };
 export const getAll = async (req, res) => {
     try {
-        const users = await findAllUsers();
+        // Filtros administrativos (§16): situação da conta e busca por nome/e-mail.
+        const { status_conta, q } = req.query;
+        if (status_conta && !Object.values(STATUS_CONTA).includes(String(status_conta))) {
+            return sendError(res, 'Filtro de situação de conta inválido', 400);
+        }
+        const users = await findAllUsers({
+            status_conta: status_conta ? String(status_conta) : null,
+            q: q ? String(q).slice(0, 150) : null,
+        });
         sendSuccess(res, { users }, 'Usuários listados com sucesso');
     }
     catch (error) {
@@ -145,35 +154,52 @@ export const remove = async (req, res) => {
         sendSuccess(res, null, 'Usuário excluído com sucesso');
     }
     catch (error) {
+        // Histórico de aluguéis preserva a relação com a conta: o banco recusa a
+        // exclusão física nesses casos. A orientação é desativar (soft delete).
+        if (error?.code === 'ER_ROW_IS_REFERENCED_2') {
+            return sendError(res, 'Este usuário possui registros que não podem ser apagados. Utilize a desativação da conta para preservar o histórico.', 409);
+        }
         console.error('Erro ao excluir usuário:', error);
         sendError(res, 'Erro interno do servidor', 500);
     }
 };
+/**
+ * Desativação da própria conta (exclusão solicitada pelo cliente).
+ * Regra central: a conta é DESATIVADA, nunca apagada fisicamente — pedidos,
+ * pagamentos, aluguéis e histórico permanecem para o Administrador (§23–§25).
+ * Obrigações em aberto (pagamento pendente, aluguel ativo/vencido) exigem
+ * confirmação explícita antes da desativação (§56).
+ */
 export const deleteOwnAccount = async (req, res) => {
     try {
         const user = await findUserById(req.user.id, true);
         if (!user)
             return sendError(res, 'Usuário não encontrado', 404);
         if (isRootAdmin(user)) {
-            return sendError(res, 'A conta do administrador raiz não pode ser excluída', 403);
+            return sendError(res, 'A conta do administrador raiz não pode ser desativada', 403);
         }
         if (!await verifyPassword(req.body.senha_atual, user.senha)) {
             return sendError(res, 'Senha atual incorreta', 401);
         }
-        const result = await deleteOwnUserAccount(req.user.id);
+        const confirmarObrigacoes = req.body.confirmar_obrigacoes === true || req.body.confirmar_obrigacoes === 'true';
+        const obrigacoes = await obterObrigacoesConta(req.user.id);
+        if (obrigacoes.possui_obrigacoes && !confirmarObrigacoes) {
+            return sendError(res, 'Sua conta possui pendências ativas. Elas permanecerão registradas e poderão ser acompanhadas pelo administrador mesmo após a desativação. Revise as pendências e confirme para continuar.', 409, { obrigacoes });
+        }
+        const result = await desativarConta(req.user.id);
         if (result.reason === 'root-admin') {
-            return sendError(res, 'A conta do administrador raiz não pode ser excluída', 403);
+            return sendError(res, 'A conta do administrador raiz não pode ser desativada', 403);
         }
-        if (result.reason === 'root-admin-missing') {
-            return sendError(res, 'Não foi possível preservar os itens do catálogo. Procure o administrador do sistema.', 409);
+        if (result.reason === 'already-desativada') {
+            return sendError(res, 'Esta conta já está desativada', 400);
         }
-        if (!result.deleted) {
+        if (!result.desativada) {
             return sendError(res, 'Usuário não encontrado', 404);
         }
-        sendSuccess(res, null, 'Conta excluída com sucesso');
+        sendSuccess(res, { desativada: true }, 'Conta desativada com sucesso. Seus registros foram preservados no histórico do sistema.');
     }
     catch (error) {
-        console.error('Erro ao excluir a própria conta:', error);
+        console.error('Erro ao desativar a própria conta:', error);
         sendError(res, 'Erro interno do servidor', 500);
     }
 };

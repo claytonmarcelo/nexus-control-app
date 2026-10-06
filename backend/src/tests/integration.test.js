@@ -107,7 +107,9 @@ describe('Integration Tests - Carrinho e Checkout', () => {
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data).toHaveProperty('usuario_id', clienteId);
       expect(response.body.data).toHaveProperty('metodo_pagamento', 'pix');
-      expect(response.body.data).toHaveProperty('status_pagamento', 'confirmado');
+      // Nova regra (§7/§10): o pedido nasce com pagamento pendente e a
+      // liberação acontece somente na confirmação (webhook ou admin).
+      expect(response.body.data).toHaveProperty('status_pagamento', 'pendente');
       testOrderId = response.body.data.id;
       console.log(`  ✓ Pedido criado: #${response.body.data.id} - Total: R$ ${response.body.data.total}`);
     });

@@ -5,13 +5,14 @@ export const USER_ROLES = {
     CLIENTE: 'cliente'
 };
 export class User {
-    constructor({ id, nome, email, senha, nivel_acesso, ativo, criado_em }) {
+    constructor({ id, nome, email, senha, nivel_acesso, ativo, status_conta, criado_em }) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
         this.nivel_acesso = nivel_acesso || USER_ROLES.CLIENTE;
         this.ativo = ativo !== undefined ? ativo : true;
+        this.status_conta = status_conta || 'ativo';
         this.criado_em = criado_em;
     }
     static async hashPassword(password) {

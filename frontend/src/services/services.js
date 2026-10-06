@@ -170,3 +170,49 @@ export const checkoutService = {
     return response.data;
   },
 };
+
+export const paymentService = {
+  async getStatus(pedidoId) {
+    const response = await api.get(`/pagamentos/pedido/${pedidoId}`);
+    return response.data.data;
+  },
+};
+
+export const rentalService = {
+  async getMine() {
+    const response = await api.get('/alugueis/me');
+    return response.data.data;
+  },
+
+  async getForOperation(params = {}) {
+    const response = await api.get('/alugueis/operacao', { params });
+    return response.data.data;
+  },
+
+  async regularize(aluguelId, data) {
+    const response = await api.post(`/alugueis/${aluguelId}/regularizacao`, data);
+    return response.data.data;
+  },
+
+  async updatePickup(aluguelId, data) {
+    const response = await api.put(`/alugueis/${aluguelId}/retirada`, data);
+    return response.data;
+  },
+};
+
+export const alertService = {
+  async getMyAlerts() {
+    const response = await api.get('/usuarios/me/alertas');
+    return response.data.data;
+  },
+
+  async getMyEvents(params = {}) {
+    const response = await api.get('/usuarios/me/eventos', { params });
+    return response.data.data;
+  },
+
+  async getUserEvents(userId, params = {}) {
+    const response = await api.get(`/usuarios/${userId}/eventos`, { params });
+    return response.data.data;
+  },
+};

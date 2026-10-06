@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useModal } from '../../contexts/ModalContext';
-import { itemService, userService } from '../../services/services';
+import { itemService, userService, rentalService, alertService } from '../../services/services';
 import { adminService } from '../../services/adminService';
 import { isRootAdmin } from '../../utils/access';
 import ItemFormModal from '../dashboard/ItemFormModal';
@@ -50,11 +50,36 @@ const ORDER_STATUS_OPTIONS = [
   { value: 'cancelado', label: 'Cancelado' },
 ];
 
+const STATUS_CONTA_OPTIONS = [
+  { value: '', label: 'Todas' },
+  { value: 'ativo', label: 'Ativas' },
+  { value: 'aviso_inatividade', label: 'Aviso de inatividade' },
+  { value: 'bloqueado_inatividade', label: 'Bloqueadas (inatividade)' },
+  { value: 'desativada', label: 'Desativadas' },
+];
+
+const ALUGUEL_STATUS_OPTIONS = [
+  { value: '', label: 'Todos os status' },
+  { value: 'aguardando_pagamento', label: 'Aguardando pagamento' },
+  { value: 'ativo', label: 'Ativos' },
+  { value: 'vencido', label: 'Vencidos' },
+  { value: 'regularizado', label: 'Regularizados (aguardando devolução)' },
+  { value: 'devolvido', label: 'Devolvidos' },
+  { value: 'cancelado', label: 'Cancelados' },
+];
+
+const RETIRADA_STATUS = [
+  { value: 'pendente', label: 'Pendente' },
+  { value: 'agendada', label: 'Agendada' },
+  { value: 'realizada', label: 'Realizada (entregue/devolvida)' },
+];
+
 const TABS = [
   { key: 'visao-geral', label: 'Visão geral', icon: 'chart' },
   { key: 'acessos', label: 'Acessos', icon: 'shield' },
   { key: 'produtos', label: 'Produtos', icon: 'box' },
   { key: 'pedidos', label: 'Pedidos', icon: 'receipt' },
+  { key: 'alugueis', label: 'Aluguéis', icon: 'clock' },
 ];
 
 export default function AdminControlCenter() {
@@ -86,6 +111,16 @@ export default function AdminControlCenter() {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [batchSaving, setBatchSaving] = useState(null); // { pageKey, role } | null
   const [globalPermissionOverrides, setGlobalPermissionOverrides] = useState({});
+
+  const [rentals, setRentals] = useState([]);
+  const [rentalStatusFilter, setRentalStatusFilter] = useState('');
+  const [rentalsLoading, setRentalsLoading] = useState(false);
+  const [updatingRetiradaId, setUpdatingRetiradaId] = useState(null);
+
+  const [userStatusFilter, setUserStatusFilter] = useState('');
+
+  const [userEvents, setUserEvents] = useState([]);
+  const [userEventsLoading, setUserEventsLoading] = useState(false);
 
   const loadControlData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -149,6 +184,40 @@ export default function AdminControlCenter() {
     () => users.find((targetUser) => String(targetUser.id) === String(selectedUserId)) || null,
     [selectedUserId, users],
   );
+
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    let cancelled = false;
+    userService.getAll({
+      limit: 100,
+      status_conta: userStatusFilter || undefined,
+    })
+      .then((res) => { if (!cancelled) setUsers(extractCollection(res, 'users')); })
+      .catch(() => { /* silencioso: o estado anterior permanece */ });
+    return () => { cancelled = true; };
+  }, [isAdmin, userStatusFilter]);
+
+  useEffect(() => {
+    if (!isAdmin || activeTab !== 'alugueis') return undefined;
+    let cancelled = false;
+    setRentalsLoading(true);
+    rentalService.getForOperation({ status: rentalStatusFilter || undefined })
+      .then((data) => { if (!cancelled) setRentals(Array.isArray(data?.alugueis) ? data.alugueis : []); })
+      .catch(() => { if (!cancelled) setRentals([]); })
+      .finally(() => { if (!cancelled) setRentalsLoading(false); });
+    return () => { cancelled = true; };
+  }, [isAdmin, activeTab, rentalStatusFilter]);
+
+  useEffect(() => {
+    if (!isAdmin || !selectedUser?.id) { setUserEvents([]); return undefined; }
+    let cancelled = false;
+    setUserEventsLoading(true);
+    alertService.getUserEvents(selectedUser.id, { limit: 50 })
+      .then((data) => { if (!cancelled) setUserEvents(Array.isArray(data?.eventos) ? data.eventos : []); })
+      .catch(() => { if (!cancelled) setUserEvents([]); })
+      .finally(() => { if (!cancelled) setUserEventsLoading(false); });
+    return () => { cancelled = true; };
+  }, [isAdmin, selectedUser?.id]);
 
   useEffect(() => {
     if (!selectedUser) return undefined;
@@ -411,6 +480,43 @@ export default function AdminControlCenter() {
     }
   };
 
+  const handleRetiradaUpdate = async (aluguel, novoStatus) => {
+    if (!RETIRADA_STATUS.some((s) => s.value === novoStatus)) {
+      toast({ message: 'Status de retirada inválido.', variant: 'danger' });
+      return;
+    }
+    const meta = RETIRADA_STATUS.find((s) => s.value === novoStatus);
+    const isConfirmed = await confirm({
+      title: 'Atualizar retirada',
+      message: `Confirmar alteração do status de retirada do item "${aluguel.item_nome || `aluguel #${aluguel.id}`}" para "${meta.label}"?`,
+      confirmText: 'Atualizar retirada',
+      variant: novoStatus === 'realizada' ? 'warning' : 'info',
+    });
+    if (!isConfirmed) return;
+
+    setUpdatingRetiradaId(aluguel.id);
+    try {
+      await rentalService.updatePickup(aluguel.id, { status_retirada: novoStatus });
+      setRentals((current) => current.map((r) => (
+        String(r.id) === String(aluguel.id)
+          ? {
+              ...r,
+              status_retirada: novoStatus,
+              status: novoStatus === 'realizada' ? 'devolvido' : r.status,
+            }
+          : r
+      )));
+      toast({ message: 'Retirada atualizada.', variant: 'success' });
+    } catch (error) {
+      toast({
+        message: error.response?.data?.message || 'Não foi possível atualizar a retirada.',
+        variant: 'danger',
+      });
+    } finally {
+      setUpdatingRetiradaId(null);
+    }
+  };
+
   if (!isAdmin) {
     return <AccessDenied />;
   }
@@ -551,6 +657,10 @@ export default function AdminControlCenter() {
           batchSaving={batchSaving}
           globalPermissionOverrides={globalPermissionOverrides}
           userSearch={userSearch}
+          userStatusFilter={userStatusFilter}
+          onUserStatusFilterChange={setUserStatusFilter}
+          userEvents={userEvents}
+          userEventsLoading={userEventsLoading}
           onUserSearchChange={setUserSearch}
           onUserSelect={setSelectedUserId}
           onDraftChange={setPermissionDraft}
@@ -581,6 +691,17 @@ export default function AdminControlCenter() {
           onDraftChange={updateOrderDraft}
           onSave={saveOrderStatus}
           onExpandedChange={setExpandedOrderId}
+        />
+      )}
+
+      {activeTab === 'alugueis' && (
+        <RentalsSection
+          rentals={rentals}
+          loading={rentalsLoading}
+          statusFilter={rentalStatusFilter}
+          onStatusFilterChange={setRentalStatusFilter}
+          updatingRetiradaId={updatingRetiradaId}
+          onRetiradaUpdate={handleRetiradaUpdate}
         />
       )}
 
@@ -1069,7 +1190,7 @@ const ACCESS_SUBTABS = [
  *  1. Controle Individual: lista de usuários + painel lateral de edição inline
  *  2. Controle Global: matriz RBAC (página × role) editável de forma global
  */
-function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, batchSaving, globalPermissionOverrides, userSearch, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave, onBatchUpdate }) {
+function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, batchSaving, globalPermissionOverrides, userSearch, userStatusFilter, onUserStatusFilterChange, userEvents, userEventsLoading, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave, onBatchUpdate }) {
   const [accessSubTab, setAccessSubTab] = useState('individual');
 
   const activeCount = users.filter(isUserActive).length;
@@ -1149,6 +1270,10 @@ function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPer
           loadingPermissions={loadingPermissions}
           savingPermissions={savingPermissions}
           userSearch={userSearch}
+          userStatusFilter={userStatusFilter}
+          onUserStatusFilterChange={onUserStatusFilterChange}
+          userEvents={userEvents}
+          userEventsLoading={userEventsLoading}
           onUserSearchChange={onUserSearchChange}
           onUserSelect={onUserSelect}
           onDraftChange={onDraftChange}
@@ -1176,7 +1301,7 @@ function AccessSection({ pages, users, selectedUser, permissionDraft, loadingPer
  * Painel split: esquerda = lista de usuários, direita = editor inline de permissões.
  * Em mobile vira empilhado (coluna).
  */
-function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, userSearch, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave }) {
+function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, loadingPermissions, savingPermissions, userSearch, userStatusFilter, onUserStatusFilterChange, userEvents, userEventsLoading, onUserSearchChange, onUserSelect, onDraftChange, onRoleChange, onSave }) {
 
   const handleSelectUser = (userId) => {
     onUserSelect(userId);
@@ -1211,6 +1336,19 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
               placeholder="Buscar nome ou e-mail…"
             />
           </label>
+          <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <span className="shrink-0">Situação</span>
+            <select
+              value={userStatusFilter || ''}
+              onChange={(e) => onUserStatusFilterChange?.(e.target.value)}
+              className="input py-1.5 text-sm flex-1"
+              aria-label="Filtrar por situação da conta"
+            >
+              {STATUS_CONTA_OPTIONS.map((opt) => (
+                <option key={opt.value || 'todos'} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <div className="overflow-y-auto max-h-[560px]" style={{ borderColor: 'var(--border-color)' }}>
@@ -1218,9 +1356,9 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
             <EmptyPanel icon="users" title="Nenhum usuário encontrado" text="Tente ajustar o filtro de busca." />
           ) : users.map((targetUser) => {
             const roleMeta = ROLE_META[targetUser.nivel_acesso] || ROLE_META.cliente;
-            const active = isUserActive(targetUser);
             const root = isRootAdmin(targetUser);
             const isSelected = String(targetUser.id) === String(selectedUser?.id);
+            const statusPill = statusContaPill(targetUser);
 
             return (
               <button
@@ -1246,7 +1384,7 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
                   }}
                 >
                   {initials(targetUser.nome)}
-                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 ${active ? 'bg-emerald-400' : 'bg-red-400'}`}
+                  <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 ${statusPill.dotClass}`}
                     style={{ borderColor: 'var(--bg-elevated-1)' }}
                   />
                 </span>
@@ -1267,9 +1405,9 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
                   <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{targetUser.email}</p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${roleMeta.className}`}>{roleMeta.label}</span>
-                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${active ? 'border-emerald-400/25 bg-emerald-400/8 text-emerald-300' : 'border-red-400/25 bg-red-400/8 text-red-300'}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                      {active ? 'Ativa' : 'Bloqueada'}
+                    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusPill.className}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${statusPill.dotClass}`} />
+                      {statusPill.label}
                     </span>
                   </div>
                 </div>
@@ -1304,16 +1442,23 @@ function IndividualAccessPanel({ pages, users, selectedUser, permissionDraft, lo
             </div>
           </div>
         ) : (
-          <UserPermissionEditor
-            user={selectedUser}
-            pages={pages}
-            permissionDraft={permissionDraft}
-            loadingPermissions={loadingPermissions}
-            savingPermissions={savingPermissions}
-            onDraftChange={onDraftChange}
-            onRoleChange={onRoleChange}
-            onSave={onSave}
-          />
+          <>
+            <UserPermissionEditor
+              user={selectedUser}
+              pages={pages}
+              permissionDraft={permissionDraft}
+              loadingPermissions={loadingPermissions}
+              savingPermissions={savingPermissions}
+              onDraftChange={onDraftChange}
+              onRoleChange={onRoleChange}
+              onSave={onSave}
+            />
+            <UserEventsPanel
+              user={selectedUser}
+              events={userEvents}
+              loading={userEventsLoading}
+            />
+          </>
         )}
       </section>
     </div>
@@ -2198,6 +2343,7 @@ function ControlIcon({ kind, className = '' }) {
     user: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 21a8 8 0 0 0-16 0m12-14a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />,
     map: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.818V8.045a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />,
     lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z" />,
+    clock: <><circle cx="12" cy="12" r="9" strokeWidth="2" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 7v5l3 2" /></>,
   };
   return <svg {...common}>{paths[kind] || paths.chart}</svg>;
 }
@@ -2331,4 +2477,257 @@ function getPageIcon(key) {
   if (['pedidos'].includes(key)) return 'receipt';
   if (['perfil'].includes(key)) return 'user';
   return 'chart';
+}
+
+/**
+ * Badge amigável do status da conta, considerando o novo campo status_conta
+ * mantido em sincronia com o flag `ativo`. Se o backend ainda não enviar
+ * status_conta (contas antigas), caímos no heurístico anterior.
+ */
+function statusContaPill(targetUser) {
+  const status = targetUser?.status_conta;
+  if (status === 'desativada') {
+    return { label: 'Desativada', className: 'border-red-400/25 bg-red-400/10 text-red-300', dotClass: 'bg-red-400' };
+  }
+  if (status === 'bloqueado_inatividade') {
+    return { label: 'Bloqueada (inatividade)', className: 'border-orange-400/25 bg-orange-400/10 text-orange-300', dotClass: 'bg-orange-400' };
+  }
+  if (status === 'aviso_inatividade') {
+    return { label: 'Aviso de inatividade', className: 'border-amber-400/25 bg-amber-400/10 text-amber-300', dotClass: 'bg-amber-400' };
+  }
+  if (status === 'ativo') {
+    return { label: 'Ativa', className: 'border-emerald-400/25 bg-emerald-400/8 text-emerald-300', dotClass: 'bg-emerald-400' };
+  }
+  const active = isUserActive(targetUser);
+  return active
+    ? { label: 'Ativa', className: 'border-emerald-400/25 bg-emerald-400/8 text-emerald-300', dotClass: 'bg-emerald-400' }
+    : { label: 'Bloqueada', className: 'border-red-400/25 bg-red-400/8 text-red-300', dotClass: 'bg-red-400' };
+}
+
+/* ─── USER EVENTS PANEL (auditoria rápida de uma conta) ─── */
+function UserEventsPanel({ user, events, loading }) {
+  return (
+    <section
+      className="mt-4 border-t pt-5"
+      style={{ borderColor: 'var(--border-color)' }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>
+            Auditoria
+          </p>
+          <h3 className="mt-1 text-sm font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
+            Histórico recente de {user?.nome || 'usuário'}
+          </h3>
+          <p className="mt-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Pedidos, pagamentos, aluguéis e demais eventos vinculados a esta conta (inclusive histórico recuperado).
+          </p>
+        </div>
+        {loading && <Spinner className="h-5 w-5" />}
+      </div>
+      {!loading && (events?.length ?? 0) === 0 ? (
+        <p className="mt-3 rounded-xl border border-dark-border bg-dark-hover/30 p-3 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          Nenhum evento registrado ainda.
+        </p>
+      ) : (
+        <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
+          {(events ?? []).slice(0, 30).map((event) => (
+            <li
+              key={event.id ?? `${event.tipo_evento}-${event.criado_em}`}
+              className="flex items-start gap-3 rounded-xl border p-3"
+              style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--bg-elevated-2)' }}
+            >
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold capitalize" style={{ color: 'var(--text-primary)' }}>
+                  {(event.tipo_evento || event.tipo || 'evento').replace(/_/g, ' ')}
+                </p>
+                {event.descricao && (
+                  <p className="mt-0.5 text-xs" style={{ color: 'var(--text-secondary)' }}>{event.descricao}</p>
+                )}
+                <p className="mt-1 text-[10px] uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                  {formatDate(event.criado_em || event.data)}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/* ─── RENTALS SECTION (Aluguéis) ─── */
+function RentalsSection({ rentals, loading, statusFilter, onStatusFilterChange, updatingRetiradaId, onRetiradaUpdate }) {
+  return (
+    <div className="space-y-5" role="tabpanel">
+      <div
+        className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:justify-between"
+        style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
+      >
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>
+            Operação de aluguéis
+          </p>
+          <h2 className="mt-1 text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+            Acompanhe prazos, excedentes e retiradas
+          </h2>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Aluguéis vencidos, itens aguardando retirada e devoluções em um só lugar.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <span>Status</span>
+          <select
+            value={statusFilter || ''}
+            onChange={(e) => onStatusFilterChange(e.target.value)}
+            className="input py-1.5 text-sm"
+            aria-label="Filtrar aluguéis por status"
+          >
+            {ALUGUEL_STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value || 'todos'} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="card overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}>
+        {loading ? (
+          <div className="flex items-center justify-center gap-3 p-8" style={{ color: 'var(--text-secondary)' }}>
+            <Spinner className="h-6 w-6" />
+            <span>Carregando aluguéis…</span>
+          </div>
+        ) : (rentals?.length ?? 0) === 0 ? (
+          <EmptyPanel icon="clock" title="Nenhum aluguel nesta visualização" text="Ajuste o filtro de status acima para ver outras fases." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead
+                className="border-b uppercase tracking-wider text-xs"
+                style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}
+              >
+                <tr>
+                  <th className="p-4 text-left">Item</th>
+                  <th className="p-4 text-left">Cliente</th>
+                  <th className="p-4 text-left">Status</th>
+                  <th className="p-4 text-left">Prazo</th>
+                  <th className="p-4 text-left">Excedente</th>
+                  <th className="p-4 text-left">Retirada</th>
+                  <th className="p-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rentals.map((r) => (
+                  <RentalRow
+                    key={r.id}
+                    rental={r}
+                    updatingRetiradaId={updatingRetiradaId}
+                    onRetiradaUpdate={onRetiradaUpdate}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RentalRow({ rental, updatingRetiradaId, onRetiradaUpdate }) {
+  const vencido = rental.status === 'vencido';
+  const regularizadoAguardandoDevolucao = rental.status === 'regularizado' && rental.status_retirada !== 'realizada';
+  const diasExcedentes = Number(rental.dias_excedentes ?? rental.dias_excedentes_calculados ?? 0);
+  const isUpdating = String(updatingRetiradaId ?? '') === String(rental.id);
+
+  return (
+    <tr
+      className="border-b"
+      style={{
+        borderColor: 'var(--border-color)',
+        backgroundColor: vencido ? 'rgba(239,68,68,0.06)' : regularizadoAguardandoDevolucao ? 'rgba(245,158,11,0.05)' : 'transparent',
+      }}
+    >
+      <td className="p-4">
+        <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{rental.item_nome || `Item #${rental.item_id}`}</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Aluguel #{rental.id} · Pedido #{rental.pedido_id ?? '—'}</p>
+      </td>
+      <td className="p-4">
+        <p style={{ color: 'var(--text-primary)' }}>{rental.usuario_nome || '—'}</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{rental.usuario_email || ''}</p>
+      </td>
+      <td className="p-4">
+        <RentalStatusPill status={rental.status} />
+      </td>
+      <td className="p-4">
+        <p style={{ color: 'var(--text-primary)' }}>
+          {rental.data_inicio ? formatDate(rental.data_inicio) : '—'}
+          {' → '}
+          {rental.data_prevista_devolucao ? formatDate(rental.data_prevista_devolucao) : '—'}
+        </p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{rental.dias_aluguel ?? '—'} dias · Qtd {rental.quantidade ?? 1}</p>
+      </td>
+      <td className="p-4">
+        {diasExcedentes > 0 ? (
+          <div>
+            <p className="font-semibold" style={{ color: '#f87171' }}>{diasExcedentes} {diasExcedentes === 1 ? 'dia' : 'dias'}</p>
+            {rental.valor_excedente && (
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatCurrency(rental.valor_excedente)}</p>
+            )}
+          </div>
+        ) : (
+          <span style={{ color: 'var(--text-muted)' }}>—</span>
+        )}
+      </td>
+      <td className="p-4">
+        <RetiradaPill status={rental.status_retirada || 'nenhum'} />
+      </td>
+      <td className="p-4 text-right">
+        <label className="inline-flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          <span className="sr-only sm:not-sr-only">Retirada:</span>
+          <select
+            value={rental.status_retirada || 'pendente'}
+            onChange={(e) => onRetiradaUpdate(rental, e.target.value)}
+            disabled={isUpdating || rental.status === 'cancelado'}
+            className="input py-1 text-xs"
+            aria-label={`Atualizar retirada do aluguel ${rental.id}`}
+          >
+            {RETIRADA_STATUS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </label>
+      </td>
+    </tr>
+  );
+}
+
+function RentalStatusPill({ status }) {
+  const map = {
+    aguardando_pagamento: 'border-nexus-400/30 bg-nexus-500/10 text-nexus-200',
+    ativo: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+    vencido: 'border-red-400/30 bg-red-400/10 text-red-200',
+    regularizado: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
+    devolvido: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
+    cancelado: 'border-zinc-400/30 bg-zinc-400/10 text-zinc-200',
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${map[status] || map.cancelado}`}>
+      {String(status || '—').replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+function RetiradaPill({ status }) {
+  const map = {
+    pendente: 'border-zinc-400/30 bg-zinc-400/10 text-zinc-200',
+    agendada: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
+    realizada: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
+    nenhum: 'border-zinc-400/25 bg-zinc-400/5 text-zinc-300',
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${map[status] || map.nenhum}`}>
+      {String(status || 'nenhum').replace(/_/g, ' ')}
+    </span>
+  );
 }

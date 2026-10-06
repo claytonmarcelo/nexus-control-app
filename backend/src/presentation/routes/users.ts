@@ -10,6 +10,7 @@ import {
   getPermissions,
   updatePermissions,
 } from '../controllers/userController.js';
+import { getMyAlerts, getMyEvents, getUserEvents } from '../controllers/alertController.js';
 import {
   validateAdminUserCreate,
   validateUserUpdate,
@@ -26,12 +27,17 @@ const router = Router();
 
 router.use(authenticate);
 
+// Centro de alertas e histórico da própria conta (antes das rotas /:id)
+router.get('/me/alertas', getMyAlerts);
+router.get('/me/eventos', getMyEvents);
+
 router.delete('/me', validateAccountDeletion, deleteOwnAccount);
 
 // Rotas de administração de usuários (apenas admin com permissão na página 'usuarios')
 router.post('/', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateAdminUserCreate, create);
 router.get('/', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validatePagination, getAll);
 router.get('/:id/permissions', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, getPermissions);
+router.get('/:id/eventos', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, getUserEvents);
 router.put('/:id/permissions', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, validatePermissions, updatePermissions);
 router.delete('/:id', authorize(USER_ROLES.ADMIN), authorizePage('usuarios'), validateIdParam, remove);
 

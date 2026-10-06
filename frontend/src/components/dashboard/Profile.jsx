@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { userService, checkoutService } from '../../services/services';
+import { userService, checkoutService, alertService } from '../../services/services';
 import { useModal } from '../../contexts/ModalContext';
 import { formatDate } from '../../utils/date';
 import { isRootAdmin } from '../../utils/access';
@@ -24,13 +24,47 @@ export default function Profile() {
   const [accountDeletionPassword, setAccountDeletionPassword] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [accountDeletionError, setAccountDeletionError] = useState('');
+  const [pendingObligations, setPendingObligations] = useState(null);
+  const [confirmingObligations, setConfirmingObligations] = useState(false);
+  const [alertsData, setAlertsData] = useState(null);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+  const [eventsData, setEventsData] = useState(null);
+  const [eventsLoading, setEventsLoading] = useState(false);
   const rootAdmin = isRootAdmin(user);
 
   useEffect(() => {
     if (activeTab === 'history') {
       loadOrders();
     }
+    if (activeTab === 'alerts') {
+      loadAlerts();
+      loadEvents();
+    }
   }, [activeTab]);
+
+  const loadAlerts = async () => {
+    setAlertsLoading(true);
+    try {
+      const data = await alertService.getMyAlerts();
+      setAlertsData(data || { alerts: [], resumo: {} });
+    } catch (error) {
+      toast({ message: 'Erro ao carregar alertas', variant: 'danger' });
+    } finally {
+      setAlertsLoading(false);
+    }
+  };
+
+  const loadEvents = async () => {
+    setEventsLoading(true);
+    try {
+      const data = await alertService.getMyEvents({ limit: 100 });
+      setEventsData(data?.eventos || []);
+    } catch (error) {
+      toast({ message: 'Erro ao carregar histórico de atividades', variant: 'danger' });
+    } finally {
+      setEventsLoading(false);
+    }
+  };
 
   const loadOrders = async () => {
     setLoadingOrders(true);
@@ -156,9 +190,10 @@ export default function Profile() {
     }
 
     const isConfirmed = await confirm({
-      title: 'Excluir sua conta permanentemente?',
-      message: 'Esta ação é irreversível. Seu acesso, histórico de compras e negociações serão excluídos. Os itens publicados no catálogo serão preservados e transferidos para o administrador do sistema.',
-      confirmText: 'Excluir minha conta',
+      title: 'Desativar sua conta?',
+      message: 'Sua conta deixará de permitir novo acesso imediato, mas pedidos, pagamentos e aluguéis permanecem preservados no histórico do sistema. Se você voltar a se cadastrar com o mesmo e-mail, poderá recuperar o vínculo com o histórico anterior.',
+      confirmText: 'Desativar minha conta',
+      variant: 'warning',
     });
     if (!isConfirmed) return;
 
@@ -167,10 +202,34 @@ export default function Profile() {
       await userService.deleteOwnAccount({ senha_atual: accountDeletionPassword });
       logout();
     } catch (error) {
-      const message = error.response?.data?.message || 'Erro ao excluir sua conta';
-      setAccountDeletionError(message);
+      const obrigacoes = error.response?.data?.errors?.obrigacoes;
+      if (error.response?.status === 409 && obrigacoes?.possui_obrigacoes) {
+        setPendingObligations(obrigacoes);
+      } else {
+        const message = error.response?.data?.message || 'Erro ao desativar sua conta';
+        setAccountDeletionError(message);
+      }
     } finally {
       setDeletingAccount(false);
+    }
+  };
+
+  const handleConfirmObligations = async () => {
+    if (!accountDeletionPassword) return;
+    setConfirmingObligations(true);
+    try {
+      await userService.deleteOwnAccount({
+        senha_atual: accountDeletionPassword,
+        confirmar_obrigacoes: true,
+      });
+      setPendingObligations(null);
+      logout();
+    } catch (error) {
+      const message = error.response?.data?.message || 'Erro ao desativar sua conta';
+      setAccountDeletionError(message);
+      setPendingObligations(null);
+    } finally {
+      setConfirmingObligations(false);
     }
   };
 
@@ -239,7 +298,7 @@ export default function Profile() {
 
       <section className="card mb-0 overflow-hidden" aria-label="Gerenciar perfil">
           <div className="border-b p-2 sm:p-3" style={{ borderColor: 'var(--divider)' }}>
-            <nav className="grid grid-cols-3 gap-2" aria-label="Abas do perfil" role="tablist">
+            <nav className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Abas do perfil" role="tablist">
             <button
               id="profile-info-tab"
               type="button"
@@ -274,6 +333,29 @@ export default function Profile() {
             >
               <ProfileTabIcon type="security" />
               <span>Segurança</span>
+            </button>
+            <button
+              id="profile-alerts-tab"
+              type="button"
+              onClick={() => setActiveTab('alerts')}
+              role="tab"
+              aria-label="Alertas"
+              aria-selected={activeTab === 'alerts'}
+              aria-controls="profile-tab-panel"
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 py-2.5 text-xs font-semibold transition-all sm:min-h-14 sm:gap-3 sm:px-4 sm:text-sm border"
+              style={{
+                backgroundColor: activeTab === 'alerts' ? 'var(--accent-gold-faint)' : 'transparent',
+                borderColor: activeTab === 'alerts' ? 'var(--accent-gold-border)' : 'transparent',
+                color: activeTab === 'alerts' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+              }}
+            >
+              <ProfileTabIcon type="alerts" />
+              <span>Alertas</span>
+              {alertsData?.alerts?.length > 0 && (
+                <span className="ml-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-300">
+                  {alertsData.alerts.length}
+                </span>
+              )}
             </button>
             <button
               id="profile-history-tab"
@@ -477,6 +559,89 @@ export default function Profile() {
             </form>
           )}
 
+          {activeTab === 'alerts' && (
+            <div className="space-y-6">
+              <div className="border-b border-dark-border pb-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">Centro de alertas</p>
+                <h2 className="mt-1 text-xl font-semibold text-white">O que precisa da sua atenção</h2>
+                <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                  Avisos amigáveis sobre pagamentos, aluguéis e o status da sua conta. Nada aqui é bloqueante por si só — mostramos o que está acontecendo e o caminho para resolver.
+                </p>
+              </div>
+
+              {alertsLoading ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-10 text-text-secondary">
+                  <Spinner size="lg" />
+                  <p>Carregando alertas...</p>
+                </div>
+              ) : (
+                <>
+                  {alertsData?.resumo?.possui_debitos && (
+                    <div
+                      className="rounded-xl border p-4"
+                      style={{
+                        backgroundColor: 'var(--color-warning-bg, rgba(245,158,11,0.08))',
+                        borderColor: 'var(--color-warning-border, rgba(245,158,11,0.35))',
+                      }}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-warning, #f59e0b)' }}>
+                        Total em aberto
+                      </p>
+                      <p className="mt-1 text-2xl font-bold text-white">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(alertsData.resumo.total_debitos || 0))}
+                      </p>
+                      <p className="mt-1 text-xs text-text-secondary">
+                        Some pagamentos pendentes e dias excedentes de aluguel em aberto. Você pode resolver tudo pelo checkout normal — sem cobrança dupla.
+                      </p>
+                    </div>
+                  )}
+
+                  {alertsData?.alerts?.length > 0 ? (
+                    <div className="space-y-3">
+                      {alertsData.alerts.map((alert, idx) => (
+                        <AlertCard key={`${alert.tipo}-${alert.pedido_id || alert.aluguel_id || idx}`} alert={alert} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
+                      <div className="flex items-start gap-3">
+                        <svg aria-hidden="true" className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <div>
+                          <p className="text-sm font-medium text-white">Tudo certo por aqui</p>
+                          <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                            Nenhum alerta pendente. Quando algo precisar da sua atenção, aparecerá aqui com um aviso amigável.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="border-t border-dark-border pt-5">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-nexus-500">Histórico recente de atividades</h3>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Pedidos, pagamentos, aluguéis e demais eventos da sua conta — inclusive de cadastros anteriores com o mesmo e-mail.
+                </p>
+                {eventsLoading ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-text-secondary">
+                    <Spinner size="md" />
+                  </div>
+                ) : (eventsData?.length ?? 0) === 0 ? (
+                  <p className="mt-4 text-sm text-text-secondary">Nenhum evento registrado ainda.</p>
+                ) : (
+                  <ul className="mt-4 space-y-3">
+                    {eventsData.slice(0, 40).map((event) => (
+                      <EventRow key={event.id} event={event} />
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'history' && (
             <div className="space-y-6">
               <div className="border-b border-dark-border pb-5">
@@ -602,14 +767,14 @@ export default function Profile() {
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-red-300">Zona de risco</p>
-                <h2 id="delete-account-title" className="mt-1 text-lg font-semibold text-white">Excluir conta</h2>
+                <h2 id="delete-account-title" className="mt-1 text-lg font-semibold text-white">Desativar conta</h2>
               </div>
             </div>
             {rootAdmin ? (
-              <p className="mt-3 text-sm leading-relaxed text-text-secondary">A conta do administrador raiz é protegida e não pode ser excluída.</p>
+              <p className="mt-3 text-sm leading-relaxed text-text-secondary">A conta do administrador raiz é protegida e não pode ser desativada.</p>
             ) : (
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">
-                A exclusão remove seu acesso e histórico de compras e negociações. Os itens publicados no catálogo serão preservados sob responsabilidade do administrador.
+                A desativação interrompe o acesso imediato à conta, mas mantém pedidos, pagamentos e aluguéis preservados no histórico do sistema. Itens publicados continuam sob sua autoria. Se você voltar a se cadastrar com o mesmo e-mail, poderá recuperar o vínculo com esse histórico mediante verificação segura.
               </p>
             )}
           </div>
@@ -640,14 +805,23 @@ export default function Profile() {
                 {deletingAccount ? (
                   <span className="flex items-center justify-center gap-2">
                     <Spinner size="md" />
-                    Excluindo conta...
+                    Desativando conta...
                   </span>
-                ) : 'Excluir minha conta'}
+                ) : 'Desativar minha conta'}
               </button>
             </form>
           )}
         </div>
       </section>
+
+      {pendingObligations && (
+        <PendingObligationsModal
+          obligations={pendingObligations}
+          onClose={() => setPendingObligations(null)}
+          onConfirm={handleConfirmObligations}
+          confirming={confirmingObligations}
+        />
+      )}
     </div>
   );
 }
@@ -657,6 +831,7 @@ function ProfileTabIcon({ type }) {
     info: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0 17.9 17.9 0 01-7.5 1.65 17.9 17.9 0 01-7.5-1.65z" />,
     security: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3l8 3v5c0 5.2-3.4 8.6-8 10-4.6-1.4-8-4.8-8-10V6l8-3zm-3 9l2 2 4-4" />,
     history: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8m0-5v5h5m4-1v5l3 2" />,
+    alerts: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V5a2 2 0 10-4 0v.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />,
   };
 
   return (
@@ -702,5 +877,202 @@ function PasswordToggle({ visible, onClick, label }) {
         )}
       </svg>
     </button>
+  );
+}
+
+const SEVERIDADE_STYLE = {
+  urgente: {
+    border: 'border-red-500/40',
+    bg: 'bg-red-500/5',
+    pill: 'bg-red-500/15 text-red-300',
+    label: 'Urgente',
+  },
+  atencao: {
+    border: 'border-amber-500/40',
+    bg: 'bg-amber-500/5',
+    pill: 'bg-amber-500/15 text-amber-300',
+    label: 'Atenção',
+  },
+  info: {
+    border: 'border-nexus-500/30',
+    bg: 'bg-nexus-500/5',
+    pill: 'bg-nexus-500/15 text-nexus-300',
+    label: 'Aviso',
+  },
+};
+
+const ACAO_LABEL = {
+  pagar: 'Ir para o checkout',
+  regularizar: 'Regularizar agora',
+  devolver: 'Organizar devolução',
+  estender: 'Estender período',
+  explorar: 'Explorar catálogo',
+};
+
+function AlertCard({ alert }) {
+  const style = SEVERIDADE_STYLE[alert.severidade] || SEVERIDADE_STYLE.info;
+  const valorTexto = alert.valor ?? alert.valor_excedente;
+
+  return (
+    <div className={`rounded-2xl border p-4 ${style.border} ${style.bg}`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${style.pill}`}>
+              {style.label}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">
+              {alert.tipo.replace(/_/g, ' ')}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-white">{alert.mensagem}</p>
+          {valorTexto != null && (
+            <p className="mt-2 text-lg font-bold text-white">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(valorTexto))}
+            </p>
+          )}
+          {alert.dias_excedentes > 0 && (
+            <p className="mt-1 text-xs text-text-secondary">
+              {alert.dias_excedentes} {alert.dias_excedentes === 1 ? 'dia' : 'dias'} em atraso
+              {alert.item_nome ? ` — ${alert.item_nome}` : ''}
+            </p>
+          )}
+        </div>
+        {alert.acao && (
+          <div className="shrink-0">
+            <a
+              href={acaoHref(alert)}
+              className="btn-secondary inline-flex items-center gap-2 px-4 py-2 text-xs"
+            >
+              {ACAO_LABEL[alert.acao] || alert.acao}
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function acaoHref(alert) {
+  if (alert.acao === 'pagar' || alert.acao === 'regularizar') return '/checkout';
+  if (alert.acao === 'explorar') return '/itens';
+  return '/profile';
+}
+
+function EventRow({ event }) {
+  const tipoLabel = (event.tipo_evento || event.tipo || 'evento').replace(/_/g, ' ');
+  return (
+    <li className="flex items-start gap-3 rounded-xl border border-dark-border bg-dark-hover/40 p-3">
+      <div className="mt-1 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: 'var(--accent-gold)' }} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-white capitalize">{tipoLabel}</p>
+        {event.descricao && <p className="mt-0.5 text-xs text-text-secondary">{event.descricao}</p>}
+        <p className="mt-1 text-[10px] uppercase tracking-widest text-text-muted">
+          {formatDate(event.criado_em || event.data)}
+        </p>
+      </div>
+    </li>
+  );
+}
+
+function PendingObligationsModal({ obligations, onClose, onConfirm, confirming }) {
+  const pedidos = obligations?.pedidos_pendentes ?? [];
+  const alugueis = obligations?.alugueis_abertos ?? [];
+  const debitos = Number(obligations?.debitos || 0);
+
+  return (
+    <div
+      className="fixed inset-0 z-[1100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"
+      style={{ background: 'rgba(0,0,0,0.75)' }}
+      onClick={(event) => event.target === event.currentTarget && onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Pendências em aberto"
+    >
+      <div className="glass w-full max-w-lg rounded-3xl shadow-glass-lg overflow-hidden animate-scale-in border-b-2 border-amber-500/40">
+        <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent border-b border-amber-500/30">
+          <div className="relative p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-amber-500/40 bg-amber-500/10">
+                <svg className="h-6 w-6 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
+                  Pendências em aberto
+                </p>
+                <h2 id="pending-obligations-title" className="mt-1 text-xl font-bold leading-tight text-white">
+                  Ainda há registros ativos na sua conta
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <p className="text-sm leading-relaxed text-nexus-300">
+            Você ainda pode desativar a conta. Pedidos, pagamentos e aluguéis ficarão preservados no histórico e poderão ser acompanhados pelo administrador.
+          </p>
+
+          <div className="mt-4 space-y-3">
+            {pedidos.length > 0 && (
+              <div className="rounded-xl border border-dark-border bg-dark-hover/40 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">
+                  Pagamentos pendentes ({pedidos.length})
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-white">
+                  {pedidos.slice(0, 5).map((pedido) => (
+                    <li key={`pedido-${pedido.id}`} className="flex items-center justify-between gap-3">
+                      <span>Pedido #{pedido.id}</span>
+                      <span className="font-mono text-xs">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(pedido.total || 0))}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {alugueis.length > 0 && (
+              <div className="rounded-xl border border-dark-border bg-dark-hover/40 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-nexus-500">
+                  Aluguéis em aberto ({alugueis.length})
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-white">
+                  {alugueis.slice(0, 5).map((aluguel) => (
+                    <li key={`aluguel-${aluguel.id}`} className="flex items-center justify-between gap-3">
+                      <span className="truncate">{aluguel.item_nome || `Aluguel #${aluguel.id}`}</span>
+                      <span className="shrink-0 text-xs uppercase tracking-wider text-text-secondary">{aluguel.status}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {debitos > 0 && (
+            <p className="mt-3 text-sm text-text-secondary">
+              Total em aberto: <span className="font-semibold text-white">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(debitos)}
+              </span>
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button type="button" onClick={onClose} className="btn-secondary w-full gap-2 sm:w-auto px-6 py-3 font-medium">
+              Voltar
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={confirming}
+              className="btn-danger w-full gap-2 sm:w-auto px-6 py-3 font-medium"
+            >
+              {confirming ? 'Desativando…' : 'Confirmar desativação'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

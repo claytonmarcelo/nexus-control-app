@@ -64,13 +64,13 @@ export function AuthProvider({ children }) {
 
   const register = async (data) => {
     const response = await api.post('/auth/register', data);
-    const { user: userData, accessToken, refreshToken } = response.data.data;
-    
+    const { user: userData, accessToken, refreshToken, recuperou_historico } = response.data.data;
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     setUser(userData);
-    
-    return userData;
+
+    return { user: userData, recuperou_historico: !!recuperou_historico };
   };
 
   const logout = () => {

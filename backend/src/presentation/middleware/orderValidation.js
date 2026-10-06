@@ -37,10 +37,22 @@ export const validateUpdateOrderStatus = [
     .isInt({ min: 1 }).withMessage('ID do pedido inválido'),
   body('status_pagamento')
     .optional()
-    .isIn(['pendente', 'processando', 'confirmado', 'recusado', 'estornado', 'aprovado', 'concluido', 'cancelado']).withMessage('Status de pagamento inválido'),
+    // Exatamente o ENUM do banco (migrate.js): evita 500 por valor truncado.
+    .isIn(['pendente', 'processando', 'confirmado', 'recusado', 'cancelado', 'falha', 'estornado']).withMessage('Status de pagamento inválido'),
+  body('status_pedido')
+    .optional()
+    .isIn(['novo', 'processando', 'concluido', 'cancelado']).withMessage('Status do pedido inválido'),
   body('metodo_pagamento')
     .optional()
-    .isIn(['cartao', 'pix', 'boleto']).withMessage('Método de pagamento inválido'),
+    .isIn(['cartao', 'pix']).withMessage('Método de pagamento inválido'),
+  body()
+    .custom((value, { req }) => {
+      const { status_pagamento, status_pedido, metodo_pagamento } = req.body || {};
+      if (status_pagamento === undefined && status_pedido === undefined && metodo_pagamento === undefined) {
+        throw new Error('Informe ao menos um status para atualização');
+      }
+      return true;
+    }),
   handleValidationErrors
 ];
 
