@@ -121,7 +121,8 @@ Backend (`npm test` — Jest):
 - Suites executadas: `api.test.js`, `integration.test.js`, `security.test.js`, `businessRules.test.js`.
 - Total: **86 testes passando** (0 falhas) na rodada desta entrega. Nos commits
   seguintes a suíte cresceu: hoje os quatro arquivos declaram **92 blocos** de
-  `it/test` (`api` 37, `businessRules` 23, `integration` 22, `security` 10).
+  `it/test` (`api` 37, `businessRules` 23, `integration` 22, `security` 10), todos
+  passando na rodada de 06/10/2026.
 - Suites novas: `businessRules.test.js` cobre liberação só com pagamento confirmado, dias excedentes/regularização, desativação + vínculo de identidade, inatividade de 6 meses, webhook MP com HMAC e idempotência, RBAC das rotas de aluguel e alertas.
 
 Frontend (`npm run test` — Vitest):

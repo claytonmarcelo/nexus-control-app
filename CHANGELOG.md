@@ -18,7 +18,8 @@ a história detalhada por marcos também pode ser lida em
 
 ## Estado atual (2026-10-06)
 
-- Backend: **92 testes verdes**, build TypeScript limpo.
+- Backend: **92 testes verdes** em 4 suites (`api` 37, `businessRules` 23,
+  `integration` 22, `security` 10), rodados de verdade nesta data — build TypeScript limpo.
 - Frontend: **49 testes verdes**, `npm run build` OK, **ESLint sem erros** (lint
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
@@ -26,6 +27,32 @@ a história detalhada por marcos também pode ser lida em
 - Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a próxima entrada.
 - Documentação: os 9 relatórios de `docs/reports/` revisados contra o código — ver a
   entrada "Revisão dos relatórios".
+
+---
+
+## 2026-10-06 · Suítes rodadas de verdade: 92 backend + 49 frontend verdes
+
+Execução completa das duas suítes contra o MySQL local (`nexusdb`), sem `--coverage`:
+
+- `backend`: `npm test` (que primeiro roda `npm run build`) → **Test Suites: 4 passed, 4
+  total; Tests: 92 passed, 92 total** em ~17 s. O `tsc` compilou sem erros e o build
+  **reproduziu o `backend/dist` versionado** — os únicos diffs eram quebra de linha, o
+  conteúdo byte a byte (após normalizar CRLF) é idêntico ao que está commitado.
+- `frontend`: `npm run test` (Vitest) → **8 arquivos, 49 testes passando** em ~8,5 s
+  (`Cart` 10, `Dashboard` 4, `Items` 6, `Profile` 8, `Login` 9, `ErrorBoundary` 3,
+  `ThemeToggle` 5, `services/api` 4). O stack trace que aparece no meio da saída é do
+  próprio teste do `ErrorBoundary`, que provoca um erro para verificar o fallback — não
+  é falha.
+- Os testes de backend escrevem no banco de desenvolvimento (criam contas
+  `*@example.test` via `POST /api/auth/register` e as removem no `afterAll` com
+  `DELETE FROM usuarios WHERE id = ?`); nenhum dado de cliente ou pedido real foi tocado,
+  e as contas `probe.*@test.local` que já existiam continuam preservadas, como registrado
+  em `docs/reports/RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md` §9.4.
+- Com isso, o número de **92** que a revisão anterior tinha contado no código está
+  confirmado como verde, e os textos de `docs/HISTORIA.md` e do relatório de regras de
+  negócio passaram a dizer "testes verdes" em vez de "casos declarados".
+- Rodado numa cópia de trabalho do repositório na Desktop (a pasta em `Documents` estava
+  somente leitura para as ferramentas); nenhum arquivo de código-fonte mudou.
 
 ---
 
