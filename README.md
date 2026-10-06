@@ -211,7 +211,7 @@ ROOT_ADMIN_NAME=Administrador
 ROOT_ADMIN_PASSWORD=123456#
 ```
 
-Novas senhas, em qualquer perfil, devem ter exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres), tanto no cadastro quanto na troca e recuperação de senha. O login continua aceitando as senhas já cadastradas; o seed preserva os hashes existentes no banco.
+Novas senhas, em qualquer perfil, devem ter de 5 a 6 dígitos seguidos de 1 símbolo (6 ou 7 caracteres), tanto no cadastro quanto na troca e recuperação de senha. O login continua aceitando as senhas já cadastradas; o seed preserva os hashes existentes no banco (por isso, ao trocar a senha de um usuário que já existe, é preciso re-criptografá-la — o seed não sobrescreve senhas existentes).
 
 Instale as dependências e prepare o banco:
 

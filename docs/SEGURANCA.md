@@ -11,7 +11,7 @@
   - for igual entre access e refresh,
   - ou se parecer placeholder conhecido (`replace_with_`, `your_`, etc.).
 - Senhas hash com **bcryptjs custo 12**; comparação com `bcrypt.compare`.
-- Política de senha: exatamente 6 dígitos seguidos de 1 símbolo (7 caracteres).
+- Política de senha: de 5 a 6 dígitos seguidos de 1 símbolo (6 ou 7 caracteres).
   Validada em `infrastructure/utils/passwordPolicy.js` e replicada no
   frontend em `utils/password.js`.
 

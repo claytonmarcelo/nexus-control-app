@@ -202,7 +202,7 @@ ROOT_ADMIN_NAME=Administrator
 ROOT_ADMIN_PASSWORD=123456#
 ```
 
-New passwords for every role must contain exactly 6 digits followed by 1 symbol (7 characters), for registration, password changes, and password recovery. Login continues to accept existing stored passwords, and database seeds preserve existing password hashes.
+New passwords for every role must contain 5 to 6 digits followed by 1 symbol (6 or 7 characters), for registration, password changes, and password recovery. Login continues to accept existing stored passwords, and database seeds preserve existing password hashes (so changing the password of an already-existing user requires re-hashing it — the seed never overwrites existing passwords).
 
 Install dependencies and setup database:
 

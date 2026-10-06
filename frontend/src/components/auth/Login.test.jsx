@@ -116,7 +116,7 @@ describe('Login Component', () => {
     expect(screen.getByText(/6 dígitos seguidos de 1 símbolo/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /cadastrar/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/exatamente 6 dígitos seguidos de 1 símbolo/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/6 dígitos seguidos de 1 símbolo/i);
     expect(api.post).not.toHaveBeenCalled();
   });
 

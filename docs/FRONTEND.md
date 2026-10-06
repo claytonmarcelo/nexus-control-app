@@ -116,7 +116,7 @@ todos os redirecionam para `/dashboard` em caso de falha.
 - `access.js` — `ROOT_ADMIN_EMAIL`, helpers de comparação de papel,
   `canRenderPage(user, key)`.
 - `date.js` — `formatDate`, `formatCurrencyPtBr`, `daysBetween`.
-- `password.js` — valida a regra "6 dígitos + 1 símbolo (7 caracteres)".
+- `password.js` — valida a regra "5–6 dígitos + 1 símbolo (6 ou 7 caracteres)".
 
 ## Testes
 

@@ -21,6 +21,36 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Acesso às contas demo e política de senha
+
+- `fix(auth): restaura login das contas demo e afrouxa a política de senha`
+  - No banco as contas já existiam, e o `seed.ts` **nunca reescreve a senha de
+    um usuário existente** (só garante nome/papel). Por isso os hashes antigos
+    de `marcelo10@gmail.com` (admin) e `funcionario@nexuscontrol.com` não
+    batiam com o `.env`/README e davam **401**, embora o fluxo de
+    cadastro→login estivesse íntegro (verificado com round-trip: register 201 +
+    login 200).
+  - Política afrouxada, a pedido, de "exatamente 6 dígitos + 1 símbolo" para
+    **"de 5 a 6 dígitos seguidos de 1 símbolo (6 ou 7 caracteres)"** — o valor
+    atual do `.env` (`ROOT_ADMIN_PASSWORD="26481#"`, 5 dígitos) passa a ser
+    válido, o que também **destrava o `seed` em base nova na AWS** (antes ele
+    lançaria "senha não atende à política" e o boot falharia).
+  - Alterações na fonte da regra (mantidas em sincronia):
+    `infrastructure/utils/passwordPolicy.js` (caminho vivo), a cópia legada
+    `utils/passwordPolicy.js`, e o espelho frontend `utils/password.js` — regex
+    `^\d{5,6}[^A-Za-z0-9\s]$` e mensagens/hint correspondentes.
+  - Testes/dicas/docs alinhados: `security.test.js` (bordas 5–6 dígitos; `1234#`
+    rejeitado, `26481#`/`12345#` aceitos), `Login.test.jsx`, placeholders de
+    `Profile.jsx`/`UserFormModal.jsx`, e as descrições em `README.md`,
+    `README.en.md`, `docs/SEGURANCA.md`, `docs/FRONTEND.md`.
+  - Banco (UPDATE não-destrutivo na coluna `senha`, sem tocar pedidos/histórico):
+    admin re-criptografado para `26481#` e funcionario para `123457#`.
+  - Validação final: **86 testes backend** e **49 testes frontend** verdes,
+    ESLint limpo, `npm run build` OK, e login **200** confirmado via API para
+    admin, funcionario e cliente.
+
+---
+
 ## 2026-10-06 · Correção dos KPIs do Dashboard (teste de navegação)
 
 - `fix(dashboard): contadores zerados/errados no painel por estouro do limite da API`

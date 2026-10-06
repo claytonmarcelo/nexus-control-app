@@ -19,10 +19,12 @@ describe('Security and readiness checks', () => {
     expect(verifyRefreshToken(accessToken)).toBeNull();
   });
 
-  it('accepts exactly six digits followed by one symbol as the global password policy', () => {
+  it('accepts five to six digits followed by one symbol as the global password policy', () => {
     expect(validatePassword('123456#')).toBe(true);
+    expect(validatePassword('26481#')).toBe(true);
+    expect(validatePassword('12345#')).toBe(true);
     expect(validatePassword('1234567')).not.toBe(true);
-    expect(validatePassword('12345#')).not.toBe(true);
+    expect(validatePassword('1234#')).not.toBe(true);
     expect(validatePassword('123456##')).not.toBe(true);
     expect(validatePassword('12345a#')).not.toBe(true);
     expect(validatePassword('Abcde1!x')).not.toBe(true);
