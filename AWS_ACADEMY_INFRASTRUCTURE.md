@@ -274,22 +274,35 @@ DB_USER=<application-user>
 DB_PASS=<secret-from-aws-secrets-manager>
 DB_NAME=nexus_control
 DB_SSL=true
+DB_SSL_REJECT_UNAUTHORIZED=true
+DB_CONNECTION_LIMIT=5
 JWT_SECRET=<unique-random-secret-at-least-32-characters>
 JWT_REFRESH_SECRET=<different-unique-random-secret-at-least-32-characters>
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_EXPIRES_IN=7d
 ROOT_ADMIN_EMAIL=<administrator-email>
+ROOT_ADMIN_NAME=<administrator-name>
 ROOT_ADMIN_PASSWORD=<six-digits-followed-by-a-symbol>
 FRONTEND_URL=https://nexus-control.com
 API_URL=https://api.nexus-control.com
 LOG_LEVEL=info
+# Pagamentos (Mercado Pago) — OPCIONAL. Deixe em branco para o modo manual
+# (Pix/crédito confirmado pelo administrador), que cobre todo o fluxo acadêmico.
+MP_ACCESS_TOKEN=
+MP_WEBHOOK_SECRET=
+PUBLIC_URL=https://api.nexus-control.com
 EOF
 chmod 600 .env
 
 # Install dependencies, build, and prepare the database
 npm ci
 npm run build
-npm run db:migrate
-npm run db:seed
+node dist/utils/migrate.js
+node dist/utils/seed.js
 npm prune --omit=dev
+
+# Create the PM2 log directory referenced by ecosystem.config.cjs
+mkdir -p logs
 
 # Start application with automatic restart after crashes and machine reboots
 pm2 start ecosystem.config.cjs --env production
@@ -695,7 +708,15 @@ aws ec2 create-subnet --vpc-id vpc-xxxxx --cidr-block 10.0.2.0/24 --availability
 
 ### Continuous Deployment Status
 
-O repositório contém CI para build, lint e testes, mas ainda não contém um workflow de deploy AWS. O deploy descrito neste documento é manual; habilitar CD exige escolher e configurar o destino (por exemplo, CodeDeploy/SSM para EC2 ou ECS), a role IAM via OIDC e os identificadores AWS do ambiente. Não use uma chave SSH privada de longa duração como secret do GitHub.
+O repositório contém CI (`ci.yml`) para build, lint e testes, e um workflow de deploy
+(`deploy.yml`) que executa a esteira completa e, **opcionalmente**, faz deploy via SSH na
+EC2 quando os secrets `EC2_HOST`, `EC2_SSH_KEY` (e, se necessário, `EC2_USER`, `EC2_PORT`)
+estão configurados no GitHub. Sem esses secrets, o workflow apenas valida (build + testes)
+e não publica. Para habilitar o CD: crie os secrets no repositório, garanta que a chave SSH
+seja específica para o deploy (rotacionável, com expiração) e que a EC2 tenha o repositório
+clonado em `~/nexus-control-app`. Alternativamente, rode `./deploy-aws.sh` manualmente na
+instância. O `ecosystem.config.cjs` e o encerramento gracioso do backend garantem um
+`pm2 reload` sem perda de requisições.
 
 ---
 

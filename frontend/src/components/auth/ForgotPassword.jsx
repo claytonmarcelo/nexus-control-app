@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../../services/services';
-import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ui/ThemeToggle';
 import { PASSWORD_POLICY_MESSAGE, validatePassword } from '../../utils/password';
 
 export default function ForgotPassword() {
-  const { theme, toggleTheme } = useTheme();
   const [searchParams] = useSearchParams();
   const initialToken = searchParams.get('token') || '';
   const [step, setStep] = useState(initialToken ? 'reset' : 'request');

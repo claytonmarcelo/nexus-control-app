@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useModal } from '../../contexts/ModalContext';
 import ThemeToggle from '../ui/ThemeToggle';
 import NexusLogo from '../ui/NexusLogo';
@@ -13,7 +12,6 @@ function Login() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard');

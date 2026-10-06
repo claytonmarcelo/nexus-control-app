@@ -201,15 +201,57 @@ const iniciarManutencaoPeriodica = () => {
     const timer = setInterval(executarManutencao, MANUTENCAO_INTERVALO_MS);
     if (typeof timer.unref === 'function')
         timer.unref();
+    return timer;
 };
+let manutencaoTimer = null;
 if (process.env.NODE_ENV !== 'test') {
     const server = app.listen(PORT, () => {
         console.log(`Servidor Nexus Control rodando na porta ${PORT}`);
         initDatabase().then(() => {
-            iniciarManutencaoPeriodica();
+            manutencaoTimer = iniciarManutencaoPeriodica();
         }).catch((error) => {
             console.error('Falha ao inicializar o banco em produção:', error.message);
             server.close(() => process.exit(1));
         });
+    });
+    // Encerramento gracioso — PM2/Kubernetes enviam SIGINT/SIGTERM; é preciso
+    // drenar conexões HTTP e fechar o pool MySQL antes de sair, sem derrubar
+    // requisições em andamento nem vazar conexões no RDS (AWS Academy).
+    let encerrando = false;
+    const encerrar = async (sinal, codigoSaida = 0) => {
+        if (encerrando)
+            return;
+        encerrando = true;
+        console.log(`Recebido ${sinal}; encerrando Nexus Control com segurança...`);
+        if (manutencaoTimer)
+            clearInterval(manutencaoTimer);
+        const watchdog = setTimeout(() => {
+            console.error('Shutdown excedeu 10s; forçando saída.');
+            process.exit(1);
+        }, 10_000);
+        if (typeof watchdog.unref === 'function')
+            watchdog.unref();
+        server.close(async () => {
+            try {
+                const pool = (await import('./config/database.js')).default;
+                await pool.end();
+            }
+            catch (error) {
+                console.warn('Falha ao encerrar pool MySQL:', error?.message);
+            }
+            clearTimeout(watchdog);
+            console.log('Servidor encerrado com sucesso.');
+            process.exit(codigoSaida);
+        });
+    };
+    ['SIGINT', 'SIGTERM'].forEach((sinal) => {
+        process.on(sinal, () => encerrar(sinal));
+    });
+    process.on('unhandledRejection', (reason) => {
+        console.error('Rejeição não tratada:', reason);
+    });
+    process.on('uncaughtException', (error) => {
+        console.error('Exceção não capturada:', error);
+        encerrar('uncaughtException', 1);
     });
 }

@@ -37,10 +37,9 @@ redefinida via fluxo público.
 
 | Camada | Janela | Limite | Escopo |
 | :--- | :--- | :--- | :--- |
-| `generalLimiter` | 15 min | 300 req/IP | `/api/*` |
-| `loginLimiter` | 15 min | 30 (prod) / 1000 (dev/test) | `POST /api/auth/login` (apenas falhas contam) |
-| `passwordResetRequestLimiter` | 15 min | 5 | `POST /api/auth/forgot-password` |
-| `passwordResetLimiter` | 15 min | 10 | `POST /api/auth/reset-password` |
+| `generalLimiter` | 15 min | 10000 req/IP | `/api/*` (ignora `/health`, `/api/health`, `/api/status`) |
+| `loginLimiter` | 15 min | 50 (apenas falhas contam) | `POST /api/auth/login` |
+| `passwordResetLimiter` | 15 min | 15 | `POST /api/auth/forgot-password` e `POST /api/auth/reset-password` |
 
 Headers `RateLimit-*` padrão; headers legados `X-RateLimit-*` desabilitados.
 

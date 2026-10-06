@@ -66,6 +66,16 @@ Se o banco de dados exigir SSL:
 - **`DB_SSL`**: `true` para habilitar SSL
 - **`DB_SSL_REJECT_UNAUTHORIZED`**: `false` se usar certificados auto-assinados
 
+## 💳 Pagamentos (Mercado Pago) — Opcional
+
+O projeto é acadêmico e funciona integralmente em modo manual (Pix/cartão com confirmação pelo administrador). As credenciais do Mercado Pago são **opcionais** e só precisam ser configuradas se você quiser pagamentos automáticos pelo gateway. **NUNCA versione tokens reais — apenas via `.env`.**
+
+- **`MP_ACCESS_TOKEN`**: Token de acesso da conta Mercado Pago (produção ou testes). Deixe **vazio** para permanecer no modo manual (Pix/crédito confirmado pelo admin).
+- **`MP_WEBHOOK_SECRET`**: Segredo do webhook (painel do Mercado Pago). Valida a assinatura HMAC do header `x-signature`. Sem ele o webhook rejeita eventos e a confirmação volta a ser manual.
+- **`PUBLIC_URL`**: URL pública (https) deste backend, usada como `notification_url` do gateway e para montar a URL do webhook.
+
+Após configurar, cadastre no painel do Mercado Pago o webhook apontando para: `POST https://<seu-host>/api/pagamentos/webhook`. A confirmação é idempotente (chave única em `provider_payment_id`), então notificações repetidas não geram pedidos duplicados.
+
 ## ✅ Checklist Pré-Deploy
 
 Antes de iniciar o deploy na AWS Academy:
@@ -80,6 +90,8 @@ Antes de iniciar o deploy na AWS Academy:
 - [ ] Configurar `VITE_API_URL` com URL real da API backend
 - [ ] Configurar `DB_CONNECTION_LIMIT=5` (recurso limitado AWS Academy)
 - [ ] Opcional: Configurar variáveis SMTP se recuperação de senha for necessária
+- [ ] Opcional: Configurar `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `PUBLIC_URL` apenas para pagamentos automáticos (deixe em branco no modo manual Pix/crédito)
+- [ ] Garantir que o diretório `backend/logs/` exista no servidor para os logs do PM2 (o `deploy-aws.sh` cria automaticamente)
 - [ ] Verificar que não há valores de exemplo nas variáveis críticas
 
 ## 🚀 Comandos de Deploy
@@ -109,10 +121,10 @@ npm run build
 
 2. **Recursos Limitados**: A configuração `DB_CONNECTION_LIMIT=5` foi definida para funcionar dentro dos limites de recursos da AWS Academy.
 
-3. **Catálogo em produção**: Ao iniciar, o backend sincroniza os 21 produtos e serviços oficiais do projeto, mesmo quando o banco já contém outros itens. A sincronização atualiza descrição, categoria, fabricante, imagem e preços desses itens padrão, mantém o estoque em pelo menos 10 e não apaga itens personalizados nem pedidos. Alterações manuais nesses campos dos 21 itens oficiais serão substituídas pelos valores do catálogo do projeto no próximo reinício.
+3. **Catálogo em produção**: Ao iniciar, o backend sincroniza os 35 produtos e serviços oficiais do projeto, mesmo quando o banco já contém outros itens. A sincronização atualiza descrição, categoria, fabricante, imagem e preços desses itens padrão, mantém o estoque em pelo menos 10 e não apaga itens personalizados nem pedidos. Alterações manuais nesses campos dos 35 itens oficiais serão substituídas pelos valores do catálogo do projeto no próximo reinício.
 
 4. **Segurança e Git**: Nunca envie `.env`, `.env.production`, `.env.bak` ou outros arquivos de ambiente reais ao repositório. Use apenas os arquivos `.env.example` como template. Faça commits e pushes do código-fonte a partir do ambiente de desenvolvimento; na EC2, não use `git add .` para enviar arquivos gerados pelo build ou configurações locais.
 
-5. **Demo vs Produção**: A conta `admin.demo@nexuscontrol.com` é para demonstrações públicas. A conta `ROOT_ADMIN_EMAIL` é pessoal e não deve ser compartilhada.
+5. **Encerramento gracioso (PM2)**: O backend trata `SIGINT`/`SIGTERM`, fecha o pool MySQL e sai com código adequado. O `ecosystem.config.cjs` está configurado com `wait_ready`, `kill_timeout` e `listen_timeout`, então um `pm2 reload` não derruba requisições em andamento nem o Mercado Pago webhook. Garanta que `backend/logs/` exista no servidor (o `deploy-aws.sh` cria automaticamente).
 
 6. **Verificação de Segurança**: O backend valida automaticamente se as variáveis críticas foram alteradas dos valores de exemplo ao iniciar em modo `production`. Se a validação falhar, o servidor não iniciará.

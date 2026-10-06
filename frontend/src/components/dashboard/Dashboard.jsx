@@ -209,7 +209,7 @@ function PermissionsPanel({ permissions }) {
 /* ─────────────────────────────── MAIN DASHBOARD ───────────────────────── */
 export default function Dashboard() {
   const { user, isAdmin, isFuncionario, isCliente } = useAuth();
-  const { totalItems: cartCount, subtotal: cartSubtotal } = useCart();
+  const { totalItems: cartCount } = useCart();
   const { toast } = useModal();
 
   const [stats, setStats] = useState({

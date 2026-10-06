@@ -1,0 +1,121 @@
+# ==============================================================================
+# Exemplo de configuração Nginx para Nexus Control App na AWS Academy
+# ------------------------------------------------------------------------------
+# A EC2 da AWS Academy normalmente serve o frontend em 80/443 e faz proxy
+# reverso de /api/* e /health para o backend Node em 127.0.0.1:3000 (PM2).
+# Copie este arquivo para /etc/nginx/conf.d/nexus.conf (Amazon Linux) ou
+# /etc/nginx/sites-available/nexus (Ubuntu) e faça `sudo nginx -t &&
+# sudo systemctl reload nginx`.
+#
+# Ajuste server_name, caminhos de certificados e porta do backend conforme
+# seu ambiente. Este arquivo é *exemplo* — a deploy-script detecta diretórios
+# Nginx já configurados e só serve estáticos quando não há proxy.
+# ==============================================================================
+
+upstream nexus_backend {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    server_name _;  # troque por dominio.sua-aws.com.br quando houver DNS
+
+    # Bloqueia URLs não esperadas e headers sensíveis
+    server_tokens off;
+
+    # Logs estruturados
+    access_log /var/log/nginx/nexus.access.log combined;
+    error_log  /var/log/nginx/nexus.error.log warn;
+
+    # Frontend estático (Vite build copiado por deploy-aws.sh)
+    root /var/www/html;
+    index index.html;
+
+    # Assets com hash no nome podem ser cacheados agressivamente
+    location /assets/ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable";
+        try_files $uri =404;
+    }
+
+    # Health check do ALB/CloudWatch (sem log, sem rate limit)
+    location = /api/health {
+        access_log off;
+        proxy_pass http://nexus_backend/api/health;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    location = /health {
+        access_log off;
+        proxy_pass http://nexus_backend/health;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    # Webhook do Mercado Pago — precisa chegar no backend SEM reescrita
+    location = /api/pagamentos/webhook {
+        proxy_pass http://nexus_backend/api/pagamentos/webhook;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # MP reenvia o corpo bruto; Nginx não deve alterar
+        proxy_buffering off;
+        client_max_body_size 1m;
+    }
+
+    # API em geral
+    location /api/ {
+        proxy_pass http://nexus_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade            $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host               $host;
+        proxy_set_header X-Real-IP          $remote_addr;
+        proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto  $scheme;
+        # Body de checkout/pagamento pode ser grande; backend usa 1mb
+        client_max_body_size 2m;
+        # Streaming futuro de resultados SSE
+        proxy_read_timeout 60s;
+    }
+
+    # SPA fallback — qualquer rota não-listada cai em index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Segurança extra
+    location ~ /\.          { deny all; }
+    location ~ /\.(env|git) { deny all; return 404; }
+}
+
+# ==============================================================================
+# Bloco HTTPS/443 — descomente depois de emitir certificado ACM/Let's Encrypt.
+# ==============================================================================
+# server {
+#     listen 443 ssl http2;
+#     server_name nexus.seudominio.com.br;
+#
+#     ssl_certificate     /etc/letsencrypt/live/nexus.seudominio.com.br/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/nexus.seudominio.com.br/privkey.pem;
+#     ssl_protocols       TLSv1.2 TLSv1.3;
+#     ssl_ciphers         HIGH:!aNULL:!MD5;
+#     ssl_prefer_server_ciphers on;
+#
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#     add_header X-Content-Type-Options nosniff always;
+#     add_header X-Frame-Options DENY always;
+#     add_header Referrer-Policy strict-origin-when-cross-origin always;
+#
+#     # ... mesmo conteúdo do bloco :80 acima
+# }
+#
+# server {
+#     listen 80;
+#     server_name nexus.seudominio.com.br;
+#     return 301 https://$host$request_uri;
+# }

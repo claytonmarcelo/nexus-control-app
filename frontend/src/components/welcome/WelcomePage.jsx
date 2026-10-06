@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ui/ThemeToggle';
 
 /* ─── Animated Particles Background ─── */
@@ -219,7 +218,6 @@ const STATS = [
    WELCOME PAGE COMPONENT
    ═══════════════════════════════════════════════════════════ */
 export default function WelcomePage() {
-  const { theme, toggleTheme } = useTheme();
   const [scrollY, setScrollY] = useState(0);
   const [loaded, setLoaded] = useState(false);
 
