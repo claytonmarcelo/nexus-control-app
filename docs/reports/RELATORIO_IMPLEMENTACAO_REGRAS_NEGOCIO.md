@@ -66,7 +66,7 @@ Frontend (source):
 
 ## 3. Migrations executadas
 
-Rodadas automaticamente via `node src/utils/migrate.js` (idempotente, `CREATE TABLE IF NOT EXISTS` + `try/catch` em `ALTER TABLE ADD COLUMN`).
+Rodadas automaticamente no boot do servidor e sob demanda com `npm run db:migrate` dentro de `backend/` (script `node src/utils/migrate.js`, idempotente, `CREATE TABLE IF NOT EXISTS` + `try/catch` em `ALTER TABLE ADD COLUMN`).
 
 - `usuarios` ganhou `status_conta`, `desativado_em`, `email_original`, `ultimo_login` + índices.
 - `pedidos` ganhou `pago_confirmado_em`, `payment_provider`, `provider_payment_id` (único), `confirmado_por`.
@@ -119,7 +119,9 @@ Alterados (retrocompatíveis):
 Backend (`npm test` — Jest):
 
 - Suites executadas: `api.test.js`, `integration.test.js`, `security.test.js`, `businessRules.test.js`.
-- Total: **86 testes passando** (0 falhas).
+- Total: **86 testes passando** (0 falhas) na rodada desta entrega. Nos commits
+  seguintes a suíte cresceu: hoje os quatro arquivos declaram **92 blocos** de
+  `it/test` (`api` 37, `businessRules` 23, `integration` 22, `security` 10).
 - Suites novas: `businessRules.test.js` cobre liberação só com pagamento confirmado, dias excedentes/regularização, desativação + vínculo de identidade, inatividade de 6 meses, webhook MP com HMAC e idempotência, RBAC das rotas de aluguel e alertas.
 
 Frontend (`npm run test` — Vitest):
@@ -129,6 +131,12 @@ Frontend (`npm run test` — Vitest):
 - Novos cenários: modal de obrigações acionado pelo 409, aba de alertas com resumo + lista, `deleteOwnAccount` com `{ confirmar_obrigacoes: true }`.
 
 ## 7. Lint
+
+> **Atualização (outubro/2026):** os itens abaixo eram os erros que já existiam
+> **na data desta entrega**; eles foram resolvidos nas sessões seguintes e o
+> `npm run lint` do frontend está limpo hoje (ver `docs/HISTORIA.md` e
+> `../../CHANGELOG.md`). Esta seção fica preservada como registro do ponto de
+> partida daquela fase.
 
 `npm run lint` no frontend reporta **11 erros pré-existentes** que existiam
 antes desta entrega (verificados com `git stash` no início da sessão):
@@ -149,10 +157,17 @@ foram preservados para correção em outro escopo.
 
 ## 9. Pontos de atenção
 
-1. **Mercado Pago em produção.** Sem `MP_ACCESS_TOKEN` o sistema permanece em
-   modo manual (admin confirma pagamento). Ao ligar o token, exponha `PUBLIC_URL`
-   apontando para o backend público e configure o webhook do painel do MP com
-   `MP_WEBHOOK_SECRET` igual ao `.env` do servidor.
+1. **Mercado Pago em produção.** Sem `MP_ACCESS_TOKEN` o checkout roda em modo
+   simulado. **Atualização (outubro/2026):** nesse modo o backend **confirma o
+   pagamento na mesma requisição**, para Pix (`provider: 'fake'`) e cartão
+   (`provider: 'manual'`) — `orderController.ts` cria o pedido como `pendente` e
+   chama `aplicarStatusPagamento` com `CONFIRMADO` em seguida, disparando aluguéis
+   e eventos. Não é mais "o admin confirma depois"; a pendência só existe com o
+   gateway real ligado (Pix aguarda webhook) ou em pedidos legados, e a retomada
+   desses casos é o `POST /api/pedidos/:id/pagamento`. A regra de liberação continua
+   no backend, lendo `status_pagamento`. Ao ligar o token real, exponha
+   `PUBLIC_URL` apontando para o backend público e configure o webhook do painel
+   do MP com `MP_WEBHOOK_SECRET` igual ao `.env` do servidor.
 2. **Índice único `provider_payment_id`.** Garante idempotência do webhook. Se
    o gateway reenviar o mesmo evento, o `INSERT` falha silenciosamente e o
    pagamento não é confirmado duas vezes.

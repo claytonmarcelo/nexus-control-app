@@ -3,6 +3,11 @@
 **Data:** Setembro 7, 2026  
 **Status:** ✅ **PRODUCTION READY - ALL TESTS PASSED**
 
+> **Snapshot histórico** (07/09/2026). Bateria executada sobre a versão daquela
+> data; desde então o projeto ganhou aluguéis/alertas/regras de conta, mudou a
+> política de senha e foi reorganizado em `docs/` e `docs/reports/`. O estado
+> atual está em [`../../CHANGELOG.md`](../../CHANGELOG.md).
+
 ---
 
 ## 📋 Sumário Executivo

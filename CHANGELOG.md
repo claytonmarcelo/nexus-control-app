@@ -24,6 +24,48 @@ a história detalhada por marcos também pode ser lida em
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
 - Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a próxima entrada.
+- Documentação: os 9 relatórios de `docs/reports/` revisados contra o código — ver a
+  entrada "Revisão dos relatórios".
+
+---
+
+## 2026-10-06 · Revisão dos relatórios de `docs/reports/` antes da entrega
+
+Passo os nove documentos de fase em revista contra o código atual. **Nenhum texto
+original foi apagado**: o que estava desatualizado ganhou uma atualização datada
+dentro do próprio documento, para continuar servindo como registro da época.
+
+- **Três afirmações que estavam factualmente erradas:**
+  - `ANALISE_AUTH_FLOWS.md` dizia que "no estado atual" a senha exigia **12+ caracteres**.
+    A política vigente é **5–6 dígitos + 1 símbolo** (`infrastructure/utils/passwordPolicy.js`,
+    replicada em `utils/` e no frontend). O mesmo aviso foi corrigido quanto ao token de
+    recuperação: ele só aparece na resposta em `development`/`test`; em produção não sai da API.
+  - `RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md` §9 ensinava que, sem `MP_ACCESS_TOKEN`,
+    o pagamento ficava **manual para o admin confirmar**. Hoje o modo simulado **confirma na
+    mesma requisição** (Pix `provider: 'fake'`, cartão `provider: 'manual'`), fiel ao
+    comportamento restaurado nesta data; a pendência só existe com gateway real ou em pedidos
+    legados, retomáveis por `POST /api/pedidos/:id/pagamento`.
+  - O mesmo relatório §7 listava **11 erros de ESLint** "pré-existentes". `npm run lint` no
+    frontend roda limpo hoje (verificado nesta revisão, sem `--fix`), e os símbolos citados
+    (`cartSubtotal`, `toggleTheme`, `UserIcon`, `vi`) já não aparecem nos arquivos.
+- **Contagem de testes:** o backend tinha **86** casos na entrega das regras de negócio e hoje
+  tem **92** (`api` 37, `businessRules` 23, `integration` 22, `security` 10). O número foi
+  atualizado em `docs/HISTORIA.md` (seção "Estado atual") e anotado dentro do relatório, que
+  continua mostrando 86 como foto daquela rodada. Frontend seguem **49**, conferem.
+- **Caminhos obsoletos sinalizados, não reescritos:** `backend/src/models|controllers|routes`
+  viraram `infrastructure/` e `presentation/`; componentes `.js` são `.jsx`; o `App.tsx` do
+  template Vite já foi removido (os assets `hero.png`/`react.svg`/`vite.svg` continuam em
+  `frontend/src/assets/`); `node src/utils/migrate.js` agora é `npm run db:migrate` em `backend/`.
+- **Datas que faltavam:** `PROJECT_STATUS`, `IMPLEMENTATION_SUMMARY`, `PRODUCTION_READY`,
+  `DEPLOYMENT_SUMMARY`, `ASSETS_AUDIT_REPORT` e `E2E_TESTING_REPORT` receberam aviso de
+  *snapshot histórico* no topo com a data do registro; `PROJECT_STATUS` e
+  `IMPLEMENTATION_SUMMARY` traziam **2024** por engano no "Data de Conclusão" (corrigido para 2026).
+- **Índice** `docs/reports/README.md` ganhou a coluna "Registro de" e um parágrafo explicando
+  que cada arquivo é foto de um momento, não especificação viva.
+- **Checagem automática:** 29 links markdown internos conferidos um a um — **0 quebrados**;
+  varredura por segredo (JWT, `access_token`, chaves de gateway, caminho absoluto, e-mail
+  pessoal) não achou nada além do e-mail demo do admin, que já é credencial de seed pública.
+- Só documentação mudou: nada em `src/` nem em `dist/`, então o app continua idêntico.
 
 ---
 

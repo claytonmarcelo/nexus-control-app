@@ -1,6 +1,6 @@
 # 🔍 ANÁLISE CRÍTICA: FLUXOS DE AUTENTICAÇÃO - NEXUS CONTROL APP
 
-> Relatório histórico: várias conclusões abaixo descrevem uma versão anterior. No estado atual, cadastro/troca/reset usam política única de 12+ caracteres, refresh usa chave separada, recuperação não retorna token na API e os endpoints públicos de reset têm rate limit.
+> Relatório histórico: várias conclusões abaixo descrevem uma versão anterior. No estado atual (outubro/2026), cadastro/troca/reset usam a política única de **5 a 6 dígitos seguidos de 1 símbolo** (`backend/src/infrastructure/utils/passwordPolicy.js`, replicada em `utils/` e no frontend), refresh usa chave separada (`JWT_REFRESH_SECRET`, validada como diferente de `JWT_SECRET`), os endpoints públicos de recuperação/reset têm rate limit, e o token de recuperação **só aparece na resposta em `development`/`test`** — em produção a API não retorna token nenhum.
 
 ## ⚠️ PROBLEMAS IDENTIFICADOS
 

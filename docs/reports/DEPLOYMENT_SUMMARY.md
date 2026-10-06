@@ -1,5 +1,10 @@
 # Nexus Control App - Deployment Summary
 
+> **Snapshot histórico** (setembro/2026, revisado em 02/10/2026). Os caminhos `backend/src/routes/`
+> etc. são da estrutura anterior; hoje as rotas estão em
+> `backend/src/presentation/routes/`. Estado atual:
+> [`../../CHANGELOG.md`](../../CHANGELOG.md).
+
 **Status:** ✅ **PRODUCTION-READY**  
 **Completion Date:** September 2026  
 **Total Tasks:** 14/14 Completed

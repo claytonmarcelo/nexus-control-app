@@ -1,5 +1,9 @@
 # 🚀 Nexus Control App - PRODUCTION READY
 
+> **Snapshot histórico** (foto de 2026-10-01). Itens marcados como pendentes
+> abaixo podem já ter sido resolvidos depois dessa data — confira o
+> [`../../CHANGELOG.md`](../../CHANGELOG.md) para o estado atual.
+
 **Status:** ✅ **PRODUCTION-READY FOR AWS ACADEMY DEPLOYMENT**
 
 ---

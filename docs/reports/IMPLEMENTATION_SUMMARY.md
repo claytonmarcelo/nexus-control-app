@@ -1,8 +1,13 @@
 # 📋 Resumo da Implementação - Carrinho e Painel Admin
 
+> **Snapshot histórico** (foto de 07/09/2026, revisado em 02/10/2026). Os caminhos
+> listados abaixo são da estrutura anterior do backend (`models/`, `controllers/`,
+> `routes/`), hoje em `infrastructure/` e `presentation/`. Estado atual:
+> [`../../CHANGELOG.md`](../../CHANGELOG.md).
+
 ## ✅ Projeto Concluído
 
-Data: Setembro 7, 2024  
+Data: Setembro 7, 2026  
 Status: **PRONTO PARA PRODUÇÃO**  
 Progresso: **11/11 tarefas completas (100%)**
 

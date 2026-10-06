@@ -1,8 +1,14 @@
 # 📊 Status do Projeto - Nexus Control App
 
+> **Snapshot histórico** (foto de 07/09/2026, revisado pela última vez em 01/10/2026). Caminhos de
+> arquivos e contagens abaixo descrevem a estrutura da época — o backend já foi
+> reorganizado em `infrastructure/`/`presentation/` e a suíte cresceu. Para o
+> estado de hoje veja [`../../CHANGELOG.md`](../../CHANGELOG.md) e
+> [`../../README.md`](../../README.md).
+
 ## 🎉 PROJETO CONCLUÍDO COM SUCESSO!
 
-**Data de Conclusão:** 7 de Setembro de 2024  
+**Data de Conclusão:** 7 de Setembro de 2026  
 **Tempo Total:** 1 dia de desenvolvimento intenso  
 **Status:** ✅ **PRONTO PARA PRODUÇÃO**
 

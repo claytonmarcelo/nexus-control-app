@@ -177,10 +177,17 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
 
 ## Estado atual
 
-- Backend: **86 testes verdes**, build TypeScript limpo.
+- Backend: **92 casos de teste** na suíte (`api` 37, `businessRules` 23,
+  `integration` 22, `security` 10 — contagem declarada nos quatro arquivos de
+  `backend/src/tests`, sem `skip`/`todo`), build TypeScript limpo. O número
+  anterior de 86 que aparecia aqui era o total da entrega das regras de negócio;
+  a suíte cresceu com os fixes de checkout, alertas e exclusão de conta.
 - Frontend: **49 testes verdes**, `npm run build` OK, **ESLint limpo** (erros
   pré-existentes resolvidos para o CI passar).
 - Banco: schema atualizado com colunas/tabelas aditivas; dados preservados.
 - Deploy: bundles `frontend/dist` e `backend/dist` atualizados para AWS.
-- Documentação técnica centralizada em `docs/`; instruções de instalação
-  permanecem em `README.md` (na raiz) e `SETUP.md`.
+- Infra local: stack Docker (`docker compose up -d --build`) sobe MySQL + API +
+  Web com migrações e seed no boot; validada em 2026-10-06.
+- Documentação técnica centralizada em `docs/`, com os relatórios de fase em
+  `docs/reports/`; instruções de instalação permanecem em `README.md` (na raiz)
+  e `SETUP.md`.

@@ -1,5 +1,11 @@
 # Relatório de Auditoria de Assets Estáticos
 
+> **Snapshot histórico** (foto de 2026-10-06). Desde então o `frontend/src/App.tsx`
+> do template Vite **foi removido** (o app usa `frontend/src/App.jsx`), mas os
+> assets que esta auditoria apontava como não usados ainda estão no repositório:
+> `frontend/src/assets/hero.png`, `react.svg` e `vite.svg`. Estado atual:
+> [`../../CHANGELOG.md`](../../CHANGELOG.md).
+
 ## 📋 Visão Geral
 Auditoria realizada para identificar oportunidades de otimização de imagens e assets estáticos no projeto Nexus Control App.
 
