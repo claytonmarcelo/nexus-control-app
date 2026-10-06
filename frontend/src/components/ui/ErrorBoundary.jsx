@@ -40,9 +40,11 @@ export default class ErrorBoundary extends Component {
       return (
         <ErrorPage
           status="500"
+          tone="danger"
           eyebrow="Nexus Control"
           title="Algo saiu do roteiro"
           message="Encontramos uma instabilidade ao abrir esta experiência. Tente novamente ou retorne ao seu painel seguro."
+          hint="Seus dados estão seguros: carrinho, pedidos e aluguéis continuam salvos."
           actionLabel="Tentar novamente"
           onAction={this.handleRetry}
           secondaryAction
@@ -62,9 +64,13 @@ export function ErrorPage({
   actionLabel,
   onAction,
   secondaryAction = false,
+  secondaryLabel = 'Ir para o dashboard',
+  secondaryHref = '/dashboard',
+  tone = 'gold',
+  hint,
 }) {
   return (
-    <main className="error-page" role="main">
+    <main className={`error-page error-page--${tone}`} role="main">
       <div className="error-page__glow" aria-hidden="true" />
       <section className="error-page__content" aria-labelledby="error-title">
         <div className="error-page__mark" aria-hidden="true">
@@ -74,6 +80,7 @@ export function ErrorPage({
         <p className="error-page__eyebrow">{eyebrow}</p>
         <h1 id="error-title">{title}</h1>
         <p className="error-page__message">{message}</p>
+        {hint && <p className="error-page__hint">{hint}</p>}
         <div className="error-page__actions">
           {onAction && (
             <button type="button" className="btn-primary" onClick={onAction}>
@@ -82,9 +89,9 @@ export function ErrorPage({
             </button>
           )}
           {secondaryAction && (
-            <Link to="/dashboard" className="btn-secondary">
+            <Link to={secondaryHref} className="btn-secondary">
               <HomeIcon />
-              Ir para o dashboard
+              {secondaryLabel}
             </Link>
           )}
         </div>

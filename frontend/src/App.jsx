@@ -6,6 +6,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
 import NotFound from './components/ui/NotFound';
+import Forbidden from './components/ui/Forbidden';
 import LoadingScreen from './components/ui/LoadingScreen';
 
 // Lazy load page components
@@ -110,6 +111,7 @@ function App() {
           </Route>
           
           <Route path="/" element={<WelcomePage />} />
+          <Route path="/acesso-negado" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

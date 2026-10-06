@@ -2491,3 +2491,290 @@ html[data-theme='light'] .welcome-stats,
 html.light .welcome-stats {
   background: rgba(255,255,255,0.6);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PÁGINAS DE ERRO PERSONALIZADAS (404 · 403 · 500)
+   Componente: src/components/ui/ErrorBoundary.jsx  (exporta <ErrorPage />)
+   Assinatura: entrada em slideUp escalonado (a mesma da Welcome) + brilho
+   champagne vivo. Todas as cores vêm das variáveis de tema, então dark e
+   light funcionam sem overrides específicos.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Transição de rota. Anima somente opacidade: qualquer transform neste invólucro
+   criaria um bloco de contenção novo e quebraria os elementos fixos/sticky do
+   Layout (header e sidebar) durante a navegação. */
+.page-transition {
+  animation: page-transition-fade 0.24s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes page-transition-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.error-page {
+  /* Tom padrão: champagne. Modificadores .error-page--warning/--danger
+     trocam apenas o acento, nada de cor hardcoded nos filhos. */
+  --error-accent: var(--accent-gold);
+  --error-accent-soft: var(--accent-gold-subtle);
+  --error-accent-glow: var(--accent-gold-glow);
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem) 1.25rem;
+  background: var(--bg-primary);
+  overflow: hidden;
+  text-align: center;
+}
+
+.error-page--warning {
+  --error-accent: var(--color-warning);
+  --error-accent-soft: var(--color-warning-bg);
+  --error-accent-glow: rgba(245, 158, 11, 0.25);
+}
+
+.error-page--danger {
+  --error-accent: var(--color-error);
+  --error-accent-soft: var(--color-error-bg);
+  --error-accent-glow: rgba(239, 68, 68, 0.22);
+}
+
+/* Cantoneiras de “moldura” — reforçam o ar de peça de vitrine */
+.error-page::before,
+.error-page::after {
+  content: '';
+  position: absolute;
+  width: clamp(54px, 9vw, 96px);
+  height: clamp(54px, 9vw, 96px);
+  border: 1px solid var(--error-accent-soft);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.error-page::before {
+  top: clamp(16px, 4vw, 44px);
+  left: clamp(16px, 4vw, 44px);
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: var(--br-lg);
+}
+
+.error-page::after {
+  bottom: clamp(16px, 4vw, 44px);
+  right: clamp(16px, 4vw, 44px);
+  border-left: 0;
+  border-top: 0;
+  border-bottom-right-radius: var(--br-lg);
+}
+
+.error-page__glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(780px, 92vw);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -52%);
+  background: radial-gradient(circle, var(--error-accent-soft) 0%, transparent 62%);
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 0;
+  animation: error-glow-drift 12s ease-in-out infinite;
+}
+
+@keyframes error-glow-drift {
+  0%, 100% { transform: translate(-50%, -52%) scale(1); opacity: 0.85; }
+  50%      { transform: translate(-50%, -48%) scale(1.08); opacity: 1; }
+}
+
+.error-page__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  max-width: 620px;
+  width: 100%;
+}
+
+/* Entrada escalonada — mesma curva premium usada na Welcome */
+.error-page__content > * {
+  animation: error-rise 0.7s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.error-page__content > *:nth-child(1) { animation-delay: 0.05s; }
+.error-page__content > *:nth-child(2) { animation-delay: 0.15s; }
+.error-page__content > *:nth-child(3) { animation-delay: 0.25s; }
+.error-page__content > *:nth-child(4) { animation-delay: 0.35s; }
+.error-page__content > *:nth-child(5) { animation-delay: 0.45s; }
+.error-page__content > *:nth-child(6) { animation-delay: 0.55s; }
+
+@keyframes error-rise {
+  from { transform: translateY(26px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.error-page__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.error-page__mark span {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 15vw, 8rem);
+  font-weight: var(--fw-extrabold);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    135deg,
+    var(--accent-gold-light) 0%,
+    var(--error-accent) 52%,
+    var(--accent-gold-dark) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 14px 34px var(--error-accent-glow));
+  animation: error-mark-in 0.9s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Régua vertical que separa o código do restante da composição */
+.error-page__mark i {
+  width: 2px;
+  height: clamp(46px, 9vw, 84px);
+  border-radius: var(--br-full);
+  background: linear-gradient(180deg, transparent, var(--error-accent), transparent);
+  animation: error-rule-in 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both;
+}
+
+@keyframes error-mark-in {
+  0%   { transform: translateY(18px) scale(0.94); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes error-rule-in {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+.error-page__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--br-full);
+  border: 1px solid var(--error-accent-soft);
+  background: var(--error-accent-soft);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--error-accent);
+}
+
+.error-page h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4.4vw, 2.4rem);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-primary);
+}
+
+.error-page__message {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
+  color: var(--text-secondary);
+}
+
+.error-page__hint {
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--br-sm);
+  border: 1px dashed var(--border-color-strong);
+  background: var(--bg-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-tertiary);
+  overflow-wrap: anywhere;
+}
+
+.error-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.875rem;
+  margin-top: var(--sp-2);
+}
+
+.error-page__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+}
+
+/* O botão primário “gira” ao receber hover: reforça a ideia de repetir a ação */
+.error-page__actions .btn-primary:hover .error-page__icon {
+  animation: error-icon-turn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes error-icon-turn {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@media (max-width: 640px) {
+  .error-page__actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .error-page__actions > * {
+    width: 100%;
+  }
+
+  .error-page__mark i {
+    display: none;
+  }
+}
+
+/* Acessibilidade: respeita quem pediu menos movimento, sem esconder conteúdo
+   (as animações têm fill “both”, então com animation:none tudo aparece normal). */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .error-page__glow,
+  .error-page__content > *,
+  .error-page__mark span,
+  .error-page__mark i,
+  .error-page__actions .btn-primary:hover .error-page__icon {
+    animation: none !important;
+  }
+
+  .error-page__content > *,
+  .error-page__mark span,
+  .error-page__mark i {
+    opacity: 1;
+    transform: none;
+  }
+
+  .error-page__glow {
+    opacity: 0.9;
+  }
+
+  .btn-primary:hover .error-page__icon {
+    animation: none !important;
+  }
+}

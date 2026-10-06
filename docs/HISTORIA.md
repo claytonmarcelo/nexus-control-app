@@ -183,9 +183,12 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
   byte a byte (só muda quebra de linha). O número anterior de 86 que aparecia
   aqui era o total da entrega das regras de negócio; a suíte cresceu com os
   fixes de checkout, alertas e exclusão de conta.
-- Frontend: **49 testes verdes** em 8 arquivos (rodados em 2026-10-06 com
-  `npm run test`), `npm run build` OK, **ESLint limpo** (erros pré-existentes
-  resolvidos para o CI passar).
+- Frontend: **58 testes verdes** em 9 arquivos (49 históricos + 9 das páginas de
+  erro; rodados em 2026-10-06 com `npm run test`), `npm run build` OK, **ESLint
+  limpo** (erros pré-existentes resolvidos para o CI passar).
+- Páginas de erro: 404, 403 e 500 com layout próprio animado (`.error-page*` e
+  `.page-transition`, que antes não tinham CSS nenhum), tons por tipo de erro,
+  `prefers-reduced-motion` respeitado e rota `/acesso-negado`.
 - Banco: schema atualizado com colunas/tabelas aditivas; dados preservados.
 - Deploy: bundles `frontend/dist` e `backend/dist` atualizados para AWS.
 - Infra local: stack Docker (`docker compose up -d --build`) sobe MySQL + API +

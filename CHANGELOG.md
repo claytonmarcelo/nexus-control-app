@@ -20,13 +20,64 @@ a história detalhada por marcos também pode ser lida em
 
 - Backend: **92 testes verdes** em 4 suites (`api` 37, `businessRules` 23,
   `integration` 22, `security` 10), rodados de verdade nesta data — build TypeScript limpo.
-- Frontend: **49 testes verdes**, `npm run build` OK, **ESLint sem erros** (lint
-  limpo para o CI).
+- Frontend: **58 testes verdes** (49 anteriores + 9 das páginas de erro),
+  `npm run build` OK, **ESLint sem erros** (lint limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
 - Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a próxima entrada.
 - Documentação: os 9 relatórios de `docs/reports/` revisados contra o código — ver a
   entrada "Revisão dos relatórios".
+
+---
+
+## 2026-10-06 · Páginas de erro personalizadas (404 · 403 · 500) com animação
+
+As páginas de erro **já existiam** em código, mas estavam **sem estilo nenhum**: o
+`<ErrorPage />` (`frontend/src/components/ui/ErrorBoundary.jsx`) escrevia as classes
+BEM `.error-page*` — e nenhuma dessas classes tinha CSS em lugar algum. O mesmo
+valia para `.page-transition`, usada em `App.jsx` a cada troca de rota. Ou seja:
+404 e 500 apareciam como HTML puro, sem a identidade visual do projeto. Esta
+entrada **adiciona o que faltava** e uma página nova; nada que já funcionava foi
+alterado.
+
+- **CSS das páginas de erro** (`frontend/src/index.css`, seção nova ao final do
+  arquivo, 100% com variáveis de tema — nenhuma cor hardcoded nos elementos):
+  código do status em `clamp(4rem, 15vw, 8rem)` com o gradiente champagne do
+  projeto recortado no texto, régua vertical em degradê, eyebrow em pílula,
+  cantoneiras de moldura (`::before`/`::after`), brilho radial que **respira**
+  (`error-glow-drift`, 12 s) e **entrada escalonada** dos blocos (`error-rise`,
+  0,05 s → 0,55 s) com a mesma curva `cubic-bezier(0.23, 1, 0.32, 1)` da Welcome.
+- **Tons por tipo de erro**: `--gold` (404, padrão), `--warning` (403, âmbar) e
+  `--danger` (500, vermelho). O tom só troca as variáveis `--error-accent*`, então
+  dark e light funcionam sem override dedicado.
+- **Ícone do botão primário gira no hover** (`error-icon-turn`) — reforça "tentar
+  de novo" sem inventar linguagem visual nova.
+- **Mobile** (≤ 640 px): ações empilhadas em largura total e a régua some.
+- **`prefers-reduced-motion: reduce`**: todas as animações das páginas de erro e da
+  transição de rota são desligadas, sem esconder conteúdo (as animações usam
+  `fill: both`, então com `animation: none` tudo aparece no lugar).
+- **Transição de rota** (`.page-transition`): fade de 0,24 s **só em opacidade** —
+  de propósito. Animar `transform` nesse invólucro criaria um bloco de contenção e
+  quebraria header/sidebar `fixed`/`sticky` do Layout durante a navegação.
+- **`<ErrorPage />` ganhou props opcionais** (`tone`, `hint`, `secondaryLabel`,
+  `secondaryHref`), todas com default igual ao comportamento anterior: os chamados
+  existentes (404 e 500) continuam renderizando as mesmas strings que os testes
+  já cobrem.
+- **404** (`NotFound.jsx`): agora informa **qual rota não existe** na dica técnica
+  (`Nenhuma rota corresponde a /xyz`), em fonte mono.
+- **403 nova** (`frontend/src/components/ui/Forbidden.jsx` + rota
+  `/acesso-negado` em `App.jsx`): superfície de "acesso negado" que o projeto não
+  tinha. **Os guards de rota (`PrivateRoute`) não foram tocados** — continuam
+  redirecionando para `/dashboard` como sempre; a página fica disponível para uso
+  quando (e se) você preferir exibir o erro em vez de redirecionar.
+- **Testes**: suíte nova `frontend/src/components/ui/ErrorPages.test.jsx` com 9
+  casos (estrutura BEM, tom, dica condicional, link secundário customizado, ação
+  primária, 404 com a rota tentada, 403 âmbar). Total do frontend: **58 testes
+  verdes**, `npm run build` OK, ESLint limpo nos arquivos alterados, e
+  `frontend/dist` reconstruído e commitado (o `dist` é versionado neste projeto).
+- **Validação visual**: `404` e `403` renderizados no navegador em tema **dark e
+  light** (Vite em `localhost:5199`), com a Welcome page conferida antes/depois
+  para garantir zero regressão.
 
 ---
 
