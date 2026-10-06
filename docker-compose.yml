@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# Nexus Control - stack completa em Docker (MySQL + API + Web).
+# Sobe tudo com `docker compose up -d --build` a partir da raiz do projeto.
+# - Nenhum segredo real fica versionado: valores via variaveis de ambiente
+#   (edite os defaults abaixo ou exporte antes de subir / use um arquivo .env).
+# - O backend, ao subir, roda as migracoes idempotentes e sincroniza o catalogo
+#   sozinho (CREATE TABLE IF NOT EXISTS / ALTER ADD COLUMN) - sem SQL destrutivo.
+# - Acesse a aplicacao em http://localhost:8080 e a API em http://localhost:3000.
+# ---------------------------------------------------------------------------
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: nexus-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-nexus_local_pwd}
+      MYSQL_DATABASE: ${DB_NAME:-nexusdb}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - nexus_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  backend:
+    build:
+      context: ./backend
+    image: nexus-control-backend:latest
+    container_name: nexus-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASS: ${DB_PASS:-nexus_local_pwd}
+      DB_NAME: ${DB_NAME:-nexusdb}
+      DB_CONNECTION_LIMIT: 10
+      # Segredos de desenvolvimento (>=32 chars, diferentes, nao-example).
+      # TROQUE antes de qualquer deploy real. Nunca versione segredos verdadeiros.
+      JWT_SECRET: ${JWT_SECRET:-dev_only_access_secret_change_me_please_0123456789abcdef}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_only_refresh_secret_change_me_please_fedcba9876543210}
+      JWT_EXPIRES_IN: 24h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      ROOT_ADMIN_EMAIL: ${ROOT_ADMIN_EMAIL:-marcelo10@gmail.com}
+      ROOT_ADMIN_NAME: ${ROOT_ADMIN_NAME:-Marcelo}
+      ROOT_ADMIN_PASSWORD: ${ROOT_ADMIN_PASSWORD:-123456#}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080,http://localhost:5173}
+      API_URL: ${API_URL:-http://localhost:3000}
+      # Pagamentos (Mercado Pago) ficam desligados por padrao => modo simulado.
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:-}
+      PUBLIC_URL: ${PUBLIC_URL:-}
+    ports:
+      - "${API_PORT:-3000}:3000"
+
+  web:
+    build:
+      context: ./frontend
+    image: nexus-control-web:latest
+    container_name: nexus-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  nexus_mysql_data:
