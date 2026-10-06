@@ -26,6 +26,40 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Página "Aluguéis" do admin reorganizada (textos quebrados + controle)
+
+- `fix(admin): reorganiza a aba Aluguéis do painel e conserta o controle de retirada`
+  - O usuário apontou que a tela **Admin → Aluguéis** estava **fora do padrão** e
+    com **textos quebrados**: a coluna de prazo mostrava o intervalo no formato
+    longo (`6 de out. de 2026, 01:07 → 6 de out. de 2026, 01:07`), que quebrava em
+    várias linhas, e o **select de "Retirada"** na coluna Ações ficava **cortado**
+    ("Pe"/"Re") — a classe `.input` é `w-full` e colapsava dentro do rótulo
+    `inline-flex` da célula alinhada à direita.
+  - `AdminControlCenter.jsx` (componentes `RentalsSection` e `RentalRow`):
+    - **Datas compactas**: novo helper `formatDateShort` (dd/mm/aaaa, sem hora) e a
+      coluna virou **Período** em duas linhas rotuladas ("Início" / "Devolução") +
+      "N dias · Qtd N" — nada de quebra.
+    - **Controle de retirada corrigido**: o `select` agora fica num contêiner de
+      largura fixa (`w-40`), com rótulo "Alterar retirada" acima; mantém o
+      comportamento de **confirmar antes de salvar** (PUT `/alugueis/:id/retirada`,
+      regra no backend). Quando o aluguel ainda não tem retirada, exibe "Sem
+      retirada" (placeholder desabilitado) em vez de fingir "Pendente"; em aluguel
+      **cancelado** o controle fica desabilitado ("Indisponível").
+    - **Rótulos mais curtos** em `RETIRADA_STATUS` ("Realizada" em vez de
+      "Realizada (entregue/devolvida)") para caber no seletor.
+    - **Cabeçalho no padrão** das outras abas: título `text-xl`, pill de contagem
+      ("N aluguéis") e filtro de status com largura fixa (`w-64`).
+    - Células de texto longo (Item/Cliente) com `truncate` + `title`; colunas
+      curtas com `whitespace-nowrap`; linhas com `align-top`.
+  - Sem mudança de backend/regra: a manipulação continua restrita à retirada
+    (admin/funcionário) e o status `devolvido` segue derivado no servidor ao marcar
+    "Realizada".
+  - Validação: **ESLint limpo**, `npm run build` OK, **49 testes frontend verdes**;
+    `frontend/dist` reconstruído. (Verificação E2E no navegador não foi feita porque
+    a sessão local estava deslogada e não se manuseiam credenciais aqui.)
+
+---
+
 ## 2026-10-06 · Retomar pagamento pendente agora confirma o pedido
 
 - `fix(pagamento): alerta de pagamento pendente conclui o pedido em modo simulado`

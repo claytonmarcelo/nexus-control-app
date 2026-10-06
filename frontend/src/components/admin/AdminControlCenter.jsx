@@ -71,7 +71,7 @@ const ALUGUEL_STATUS_OPTIONS = [
 const RETIRADA_STATUS = [
   { value: 'pendente', label: 'Pendente' },
   { value: 'agendada', label: 'Agendada' },
-  { value: 'realizada', label: 'Realizada (entregue/devolvida)' },
+  { value: 'realizada', label: 'Realizada' },
 ];
 
 const TABS = [
@@ -2457,6 +2457,15 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
+// Data curta (dd/mm/aaaa) para colunas apertadas de tabela — evita a quebra do
+// formato extenso "6 de out. de 2026, 01:07" no acompanhamento de aluguéis.
+function formatDateShort(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+}
+
 function toNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -2559,36 +2568,45 @@ function UserEventsPanel({ user, events, loading }) {
 
 /* ─── RENTALS SECTION (Aluguéis) ─── */
 function RentalsSection({ rentals, loading, statusFilter, onStatusFilterChange, updatingRetiradaId, onRetiradaUpdate }) {
+  const total = rentals?.length ?? 0;
   return (
     <div className="space-y-5" role="tabpanel">
       <div
-        className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:justify-between"
+        className="card flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between"
         style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}
       >
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--accent-gold)' }}>
             Operação de aluguéis
           </p>
-          <h2 className="mt-1 text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+          <h2 className="mt-2 text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
             Acompanhe prazos, excedentes e retiradas
           </h2>
           <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Aluguéis vencidos, itens aguardando retirada e devoluções em um só lugar.
           </p>
         </div>
-        <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <span>Status</span>
-          <select
-            value={statusFilter || ''}
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="input py-1.5 text-sm"
-            aria-label="Filtrar aluguéis por status"
-          >
-            {ALUGUEL_STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value || 'todos'} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-wrap items-end gap-3">
+          <span
+            className="h-fit w-fit rounded-full border px-3 py-1.5 text-sm font-semibold"
+            style={{ backgroundColor: 'var(--accent-gold-faint)', borderColor: 'var(--accent-gold-border)', color: 'var(--accent-gold)' }}
+          >{total} {total === 1 ? 'aluguel' : 'aluguéis'}</span>
+          <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+            Status
+            <div className="w-64">
+              <select
+                value={statusFilter || ''}
+                onChange={(e) => onStatusFilterChange(e.target.value)}
+                className="input py-2 text-sm"
+                aria-label="Filtrar aluguéis por status"
+              >
+                {ALUGUEL_STATUS_OPTIONS.map((opt) => (
+                  <option key={opt.value || 'todos'} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          </label>
+        </div>
       </div>
 
       <div className="card overflow-hidden" style={{ backgroundColor: 'var(--bg-elevated-1)', borderColor: 'var(--border-color)' }}>
@@ -2597,7 +2615,7 @@ function RentalsSection({ rentals, loading, statusFilter, onStatusFilterChange, 
             <Spinner className="h-6 w-6" />
             <span>Carregando aluguéis…</span>
           </div>
-        ) : (rentals?.length ?? 0) === 0 ? (
+        ) : total === 0 ? (
           <EmptyPanel icon="clock" title="Nenhum aluguel nesta visualização" text="Ajuste o filtro de status acima para ver outras fases." />
         ) : (
           <div className="overflow-x-auto">
@@ -2607,13 +2625,13 @@ function RentalsSection({ rentals, loading, statusFilter, onStatusFilterChange, 
                 style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}
               >
                 <tr>
-                  <th className="p-4 text-left">Item</th>
-                  <th className="p-4 text-left">Cliente</th>
-                  <th className="p-4 text-left">Status</th>
-                  <th className="p-4 text-left">Prazo</th>
-                  <th className="p-4 text-left">Excedente</th>
-                  <th className="p-4 text-left">Retirada</th>
-                  <th className="p-4 text-right">Ações</th>
+                  <th className="p-4 text-left font-semibold">Item</th>
+                  <th className="p-4 text-left font-semibold">Cliente</th>
+                  <th className="whitespace-nowrap p-4 text-left font-semibold">Status</th>
+                  <th className="whitespace-nowrap p-4 text-left font-semibold">Período</th>
+                  <th className="whitespace-nowrap p-4 text-left font-semibold">Excedente</th>
+                  <th className="whitespace-nowrap p-4 text-left font-semibold">Retirada</th>
+                  <th className="whitespace-nowrap p-4 text-right font-semibold">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -2639,39 +2657,47 @@ function RentalRow({ rental, updatingRetiradaId, onRetiradaUpdate }) {
   const regularizadoAguardandoDevolucao = rental.status === 'regularizado' && rental.status_retirada !== 'realizada';
   const diasExcedentes = Number(rental.dias_excedentes ?? rental.dias_excedentes_calculados ?? 0);
   const isUpdating = String(updatingRetiradaId ?? '') === String(rental.id);
+  const cancelado = rental.status === 'cancelado';
+  const retiradaAtual = rental.status_retirada || 'nenhum';
+  const retiradaEditavel = RETIRADA_STATUS.some((opt) => opt.value === retiradaAtual);
 
   return (
     <tr
-      className="border-b"
+      className="border-b align-top"
       style={{
         borderColor: 'var(--border-color)',
         backgroundColor: vencido ? 'rgba(239,68,68,0.06)' : regularizadoAguardandoDevolucao ? 'rgba(245,158,11,0.05)' : 'transparent',
       }}
     >
-      <td className="p-4">
-        <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{rental.item_nome || `Item #${rental.item_id}`}</p>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Aluguel #{rental.id} · Pedido #{rental.pedido_id ?? '—'}</p>
+      <td className="max-w-[220px] p-4">
+        <p className="truncate font-semibold" style={{ color: 'var(--text-primary)' }} title={rental.item_nome || `Item #${rental.item_id}`}>
+          {rental.item_nome || `Item #${rental.item_id}`}
+        </p>
+        <p className="mt-0.5 whitespace-nowrap text-xs" style={{ color: 'var(--text-muted)' }}>
+          Aluguel #{rental.id} · Pedido #{rental.pedido_id ?? '—'}
+        </p>
       </td>
-      <td className="p-4">
-        <p style={{ color: 'var(--text-primary)' }}>{rental.usuario_nome || '—'}</p>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{rental.usuario_email || ''}</p>
+      <td className="max-w-[200px] p-4">
+        <p className="truncate" style={{ color: 'var(--text-primary)' }} title={rental.usuario_nome || '—'}>{rental.usuario_nome || '—'}</p>
+        <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }} title={rental.usuario_email || ''}>{rental.usuario_email || ''}</p>
       </td>
-      <td className="p-4">
+      <td className="whitespace-nowrap p-4">
         <RentalStatusPill status={rental.status} />
       </td>
-      <td className="p-4">
-        <p style={{ color: 'var(--text-primary)' }}>
-          {rental.data_inicio ? formatDate(rental.data_inicio) : '—'}
-          {' → '}
-          {rental.data_prevista_devolucao ? formatDate(rental.data_prevista_devolucao) : '—'}
+      <td className="whitespace-nowrap p-4">
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          Início: <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{rental.data_inicio ? formatDateShort(rental.data_inicio) : '—'}</span>
         </p>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{rental.dias_aluguel ?? '—'} dias · Qtd {rental.quantidade ?? 1}</p>
+        <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          Devolução: <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{rental.data_prevista_devolucao ? formatDateShort(rental.data_prevista_devolucao) : '—'}</span>
+        </p>
+        <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>{rental.dias_aluguel ?? '—'} dias · Qtd {rental.quantidade ?? 1}</p>
       </td>
-      <td className="p-4">
+      <td className="whitespace-nowrap p-4">
         {diasExcedentes > 0 ? (
           <div>
             <p className="font-semibold" style={{ color: '#f87171' }}>{diasExcedentes} {diasExcedentes === 1 ? 'dia' : 'dias'}</p>
-            {rental.valor_excedente && (
+            {Number(rental.valor_excedente) > 0 && (
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatCurrency(rental.valor_excedente)}</p>
             )}
           </div>
@@ -2679,24 +2705,29 @@ function RentalRow({ rental, updatingRetiradaId, onRetiradaUpdate }) {
           <span style={{ color: 'var(--text-muted)' }}>—</span>
         )}
       </td>
-      <td className="p-4">
-        <RetiradaPill status={rental.status_retirada || 'nenhum'} />
+      <td className="whitespace-nowrap p-4">
+        <RetiradaPill status={retiradaAtual} />
       </td>
-      <td className="p-4 text-right">
-        <label className="inline-flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <span className="sr-only sm:not-sr-only">Retirada:</span>
-          <select
-            value={rental.status_retirada || 'pendente'}
-            onChange={(e) => onRetiradaUpdate(rental, e.target.value)}
-            disabled={isUpdating || rental.status === 'cancelado'}
-            className="input py-1 text-xs"
-            aria-label={`Atualizar retirada do aluguel ${rental.id}`}
-          >
-            {RETIRADA_STATUS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </label>
+      <td className="whitespace-nowrap p-4 text-right">
+        <div className="inline-flex flex-col items-end gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+            {cancelado ? 'Indisponível' : 'Alterar retirada'}
+          </span>
+          <div className="w-40">
+            <select
+              value={retiradaAtual}
+              onChange={(e) => { if (e.target.value) onRetiradaUpdate(rental, e.target.value); }}
+              disabled={isUpdating || cancelado}
+              className="input py-2 text-xs"
+              aria-label={`Atualizar retirada do aluguel ${rental.id}`}
+            >
+              {!retiradaEditavel && <option value="nenhum" disabled>Sem retirada</option>}
+              {RETIRADA_STATUS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </td>
     </tr>
   );
