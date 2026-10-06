@@ -1,0 +1,3382 @@
+{
+  "generatedAt": "2026-10-06T05:05:25.025Z",
+  "repoRoot": ".",
+  "stats": {
+    "files": 118,
+    "macros": 23,
+    "endpoints": 7,
+    "externalPackages": 23,
+    "edges": 440
+  },
+  "nodes": [
+    {
+      "id": "backend/src/application/use-cases/AuthUseCase.js",
+      "label": "AuthUseCase",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/application/use-cases/ItemUseCase.js",
+      "label": "ItemUseCase",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/config/access.js",
+      "label": "access",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/config/database.js",
+      "label": "database",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/config/jwt.js",
+      "label": "jwt",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/config/permissions.js",
+      "label": "permissions",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/entities/Item.js",
+      "label": "Item",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/entities/Order.js",
+      "label": "Order",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/entities/User.js",
+      "label": "User",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/repositories/ItemRepository.js",
+      "label": "ItemRepository",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/repositories/PermissionRepository.js",
+      "label": "PermissionRepository",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/domain/repositories/UserRepository.js",
+      "label": "UserRepository",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Aluguel.js",
+      "label": "Aluguel",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/config/access.js",
+      "label": "access",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/config/database.js",
+      "label": "database",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/config/jwt.js",
+      "label": "jwt",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/config/permissions.js",
+      "label": "permissions",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Conta.js",
+      "label": "Conta",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/EventLog.js",
+      "label": "EventLog",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Item.js",
+      "label": "Item",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Negotiation.js",
+      "label": "Negotiation",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Order.js",
+      "label": "Order",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Pagamento.js",
+      "label": "Pagamento",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/PasswordReset.js",
+      "label": "PasswordReset",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/payments/mercadopago.js",
+      "label": "mercadopago",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Permission.js",
+      "label": "Permission",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/Preco.js",
+      "label": "Preco",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/security/bruteForceProtection.js",
+      "label": "bruteForceProtection",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/security/securityMiddleware.js",
+      "label": "securityMiddleware",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/security/tokenBlacklist.js",
+      "label": "tokenBlacklist",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/User.js",
+      "label": "User",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/utils/jwt.js",
+      "label": "jwt",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/utils/passwordPolicy.js",
+      "label": "passwordPolicy",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/infrastructure/utils/response.js",
+      "label": "response",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/middleware/auth.js",
+      "label": "auth",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/middleware/orderValidation.js",
+      "label": "orderValidation",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/middleware/validation.js",
+      "label": "validation",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/adminController.js",
+      "label": "adminController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/adminController.ts",
+      "label": "adminController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/alertController.ts",
+      "label": "alertController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/aluguelController.ts",
+      "label": "aluguelController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/authController.js",
+      "label": "authController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/authController.ts",
+      "label": "authController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/itemController.js",
+      "label": "itemController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/itemController.ts",
+      "label": "itemController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/orderController.js",
+      "label": "orderController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/orderController.ts",
+      "label": "orderController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/paymentController.ts",
+      "label": "paymentController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/userController.js",
+      "label": "userController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/controllers/userController.ts",
+      "label": "userController",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/middleware/auth.js",
+      "label": "auth",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/middleware/orderValidation.js",
+      "label": "orderValidation",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/middleware/validation.js",
+      "label": "validation",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/admin.js",
+      "label": "admin",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/admin.ts",
+      "label": "admin",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/alugueis.ts",
+      "label": "alugueis",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/auth.js",
+      "label": "auth",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/auth.ts",
+      "label": "auth",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/index.js",
+      "label": "index",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/index.ts",
+      "label": "index",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/items.js",
+      "label": "items",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/items.ts",
+      "label": "items",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/orders.js",
+      "label": "orders",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/orders.ts",
+      "label": "orders",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/payments.ts",
+      "label": "payments",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/users.js",
+      "label": "users",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/presentation/routes/users.ts",
+      "label": "users",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/server.ts",
+      "label": "server",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/tests/helpers/testClient.js",
+      "label": "testClient",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/email.js",
+      "label": "email",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/jwt.ts",
+      "label": "jwt",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/migrate.js",
+      "label": "migrate",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/passwordPolicy.js",
+      "label": "passwordPolicy",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/resetAdminPassword.ts",
+      "label": "resetAdminPassword",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/response.js",
+      "label": "response",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "backend/src/utils/seed.ts",
+      "label": "seed",
+      "layer": "backend",
+      "side": "backend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/App.jsx",
+      "label": "App",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "label": "AdminControlCenter",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/auth/ForgotPassword.jsx",
+      "label": "ForgotPassword",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/auth/Login.jsx",
+      "label": "Login",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/auth/Register.jsx",
+      "label": "Register",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/cart/Cart.jsx",
+      "label": "Cart",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/cart/Checkout.jsx",
+      "label": "Checkout",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/cart/ReceiptPrintable.jsx",
+      "label": "ReceiptPrintable",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/Dashboard.jsx",
+      "label": "Dashboard",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/DashboardCanvas.jsx",
+      "label": "DashboardCanvas",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/ItemFormModal.jsx",
+      "label": "ItemFormModal",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/Items.jsx",
+      "label": "Items",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/OrdersSummaryWidget.jsx",
+      "label": "OrdersSummaryWidget",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/PermissionFormModal.jsx",
+      "label": "PermissionFormModal",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/Profile.jsx",
+      "label": "Profile",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/RecentItems.jsx",
+      "label": "RecentItems",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/UserFormModal.jsx",
+      "label": "UserFormModal",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "label": "UserHistoryModal",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/dashboard/Users.jsx",
+      "label": "Users",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/layout/Layout.jsx",
+      "label": "Layout",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/EmptyState.jsx",
+      "label": "EmptyState",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/ErrorBoundary.jsx",
+      "label": "ErrorBoundary",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/LoadingScreen.jsx",
+      "label": "LoadingScreen",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/NexusLogo.jsx",
+      "label": "NexusLogo",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/NotFound.jsx",
+      "label": "NotFound",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/OrderStepper.jsx",
+      "label": "OrderStepper",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/Spinner.jsx",
+      "label": "Spinner",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/StatCard.jsx",
+      "label": "StatCard",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/ui/ThemeToggle.jsx",
+      "label": "ThemeToggle",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/components/welcome/WelcomePage.jsx",
+      "label": "WelcomePage",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/contexts/AuthContext.jsx",
+      "label": "AuthContext",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/contexts/CartContext.jsx",
+      "label": "CartContext",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/contexts/ModalContext.jsx",
+      "label": "ModalContext",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/contexts/ThemeContext.jsx",
+      "label": "ThemeContext",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/main.jsx",
+      "label": "main",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/services/adminService.js",
+      "label": "adminService",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/services/api.js",
+      "label": "api",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/services/services.js",
+      "label": "services",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/tests/setup.js",
+      "label": "setup",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/utils/access.js",
+      "label": "access",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/utils/date.js",
+      "label": "date",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "frontend/src/utils/password.js",
+      "label": "password",
+      "layer": "frontend",
+      "side": "frontend",
+      "kind": "file"
+    },
+    {
+      "id": "npm:dotenv",
+      "label": "dotenv",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:mysql2",
+      "label": "mysql2",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:bcryptjs",
+      "label": "bcryptjs",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:jsonwebtoken",
+      "label": "jsonwebtoken",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:express-validator",
+      "label": "express-validator",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:express",
+      "label": "express",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:express-rate-limit",
+      "label": "express-rate-limit",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:cors",
+      "label": "cors",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:helmet",
+      "label": "helmet",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:compression",
+      "label": "compression",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:morgan",
+      "label": "morgan",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:path",
+      "label": "path",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:fs",
+      "label": "fs",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:url",
+      "label": "url",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:supertest",
+      "label": "supertest",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:nodemailer",
+      "label": "nodemailer",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:react-router-dom",
+      "label": "react-router-dom",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:react",
+      "label": "react",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:jwt-decode",
+      "label": "jwt-decode",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:react-dom",
+      "label": "react-dom",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:axios",
+      "label": "axios",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:@testing-library/react",
+      "label": "@testing-library/react",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "npm:vitest",
+      "label": "vitest",
+      "layer": "external",
+      "side": "npm",
+      "kind": "package"
+    },
+    {
+      "id": "camada:frontend-ui",
+      "label": "UI React",
+      "side": "frontend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:frontend-ctx",
+      "label": "Contextos",
+      "side": "frontend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:frontend-svc",
+      "label": "Serviços HTTP",
+      "side": "frontend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-routes",
+      "label": "Rotas Express",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-ctrl",
+      "label": "Controllers",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-mw",
+      "label": "Middlewares",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-infra",
+      "label": "Infraestrutura / DB",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-domain",
+      "label": "Domínio",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-integr",
+      "label": "Integrações externas",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-sec",
+      "label": "Segurança",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "camada:backend-util",
+      "label": "Utils / Response",
+      "side": "backend",
+      "kind": "macro"
+    },
+    {
+      "id": "data:usuarios",
+      "label": "Tabela usuarios",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:itens",
+      "label": "Tabela itens",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:pedidos",
+      "label": "Tabela pedidos",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:alugueis",
+      "label": "Tabela alugueis",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:negociacoes",
+      "label": "Tabela negociacoes",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:usuario_permissoes",
+      "label": "Tabela usuario_permissoes",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:password_resets",
+      "label": "Tabela password_resets",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:historico_eventos",
+      "label": "Tabela historico_eventos",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "data:vinculos_conta",
+      "label": "Tabela vinculos_conta",
+      "side": "data",
+      "kind": "macro"
+    },
+    {
+      "id": "ext:mercadopago",
+      "label": "Mercado Pago",
+      "side": "external",
+      "kind": "macro"
+    },
+    {
+      "id": "ext:smtp",
+      "label": "SMTP (Nodemailer)",
+      "side": "external",
+      "kind": "macro"
+    },
+    {
+      "id": "ext:mysql",
+      "label": "MySQL (nexusdb)",
+      "side": "external",
+      "kind": "macro"
+    },
+    {
+      "id": "route:/api/auth",
+      "label": "POST /auth · GET /auth/me",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/itens",
+      "label": "/itens",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/usuarios",
+      "label": "/usuarios · /me · /:id/eventos",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/pedidos",
+      "label": "/pedidos · confirmar pagamento",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/admin",
+      "label": "/admin",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/pagamentos",
+      "label": "/pagamentos · webhook MP",
+      "side": "endpoint",
+      "kind": "endpoint"
+    },
+    {
+      "id": "route:/api/alugueis",
+      "label": "/alugueis · regularização · retirada",
+      "side": "endpoint",
+      "kind": "endpoint"
+    }
+  ],
+  "edges": [
+    {
+      "source": "backend/src/application/use-cases/AuthUseCase.js",
+      "target": "backend/src/domain/repositories/UserRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/AuthUseCase.js",
+      "target": "backend/src/infrastructure/utils/jwt.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/AuthUseCase.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/AuthUseCase.js",
+      "target": "backend/src/infrastructure/PasswordReset.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/AuthUseCase.js",
+      "target": "backend/src/utils/email.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/ItemUseCase.js",
+      "target": "backend/src/domain/repositories/ItemRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/application/use-cases/ItemUseCase.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/config/access.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/config/database.js",
+      "target": "npm:mysql2",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/config/database.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/config/jwt.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/domain/entities/User.js",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/domain/repositories/ItemRepository.js",
+      "target": "backend/src/domain/entities/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/domain/repositories/PermissionRepository.js",
+      "target": "backend/src/infrastructure/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/domain/repositories/PermissionRepository.js",
+      "target": "backend/src/infrastructure/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/domain/repositories/PermissionRepository.js",
+      "target": "backend/src/infrastructure/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/domain/repositories/UserRepository.js",
+      "target": "backend/src/domain/entities/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Aluguel.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Aluguel.js",
+      "target": "backend/src/infrastructure/EventLog.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Aluguel.js",
+      "target": "backend/src/infrastructure/Preco.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/config/access.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/config/database.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/config/jwt.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/Conta.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Conta.js",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Conta.js",
+      "target": "backend/src/infrastructure/EventLog.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/EventLog.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Item.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Item.js",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Negotiation.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Order.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Order.js",
+      "target": "backend/src/infrastructure/Aluguel.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Pagamento.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Pagamento.js",
+      "target": "backend/src/infrastructure/EventLog.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Pagamento.js",
+      "target": "backend/src/infrastructure/Aluguel.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/PasswordReset.js",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/PasswordReset.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/PasswordReset.js",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Permission.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Permission.js",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/Permission.js",
+      "target": "backend/src/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/security/securityMiddleware.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/User.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/User.js",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/User.js",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/utils/jwt.js",
+      "target": "backend/src/infrastructure/config/jwt.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/infrastructure/utils/jwt.js",
+      "target": "npm:jsonwebtoken",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/utils/jwt.js",
+      "target": "backend/src/infrastructure/security/tokenBlacklist.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/middleware/auth.js",
+      "target": "backend/src/utils/jwt.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/middleware/auth.js",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/middleware/orderValidation.js",
+      "target": "npm:express-validator",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/middleware/validation.js",
+      "target": "npm:express-validator",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/middleware/validation.js",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/middleware/validation.js",
+      "target": "backend/src/utils/passwordPolicy.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/middleware/validation.js",
+      "target": "backend/src/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/infrastructure/Permission.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/infrastructure/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.js",
+      "target": "backend/src/utils/seed.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/infrastructure/Permission.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/infrastructure/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/adminController.ts",
+      "target": "backend/src/utils/seed.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/alertController.ts",
+      "target": "backend/src/infrastructure/Conta.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/alertController.ts",
+      "target": "backend/src/infrastructure/EventLog.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/alertController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/alertController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/alertController.ts",
+      "target": "backend/src/infrastructure/Preco.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Aluguel.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Conta.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Pagamento.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Preco.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/payments/mercadopago.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/aluguelController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/utils/jwt.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/PasswordReset.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/utils/email.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/Permission.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/security/bruteForceProtection.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.js",
+      "target": "backend/src/infrastructure/security/tokenBlacklist.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/utils/jwt.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/PasswordReset.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/utils/email.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/Permission.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/security/bruteForceProtection.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/security/tokenBlacklist.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/authController.ts",
+      "target": "backend/src/infrastructure/Conta.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.js",
+      "target": "backend/src/application/use-cases/ItemUseCase.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.js",
+      "target": "backend/src/domain/repositories/ItemRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.js",
+      "target": "backend/src/infrastructure/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.ts",
+      "target": "backend/src/infrastructure/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/itemController.ts",
+      "target": "backend/src/infrastructure/Negotiation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.js",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.js",
+      "target": "backend/src/infrastructure/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/Item.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/Pagamento.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/Preco.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/orderController.ts",
+      "target": "backend/src/infrastructure/payments/mercadopago.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/paymentController.ts",
+      "target": "backend/src/infrastructure/Order.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/paymentController.ts",
+      "target": "backend/src/infrastructure/Pagamento.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/paymentController.ts",
+      "target": "backend/src/infrastructure/payments/mercadopago.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/paymentController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/domain/repositories/UserRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/domain/repositories/PermissionRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/domain/entities/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/infrastructure/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/infrastructure/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/infrastructure/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.js",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/infrastructure/Conta.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/infrastructure/Permission.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/controllers/userController.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/auth.js",
+      "target": "backend/src/infrastructure/utils/jwt.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/auth.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/auth.js",
+      "target": "backend/src/domain/repositories/PermissionRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/auth.js",
+      "target": "backend/src/domain/repositories/UserRepository.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/auth.js",
+      "target": "backend/src/infrastructure/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/orderValidation.js",
+      "target": "npm:express-validator",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/middleware/orderValidation.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/validation.js",
+      "target": "npm:express-validator",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/middleware/validation.js",
+      "target": "backend/src/infrastructure/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/validation.js",
+      "target": "backend/src/infrastructure/utils/passwordPolicy.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/middleware/validation.js",
+      "target": "backend/src/infrastructure/config/permissions.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.js",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.js",
+      "target": "backend/src/presentation/controllers/adminController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.ts",
+      "target": "backend/src/presentation/controllers/adminController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/alugueis.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/alugueis.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/alugueis.ts",
+      "target": "backend/src/utils/response.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/alugueis.ts",
+      "target": "backend/src/presentation/controllers/aluguelController.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.js",
+      "target": "npm:express-rate-limit",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.js",
+      "target": "backend/src/presentation/controllers/authController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.js",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.js",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "npm:express-rate-limit",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "backend/src/presentation/controllers/authController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "backend/src/presentation/routes/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "backend/src/presentation/routes/items.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "backend/src/presentation/routes/users.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "backend/src/presentation/routes/orders.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.js",
+      "target": "backend/src/presentation/routes/admin.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/items.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/users.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/orders.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/admin.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/payments.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/index.ts",
+      "target": "backend/src/presentation/routes/alugueis.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.js",
+      "target": "backend/src/presentation/controllers/itemController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.js",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.js",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.js",
+      "target": "backend/src/domain/entities/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "backend/src/presentation/controllers/itemController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.js",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.js",
+      "target": "backend/src/presentation/middleware/orderValidation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.js",
+      "target": "backend/src/presentation/controllers/orderController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.ts",
+      "target": "backend/src/presentation/middleware/orderValidation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.ts",
+      "target": "backend/src/presentation/controllers/orderController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/payments.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/payments.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/payments.ts",
+      "target": "backend/src/presentation/controllers/paymentController.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.js",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.js",
+      "target": "backend/src/presentation/controllers/userController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.js",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.js",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.js",
+      "target": "backend/src/domain/entities/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "backend/src/presentation/controllers/userController.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "backend/src/presentation/controllers/alertController.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "backend/src/presentation/middleware/validation.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "backend/src/presentation/middleware/auth.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "backend/src/infrastructure/User.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:express",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:cors",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:helmet",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:compression",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:morgan",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:express-rate-limit",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/presentation/routes/index.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/infrastructure/security/securityMiddleware.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:path",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:fs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "npm:url",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/utils/migrate.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/utils/seed.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/infrastructure/Aluguel.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/server.ts",
+      "target": "backend/src/infrastructure/Conta.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/tests/helpers/testClient.js",
+      "target": "npm:supertest",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/tests/helpers/testClient.js",
+      "target": "backend/src/server.ts",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/tests/helpers/testClient.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/email.js",
+      "target": "npm:nodemailer",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/email.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/jwt.ts",
+      "target": "backend/src/config/jwt.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/jwt.ts",
+      "target": "npm:jsonwebtoken",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/jwt.ts",
+      "target": "npm:jsonwebtoken",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/jwt.ts",
+      "target": "backend/src/infrastructure/security/tokenBlacklist.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/migrate.js",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/migrate.js",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "npm:mysql2",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/resetAdminPassword.ts",
+      "target": "backend/src/infrastructure/utils/passwordPolicy.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "backend/src/config/database.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "npm:bcryptjs",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "npm:dotenv",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "npm:mysql2",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "backend/src/config/access.js",
+      "type": "local"
+    },
+    {
+      "source": "backend/src/utils/seed.ts",
+      "target": "backend/src/infrastructure/utils/passwordPolicy.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/layout/Layout.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/auth/Login.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/auth/Register.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/auth/ForgotPassword.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/ui/NotFound.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/ui/LoadingScreen.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/dashboard/Dashboard.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/dashboard/Items.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/dashboard/Items.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/dashboard/Users.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/dashboard/Profile.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/cart/Cart.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/cart/Checkout.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/App.jsx",
+      "target": "frontend/src/components/welcome/WelcomePage.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/services/adminService.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/utils/access.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/admin/AdminControlCenter.jsx",
+      "target": "frontend/src/components/dashboard/ItemFormModal.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "frontend/src/components/ui/ThemeToggle.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/ForgotPassword.jsx",
+      "target": "frontend/src/utils/password.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/components/ui/ThemeToggle.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/components/ui/NexusLogo.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/services/api.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Login.jsx",
+      "target": "frontend/src/utils/password.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/auth/Register.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/auth/Register.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/cart/Cart.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/cart/Cart.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/cart/Cart.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/cart/Cart.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/cart/Checkout.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/cart/Checkout.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/cart/Checkout.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/cart/Checkout.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/cart/Checkout.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/cart/ReceiptPrintable.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/components/ui/StatCard.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/components/dashboard/RecentItems.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/components/dashboard/OrdersSummaryWidget.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Dashboard.jsx",
+      "target": "frontend/src/components/ui/LoadingScreen.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/DashboardCanvas.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/ItemFormModal.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/ItemFormModal.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/components/ui/LoadingScreen.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/components/ui/EmptyState.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/components/ui/Spinner.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Items.jsx",
+      "target": "frontend/src/components/dashboard/ItemFormModal.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/OrdersSummaryWidget.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/OrdersSummaryWidget.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/OrdersSummaryWidget.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/PermissionFormModal.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/utils/date.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/utils/access.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/utils/password.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Profile.jsx",
+      "target": "frontend/src/components/ui/Spinner.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/RecentItems.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/RecentItems.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/RecentItems.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/RecentItems.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/RecentItems.jsx",
+      "target": "frontend/src/utils/date.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserFormModal.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserFormModal.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserFormModal.jsx",
+      "target": "frontend/src/utils/password.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "target": "frontend/src/utils/date.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "target": "frontend/src/components/ui/Spinner.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/services/services.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/utils/date.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/utils/access.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/components/ui/LoadingScreen.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/components/ui/EmptyState.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/components/dashboard/UserFormModal.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/components/dashboard/PermissionFormModal.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/dashboard/Users.jsx",
+      "target": "frontend/src/components/dashboard/UserHistoryModal.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/layout/Layout.jsx",
+      "target": "frontend/src/components/ui/ThemeToggle.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/ui/ErrorBoundary.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/ui/ErrorBoundary.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/ui/NotFound.jsx",
+      "target": "frontend/src/components/ui/ErrorBoundary.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/ui/NotFound.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/ui/ThemeToggle.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/welcome/WelcomePage.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/welcome/WelcomePage.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/components/welcome/WelcomePage.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/components/welcome/WelcomePage.jsx",
+      "target": "frontend/src/components/ui/ThemeToggle.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/contexts/AuthContext.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/contexts/AuthContext.jsx",
+      "target": "frontend/src/services/api.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/contexts/AuthContext.jsx",
+      "target": "npm:jwt-decode",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/contexts/CartContext.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/contexts/ModalContext.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/contexts/ThemeContext.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "npm:react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "npm:react-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "npm:react-router-dom",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/App.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/contexts/AuthContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/contexts/ModalContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/contexts/ThemeContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/contexts/CartContext.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/main.jsx",
+      "target": "frontend/src/components/ui/ErrorBoundary.jsx",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/services/adminService.js",
+      "target": "frontend/src/services/api.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/services/api.js",
+      "target": "npm:axios",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "frontend/src/services/api.js",
+      "type": "local"
+    },
+    {
+      "source": "frontend/src/tests/setup.js",
+      "target": "npm:@testing-library/react",
+      "type": "external"
+    },
+    {
+      "source": "frontend/src/tests/setup.js",
+      "target": "npm:vitest",
+      "type": "external"
+    },
+    {
+      "source": "backend/src/infrastructure/User.js",
+      "target": "data:usuarios",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Conta.js",
+      "target": "data:usuarios",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Conta.js",
+      "target": "data:vinculos_conta",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Item.js",
+      "target": "data:itens",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Order.js",
+      "target": "data:pedidos",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Pagamento.js",
+      "target": "data:pedidos",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Aluguel.js",
+      "target": "data:alugueis",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Negotiation.js",
+      "target": "data:negociacoes",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/Permission.js",
+      "target": "data:usuario_permissoes",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/PasswordReset.js",
+      "target": "data:password_resets",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/EventLog.js",
+      "target": "data:historico_eventos",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/config/database.js",
+      "target": "ext:mysql",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/infrastructure/payments/mercadopago.js",
+      "target": "ext:mercadopago",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/utils/email.js",
+      "target": "ext:smtp",
+      "type": "data"
+    },
+    {
+      "source": "backend/src/presentation/routes/auth.ts",
+      "target": "route:/api/auth",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/items.ts",
+      "target": "route:/api/itens",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/users.ts",
+      "target": "route:/api/usuarios",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/orders.ts",
+      "target": "route:/api/pedidos",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/admin.ts",
+      "target": "route:/api/admin",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/payments.ts",
+      "target": "route:/api/pagamentos",
+      "type": "endpoint"
+    },
+    {
+      "source": "backend/src/presentation/routes/alugueis.ts",
+      "target": "route:/api/alugueis",
+      "type": "endpoint"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/auth",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/itens",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/usuarios",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/pedidos",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/admin",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/pagamentos",
+      "type": "http"
+    },
+    {
+      "source": "frontend/src/services/services.js",
+      "target": "route:/api/alugueis",
+      "type": "http"
+    }
+  ]
+}
