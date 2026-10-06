@@ -190,13 +190,13 @@ Edite o `.env` com suas credenciais:
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=sua_senha
+DB_PASS=sua_senha
 DB_NAME=nexusdb
 
 # JWT
-JWT_SECRET=sua_chave_secreta_longa
-JWT_REFRESH_SECRET=sua_chave_refresh_secreta
-JWT_EXPIRES_IN=15m
+JWT_SECRET=sua_chave_secreta_longa_com_no_minimo_32_caracteres
+JWT_REFRESH_SECRET=sua_chave_refresh_secreta_diferente_min_32
+JWT_EXPIRES_IN=24h
 JWT_REFRESH_EXPIRES_IN=7d
 
 # Servidor
@@ -276,45 +276,90 @@ aa06cd1 - feat(frontend): add 'Quem Somos' about page with professional profile
 b52417f - refactor(cleanup): remove redundant files and legacy configurations
 ```
 
-## 🚀 Deployment & Produção
+## 🚀 Deployment & Produção (AWS Academy)
 
 ### Status: ✅ PRODUCTION READY
 
-O projeto está completamente preparado para deploy em produção no AWS Academy. Todas as 14 tarefas de deployment foram concluídas:
+O projeto está preparado para deploy no AWS Academy (EC2 + RDS + Nginx + PM2), com
+encerramento gracioso no backend e `pm2 reload` sem perda de requisições.
 
 **📚 Documentação de Deployment:**
 
 | Documento | Conteúdo | Link |
 |---|---|---|
-| **PRODUCTION_READY.md** | Status e checklist final de produção | [Ver](./PRODUCTION_READY.md) |
-| **DEPLOYMENT_SUMMARY.md** | Resumo das 14 tarefas completadas | [Ver](./DEPLOYMENT_SUMMARY.md) |
-| **AWS_ACADEMY_INFRASTRUCTURE.md** | Guia completo AWS (800+ linhas) | [Ver](./AWS_ACADEMY_INFRASTRUCTURE.md) |
-| **CHANGES_LOG.md** | Log detalhado de todas as mudanças | [Ver](./CHANGES_LOG.md) |
-| **E2E_TESTING_REPORT.md** | ⭐ Bateria completa de testes (10/10 PASS) | [Ver](./E2E_TESTING_REPORT.md) |
+| **DEPLOY_CHECKLIST.md** | Variáveis de ambiente obrigatórias e checklist pré-deploy | [Ver](./DEPLOY_CHECKLIST.md) |
+| **AWS_ACADEMY_INFRASTRUCTURE.md** | Guia completo da infraestrutura AWS (RDS, EC2, ALB, S3, CloudFront) | [Ver](./AWS_ACADEMY_INFRASTRUCTURE.md) |
+| **deploy/nginx.conf.example** | Configuração Nginx (proxy `/api`, webhook MP, fallback SPA) | [Ver](./deploy/nginx.conf.example) |
+| **docs/SEGURANCA.md** | Rate limiting, CORS, segredos e boas práticas | [Ver](./docs/SEGURANCA.md) |
 
-### Performance & Segurança (Frontend)
+### Deploy Local (desenvolvimento)
 
-| Documento | Conteúdo | Link |
-|---|---|---|
-| **OPTIMIZATION.md** | Estratégia de lazy loading e code-splitting | [Ver](./frontend/OPTIMIZATION.md) |
-| **LOADING_VERIFICATION.md** | Validação de loading screens | [Ver](./frontend/LOADING_VERIFICATION.md) |
-| **MOBILE_OVERFLOW_AUDIT.md** | Auditoria mobile responsiva | [Ver](./frontend/MOBILE_OVERFLOW_AUDIT.md) |
+```bash
+# A partir da raiz do projeto — sobe backend (3000) e frontend (5173) juntos
+npm run dev          # ou dê duplo clique em INICIAR_PROJETO.bat
+```
 
-### Deploy Rápido
+### Deploy na nuvem (AWS EC2) — recomendado
+
+Use o script pronto, que faz pré-flight (Node ≥ 20), instala com `npm ci`, compila,
+migra, sincroniza o catálogo, cria `logs/`, recarrega o PM2 e verifica a saúde:
+
+```bash
+cd nexus-control-app
+cp backend/.env.production.example backend/.env   # depois preencha TODOS os valores
+./deploy-aws.sh
+```
+
+Passo a passo equivalente, caso prefira executar manualmente:
 
 ```bash
 # Backend
 cd backend
-npm install
-npm run build && npm start
+cp .env.production.example .env    # configure segredos reais (mín. 32 caracteres) e o RDS
+npm ci
+npm run build                      # gera dist/ (inclui dist/utils/migrate.js e seed.js)
+mkdir -p logs
+node dist/utils/migrate.js         # cria/atualiza as tabelas (idempotente)
+node dist/utils/seed.js            # sincroniza os 35 produtos e serviços oficiais
+pm2 start ecosystem.config.cjs --env production   # reload gracioso via SIGTERM
+pm2 save && pm2 startup
 
-# Frontend  
-cd frontend
-npm install
-npm run build
+# Frontend
+cd ../frontend
+cp .env.example .env               # defina VITE_API_URL (ex: https://api.seu-dominio.com/api)
+npm ci
+npm run build                      # gera dist/ para servir pelo Nginx
 ```
 
-Consulte [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) para instruções detalhadas de produção.
+Configure o Nginx a partir de [`deploy/nginx.conf.example`](./deploy/nginx.conf.example)
+(origin estática do frontend + proxy `/api/` → `127.0.0.1:3000`) e recarregue:
+`sudo nginx -t && sudo systemctl reload nginx`.
+
+### Verificação pós-deploy (sem falhas)
+
+```bash
+curl -s http://localhost:3000/api/health
+# Esperado: {"status":"ok","database":"ok"}  (HTTP 200; 503 se o banco estiver fora)
+pm2 status                          # processo nexus-backend em "online"
+```
+
+Se o `/api/health` retornar 503, revise `DB_HOST/DB_PORT/DB_USER/DB_PASS/DB_NAME` e o
+SSL (`DB_SSL`/`DB_SSL_REJECT_UNAUTHORIZED`) no `backend/.env`. O backend **não sobe** em
+`production` se `JWT_SECRET`/`JWT_REFRESH_SECRET` estiverem ausentes, curtos (< 32),
+idênticos ou com valores de exemplo — isso evita subir uma instância insegura na nuvem.
+
+### Pagamentos (Mercado Pago) — opcional
+
+Em modo acadêmico o checkout funciona em **Pix/Cartão com confirmação pelo administrador**
+(sem gateway). Para pagamentos automáticos, preencha apenas via ambiente — nunca versione
+tokens: `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e `PUBLIC_URL`, e cadastre o webhook
+`POST https://<seu-host>/api/pagamentos/webhook`.
+
+### CI/CD (GitHub Actions)
+
+O push em `main` roda `ci.yml` (build + lint + testes backend/frontend). O `deploy.yml`
+executa a mesma esteira e, **somente quando os secrets `EC2_HOST` e `EC2_SSH_KEY` existem**
+no repositório, publica via SSH na EC2 (sem esses secrets, apenas valida sem publicar).
 
 ## 📄 API Endpoints
 

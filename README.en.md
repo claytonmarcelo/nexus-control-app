@@ -181,7 +181,7 @@ Edit `.env` with your credentials:
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=your_password
+DB_PASS=your_password
 DB_NAME=nexusdb
 
 # JWT

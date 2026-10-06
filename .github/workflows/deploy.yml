@@ -14,6 +14,15 @@ jobs:
     name: 🧪 Build & Testes & Deploy
     runs-on: ubuntu-latest
 
+    # Os segredos são expostos aqui (contexto `secrets` é permitido em jobs.<job_id>.env)
+    # para que o passo de deploy possa ser condicionado via `if: env.*` — o contexto
+    # `secrets` NÃO é permitido em `jobs.<job_id>.steps.<step_id>.if`.
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_PORT: ${{ secrets.EC2_PORT }}
+
     services:
       mysql:
         image: mysql:8.0
@@ -89,15 +98,15 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
-      # Deploy Condicional via SSH (se configurado secrets)
+      # Deploy Condicional via SSH (só roda quando EC2_HOST e EC2_SSH_KEY existem)
       - name: 🚀 Deploy na AWS EC2 (via SSH)
-        if: ${{ secrets.EC2_HOST != '' && secrets.EC2_SSH_KEY != '' }}
+        if: ${{ env.EC2_HOST != '' && env.EC2_SSH_KEY != '' }}
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER || 'ubuntu' }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER != '' && env.EC2_USER || 'ubuntu' }}
+          key: ${{ env.EC2_SSH_KEY }}
+          port: ${{ env.EC2_PORT != '' && env.EC2_PORT || 22 }}
           script: |
             set -e
             echo "=== Atualizando Nexus Control na AWS EC2 ==="
