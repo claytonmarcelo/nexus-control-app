@@ -1,5 +1,8 @@
 # História do desenvolvimento — Nexus Control App
 
+> 📌 Este é o relato narrativo por marcos. O **changelog oficial** (ordem
+> mais-recente-primeiro) está em [`CHANGELOG.md`](../CHANGELOG.md) na raiz.
+
 Linha do tempo completa do repositório, do commit inicial à entrega atual.
 Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
 útil para entender *por que* cada parte existe.
@@ -175,8 +178,8 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
 ## Estado atual
 
 - Backend: **86 testes verdes**, build TypeScript limpo.
-- Frontend: **49 testes verdes**, `npm run build` OK, ESLint com 11 erros
-  pré-existentes fora do escopo das regras globais.
+- Frontend: **49 testes verdes**, `npm run build` OK, **ESLint limpo** (erros
+  pré-existentes resolvidos para o CI passar).
 - Banco: schema atualizado com colunas/tabelas aditivas; dados preservados.
 - Deploy: bundles `frontend/dist` e `backend/dist` atualizados para AWS.
 - Documentação técnica centralizada em `docs/`; instruções de instalação

@@ -1,5 +1,10 @@
 # Nexus Control App - Complete Changes Log
 
+> ⚠️ **Arquivo legado (legado / histórico).** O changelog **oficial** do projeto é
+> agora [`CHANGELOG.md`](./CHANGELOG.md) — em português, ordenado do mais recente
+> para o mais antigo e atualizado até hoje. Este `CHANGES_LOG.md` está preservado
+> como registro histórico das tarefas de setembro/2026 e não é mais mantido.
+
 **Project:** Deploy AWS Academy + Identidade Visual + Performance  
 **Status:** ✅ Complete (14/14 tasks)  
 **Date Range:** September 2026
