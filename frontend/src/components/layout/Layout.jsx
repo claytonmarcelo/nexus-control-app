@@ -335,8 +335,6 @@ export default function Layout() {
                 className="pt-2 border-t flex flex-col gap-2"
                 style={{ borderColor: 'var(--divider)' }}
               >
-                <ThemeToggle variant="mobile" />
-
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

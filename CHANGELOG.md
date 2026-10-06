@@ -21,6 +21,24 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Remove tema duplicado do menu do usuário
+
+- `refactor(tema): remove o switch dark/light redundante do drawer do usuário`
+  - O `Layout.jsx` renderizava **dois** controles de tema: o pill do cabeçalho
+    (`header-theme-toggle` — o padrão global) e um `ThemeToggle variant="mobile"`
+    dentro do menu lateral que mostra o nome do usuário e "Sair". Como o tema já
+    é **global** e o pill do cabeçalho fica visível também no mobile (< 768px),
+    o switch do menu era redundante e dava a impressão de ser uma função "do
+    perfil".
+  - Removido apenas o `<ThemeToggle variant="mobile" />` do drawer. O controle
+    original do cabeçalho (padrão do projeto) permanece, assim como os toggles
+    das telas de autenticação/bem-vindo (Login, ForgotPassword, WelcomePage),
+    que não têm cabeçalho e precisam do próprio botão. A página de perfil
+    (`Profile.jsx`) nunca teve controle de tema próprio.
+  - Validação: 49 testes frontend verdes, ESLint limpo, `npm run build` OK.
+
+---
+
 ## 2026-10-06 · Acesso às contas demo e política de senha
 
 - `fix(auth): restaura login das contas demo e afrouxa a política de senha`
