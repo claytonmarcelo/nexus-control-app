@@ -21,6 +21,26 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Correção dos KPIs do Dashboard (teste de navegação)
+
+- `fix(dashboard): contadores zerados/errados no painel por estouro do limite da API`
+  - No teste de navegação com o sistema rodando, o Dashboard pedia o catálogo e
+    os usuários com `limit: 200`, mas o validador da API (`validatePagination`)
+    aceita no máximo `1–100`. A resposta **400** fazia o `Promise.allSettled`
+    retornar erro e os KPIs "Itens no Catálogo" (todos os perfis) e "Usuários"
+    (admin) apareciam como **0**, mesmo com 107 itens no catálogo.
+  - "Meus Pedidos" era calculado pelo tamanho do array buscado (`limit: 50`),
+    mostrando **50** quando o cliente tinha **57** pedidos reais.
+  - Ajuste no frontend (`Dashboard.jsx`): buscas passam a usar `limit: 100`
+    (dentro do teto da API) e o total de itens passa a ler `pagination.total`
+    (107), não o tamanho do array. Regras de negócio e o teto da API permanecem
+    no backend — nenhuma mudança destrutiva.
+  - Validação: `vitest` do Dashboard (4/4 verdes), ESLint limpo, e checagem na
+    API confirmou `/itens?limit=100` → 200 (total 107) e `/pedidos/me?limit=100`
+    → 200 (57 pedidos).
+
+---
+
 ## 2026-10-06 · Prontidão para a nuvem (AWS Academy)
 
 - `a58ea5f` **🐛 fix(deploy): destravar o deploy na AWS e alinhar o README à nuvem**

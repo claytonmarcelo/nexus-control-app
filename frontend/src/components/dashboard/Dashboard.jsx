@@ -239,15 +239,17 @@ export default function Dashboard() {
   const loadData = useCallback(async () => {
     if (!user) return;
     try {
-      const promises = [itemService.getAll({ limit: 200 })];
+      // A API aceita no máximo limit=100 (validatePagination). Pedir acima disso
+      // retorna 400 e zerava os contadores do dashboard.
+      const promises = [itemService.getAll({ limit: 100 })];
 
       if (isAdmin) {
-        promises.push(userService.getAll({ limit: 200 }));
+        promises.push(userService.getAll({ limit: 100 }));
         promises.push(checkoutService.getAllOrders({ limit: 100 }));
       }
 
       if (isCliente || isFuncionario) {
-        promises.push(checkoutService.getMyOrders({ limit: 50 }));
+        promises.push(checkoutService.getMyOrders({ limit: 100 }));
       }
 
       const results = await Promise.allSettled(promises);
@@ -262,6 +264,9 @@ export default function Dashboard() {
         : [];
 
       const meusItens = allItems.filter((item) => item.criado_por === user?.id).length;
+
+      // Total real do catálogo vem da paginação (não limitado ao fetch de 100).
+      const totalItens = Number(itemsRes?.pagination?.total) || allItems.length;
 
       let totalUsuarios = 0;
       let totalPedidos = 0;
@@ -313,7 +318,7 @@ export default function Dashboard() {
         valorTotalPedidos = myOrders.reduce((s, o) => s + (Number(o.total || o.valor_total) || 0), 0);
       }
 
-      setStats({ totalItens: allItems.length, meusItens, totalUsuarios, totalPedidos, pedidosPendentes, pedidosConcluidos, valorTotalPedidos });
+      setStats({ totalItens, meusItens, totalUsuarios, totalPedidos, pedidosPendentes, pedidosConcluidos, valorTotalPedidos });
     } catch (error) {
       console.error('[Dashboard] Erro ao carregar dados:', error);
       toast({ message: 'Erro ao carregar dados do dashboard', variant: 'danger' });
