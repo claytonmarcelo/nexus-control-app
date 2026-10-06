@@ -182,7 +182,9 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
   TypeScript limpo e o `npm run build` reproduz o `backend/dist` versionado
   byte a byte (só muda quebra de linha). O número anterior de 86 que aparecia
   aqui era o total da entrega das regras de negócio; a suíte cresceu com os
-  fixes de checkout, alertas e exclusão de conta.
+  fixes de checkout, alertas e exclusão de conta. No boot de produção, falha de
+  banco agora encerra o processo pelo mesmo caminho do `SIGTERM` (watchdog de 10s)
+  em vez de deixar o servidor ouvindo a porta sem MySQL.
 - Frontend: **58 testes verdes** em 9 arquivos (49 históricos + 9 das páginas de
   erro; rodados em 2026-10-06 com `npm run test`), `npm run build` OK, **ESLint
   limpo** (erros pré-existentes resolvidos para o CI passar).

@@ -237,7 +237,12 @@ if (process.env.NODE_ENV !== 'test') {
       manutencaoTimer = iniciarManutencaoPeriodica();
     }).catch((error) => {
       console.error('Falha ao inicializar o banco em produção:', error.message);
-      server.close(() => process.exit(1));
+      // Sai pelo MESMO caminho do SIGINT/SIGTERM (que tem watchdog de 10s e fecha
+      // o pool MySQL). Um server.close() solto aqui esperaria para sempre uma
+      // requisição em andamento: o processo continuaria ouvindo a porta com o banco
+      // morto, e o PM2 não reinicia um processo que nunca sai — a instância ficaria
+      // "online" distribuindo erro em vez de subir de novo quando o MySQL voltar.
+      encerrar('falha-banco', 1);
     });
   });
 

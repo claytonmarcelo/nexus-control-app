@@ -11,9 +11,11 @@ module.exports = {
     min_uptime: '10s',
     max_restarts: 10,
     restart_delay: 5000,
-    // O backend emite process.send('ready') quando HTTP está pronto; sem isso
-    // PM2 assumia "online" antes do listen terminar e o reload derrubava
-    // requisições em voo.
+    // `wait_ready` fica desligado de propósito: o backend NÃO emite
+    // process.send('ready') — não existe nenhuma chamada em src/ — então ligá-lo
+    // faria o PM2 esperar `listen_timeout` (15s) em todo reload antes de marcar
+    // "online". A confirmação real de que a API e o banco estão prontos vem do
+    // health check em /api/health no fim do deploy-aws.sh, que cobre essa lacuna.
     wait_ready: false,
     kill_timeout: 8000,
     listen_timeout: 15000,

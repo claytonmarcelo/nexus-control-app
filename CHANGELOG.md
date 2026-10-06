@@ -20,6 +20,8 @@ a história detalhada por marcos também pode ser lida em
 
 - Backend: **92 testes verdes** em 4 suites (`api` 37, `businessRules` 23,
   `integration` 22, `security` 10), rodados de verdade nesta data — build TypeScript limpo.
+  Inclui o fix do boot de produção: falha de banco agora encerra o processo (watchdog de 10s)
+  em vez de deixá-lo ouvindo a porta sem MySQL.
 - Frontend: **58 testes verdes** (49 anteriores + 9 das páginas de erro),
   `npm run build` OK, **ESLint sem erros** (lint limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; o workflow de deploy agora executa
@@ -29,6 +31,45 @@ a história detalhada por marcos também pode ser lida em
   "Prontidão de portfólio: Docker + README fiel ao código".
 - Documentação: os 9 relatórios de `docs/reports/` revisados contra o código — ver a
   entrada "Revisão dos relatórios".
+
+---
+
+## 2026-10-06 · Bug fix: servidor ficava "online" com o banco morto em produção
+
+Complementando o que a auditoria de deploy mostrou, a leitura do boot em produção revelou um
+buraco no caminho de falha do banco: `initDatabase()` chamava `server.close(() => process.exit(1))`
+sem watchdog. `server.close()` **espera as requisições em andamento terminarem** — se havia
+uma delas no ar (upload parado, retry do webhook, cliente sem `requestTimeout`), o callback
+nunca rodava e o processo continuava ouvindo a porta com o MySQL morto. Como o PM2 não
+reinicia um processo que nunca sai, a AWS Academy ficava com o site no ar distribuindo erro
+em silêncio — exatamente o tipo de falha que o health check do deploy não pegaria se o banco
+caísse depois da virada.
+
+- **Correção na íntegra**: a falha de inicialização do banco agora usa o
+  `encerrar('falha-banco', 1)` que **já existia** para `SIGINT`/`SIGTERM` — mesmo watchdog de
+  10s, mesmo `pool.end()` no MySQL, mesmo código de saída 1. Nenhuma regra de negócio, rota,
+  validação ou configuração do PM2 foi alterada.
+- **Prova antes/depois** (ensaio com `dist` real, `NODE_ENV=production`, host de banco
+  inacessível e uma requisição com corpo incompleto em voo):
+  - antes do fix: `❌ CONTINUA VIVO após 30s com o banco fora` (porta ocupada, nunca saía);
+  - depois do fix: `Shutdown excedeu 10s; forçando saída.` → `✅ encerrou sozinho: código=1`
+    — e com o processo encerrado o `autorestart`/`restart_delay` do PM2 cuida do reinício.
+- **Regressão do caminho feliz**: boot real no schema isolado de ensaio (`nexus_deploy_dryrun`,
+  **sem tocar no `nexusdb`**) → migrações ok, seed idempotente (`⏭️ Item já existe`),
+  `/api/health` → `HTTP 200 {"status":"ok","database":"ok"}`, SPA `/acesso-negado` → 200,
+  SIGTERM encerra normalmente.
+- **Suíte completa**: `npm test` com `NODE_ENV=test` apontando para o schema de ensaio →
+  **4 suites, 92 testes verdes**. `backend/dist/server.js` recompilado e commitado junto
+  (regra do projeto: `dist` versionado; o rebuild só mudou este arquivo).
+- **Documentação que mentia** corrigida junto, sem mudança de comportamento: o comentário do
+  `ecosystem.config.cjs` afirmava que o backend emite `process.send('ready')` — não existe
+  nenhuma chamada assim em `src/` (por isso `wait_ready: false` está correto, e ligá-lo só
+  faria cada reload esperar os 15s de `listen_timeout`); e a nota 5 do `DEPLOY_CHECKLIST.md`
+  dizia que o `wait_ready` estava configurado. A nota agora também registra o limite do PM2
+  (`max_restarts: 10` com `restart_delay: 5000`): se o MySQL ficar fora por mais de ~50s, o
+  processo fica `errored` e precisa de um `pm2 restart nexus-backend` quando o banco voltar.
+- Ensaio repetido contra o schema isolado depois do fix, e a suíte de backend (92 testes)
+  rodada verde contra ele — o `nexusdb` local não foi tocado por nenhum dos ensaios.
 
 ---
 
