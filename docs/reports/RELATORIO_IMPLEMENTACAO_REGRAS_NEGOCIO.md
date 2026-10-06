@@ -134,8 +134,8 @@ Frontend (`npm run test` — Vitest):
 
 > **Atualização (outubro/2026):** os itens abaixo eram os erros que já existiam
 > **na data desta entrega**; eles foram resolvidos nas sessões seguintes e o
-> `npm run lint` do frontend está limpo hoje (ver `docs/HISTORIA.md` e
-> `../../CHANGELOG.md`). Esta seção fica preservada como registro do ponto de
+> `npm run lint` do frontend está limpo hoje (ver [`../HISTORIA.md`](../HISTORIA.md) e
+> [`../../CHANGELOG.md`](../../CHANGELOG.md)). Esta seção fica preservada como registro do ponto de
 > partida daquela fase.
 
 `npm run lint` no frontend reporta **11 erros pré-existentes** que existiam
