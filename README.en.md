@@ -277,11 +277,11 @@ The project is fully prepared for production deployment on AWS Academy. All 14 d
 
 | Document | Content | Link |
 |---|---|---|
-| **PRODUCTION_READY.md** | Status and final production checklist | [View](./PRODUCTION_READY.md) |
-| **DEPLOYMENT_SUMMARY.md** | Summary of 14 completed tasks | [View](./DEPLOYMENT_SUMMARY.md) |
+| **PRODUCTION_READY.md** | Status and final production checklist | [View](./docs/reports/PRODUCTION_READY.md) |
+| **DEPLOYMENT_SUMMARY.md** | Summary of 14 completed tasks | [View](./docs/reports/DEPLOYMENT_SUMMARY.md) |
 | **AWS_ACADEMY_INFRASTRUCTURE.md** | Complete AWS guide (800+ lines) | [View](./AWS_ACADEMY_INFRASTRUCTURE.md) |
-| **CHANGES_LOG.md** | Detailed change tracking | [View](./CHANGES_LOG.md) |
-| **E2E_TESTING_REPORT.md** | ⭐ Complete E2E testing suite (10/10 PASS) | [View](./E2E_TESTING_REPORT.md) |
+| **CHANGES_LOG.md** | Detailed change tracking | [View](./docs/reports/CHANGES_LOG.md) |
+| **E2E_TESTING_REPORT.md** | ⭐ Complete E2E testing suite (10/10 PASS) | [View](./docs/reports/E2E_TESTING_REPORT.md) |
 
 ### Performance & Security (Frontend)
 
@@ -305,7 +305,7 @@ npm install
 npm run build
 ```
 
-See [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) for detailed production instructions.
+See [DEPLOYMENT_SUMMARY.md](./docs/reports/DEPLOYMENT_SUMMARY.md) for detailed production instructions.
 
 ## 📄 API Endpoints
 

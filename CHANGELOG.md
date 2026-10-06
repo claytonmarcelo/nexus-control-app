@@ -23,6 +23,38 @@ a história detalhada por marcos também pode ser lida em
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
+- Infra local: **stack Docker** adicionada (MySQL + API + Web) — ver a próxima entrada.
+
+---
+
+## 2026-10-06 · Prontidão de portfólio: Docker + README fiel ao código
+
+Foco em deixá-lo apresentável para análise de vaga (estágio/júnior) **sem** publicar demo no ar.
+
+- **Docker (aditivo, não toca o código do app):** `backend/Dockerfile` (build em 2 estágios,
+  `node:20-alpine`, `tsc`→`dist`, runtime só com `--omit=dev`, usuário sem privilégios),
+  `frontend/Dockerfile` (bundle do Vite servido por **Nginx** com fallback de SPA e proxy reverso
+  de `/api`), `frontend/nginx.conf`, `docker-compose.yml` (**MySQL 8 + API + Web**) e os
+  `.dockerignore`. `docker compose up -d --build` sobe tudo: app em `http://localhost:8080`, API
+  em `http://localhost:3000`. O backend roda as **migrações idempotentes + seed no boot** (nenhum
+  SQL destrutivo). **Nenhum segredo fica na imagem ou no compose** — tudo por variáveis de
+  ambiente, com defaults claros de desenvolvimento que devem ser trocados em produção.
+- **README.md (correções de exatidão):** versões reais (**React Router 7**, **Vite 6**,
+  **TypeScript 5.4**) no lugar de 6/5/5.5; **lista de tabelas do banco** corrigida (adicionadas
+  `alugueis`, `historico_eventos`, `vinculos_conta`; `negociacoes` mantida, pois ainda é usada
+  por `Negotiation.js`/`GET /api/itens/my-negotiations`); novos bullets de capacidades já
+  implementadas (**aluguéis/retiradas, alertas e varreduras periódicas, desativação de conta com
+  preservação de histórico, webhook do Mercado Pago, checkout fiel à regra do backend**); badge de
+  Docker e a seção **🐳 Rodar com Docker**.
+- **Organização da raiz:** 9 relatórios/status/auditorias históricos movidos com `git mv` para
+  [`docs/reports/`](./docs/reports/) (com índice próprio), reduzindo a raiz de 18 para 9 `.md`.
+  Links corrigidos em `README.en.md`, `docs/README.md`, `docs/HISTORIA.md` e dentro dos próprios
+  arquivos movidos (`./` → `../../`). **Nenhum documento foi apagado** — só relocalizado.
+- **Validação da stack Docker** (`docker compose up`): API `/api/status` 200, `/api/health`
+  `{"status":"ok","database":"ok"}`, migrações + seed (35 itens) no boot, proxy `/api` do Nginx,
+  fallback de SPA e **login admin real pela interface** levando ao `/dashboard` — tudo verde.
+- Testes/build do app **inalterados** (mudou só Docker + docs), então `backend/dist` e
+  `frontend/dist` permanecem válidos e a aplicação continua funcionando como antes.
 
 ---
 

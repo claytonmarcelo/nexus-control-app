@@ -14,15 +14,18 @@ mergulhe nas referências específicas.
 | [TESTES.md](./TESTES.md) | Como rodar as suítes Jest e Vitest; coberturas |
 | [REGRAS_NEGOCIO.md](../REGRAS_NEGOCIO.md) | Regras globais implementadas (raiz do projeto) |
 | [HISTORIA.md](./HISTORIA.md) | Linha do tempo completa do desenvolvimento |
-| [RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md](../RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md) | Entrega final das 8 fases das regras de negócio |
+| [RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md](./reports/RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md) | Entrega final das 8 fases das regras de negócio |
+| [reports/](./reports/) | Relatórios, auditorias e resumos de marcos (antes espalhados na raiz) |
 | [graph/GRAPHIFY.md](./graph/GRAPHIFY.md) | Grafo interativo do repositório (scan + HTML) |
 | [../README.md](../README.md) | Instalação e uso geral (mantido separado desta pasta) |
 
-Arquivos legados que continuam válidos na raiz do projeto (não foram
-movidos para `docs/` para preservar links externos):
+Mantidos na raiz do projeto (documentos principais, com links externos já
+estabelecidos): `README.md`, `README.en.md`, `CHANGELOG.md`, `SETUP.md`,
+`TESTING.md`, `REGRAS_NEGOCIO.md`, `DEPLOY_CHECKLIST.md`,
+`AWS_ACADEMY_INFRASTRUCTURE.md`, `INSTRUCOES_ATUALIZACAO_AWS.md`.
 
-- `SETUP.md` — configuração inicial
-- `PRODUCTION_READY.md` — checklist de produção
-- `DEPLOY_CHECKLIST.md`, `DEPLOYMENT_SUMMARY.md` — instruções de deploy
-- `AWS_ACADEMY_INFRASTRUCTURE.md`, `INSTRUCOES_ATUALIZACAO_AWS.md` — infra AWS
-- `ANALISE_AUTH_FLOWS.md`, `E2E_TESTING_REPORT.md` — análises pontuais
+Relatórios/status de marcos movidos para [`docs/reports/`](./reports/):
+`PRODUCTION_READY.md`, `DEPLOYMENT_SUMMARY.md`, `CHANGES_LOG.md`,
+`E2E_TESTING_REPORT.md`, `ANALISE_AUTH_FLOWS.md`, `ASSETS_AUDIT_REPORT.md`,
+`IMPLEMENTATION_SUMMARY.md`, `PROJECT_STATUS.md`,
+`RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md`.

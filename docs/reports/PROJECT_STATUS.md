@@ -503,9 +503,9 @@ cd frontend && npm run test
 ```
 
 ### Documentação
-- Instalar: Leia [SETUP.md](./SETUP.md)
-- Testar: Leia [TESTING.md](./TESTING.md)
-- Visão Geral: Leia [README.md](./README.md)
+- Instalar: Leia [SETUP.md](../../SETUP.md)
+- Testar: Leia [TESTING.md](../../TESTING.md)
+- Visão Geral: Leia [README.md](../../README.md)
 - Detalhes: Leia [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)
 
 ---

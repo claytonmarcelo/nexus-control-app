@@ -18,9 +18,10 @@
     <img src="https://img.shields.io/badge/Node.js-%3E%3D20-green?style=flat-square" alt="Node.js">
     <img src="https://img.shields.io/badge/MySQL-8.0-orange?style=flat-square" alt="MySQL">
     <img src="https://img.shields.io/badge/React-18-cyan?style=flat-square" alt="React">
-    <img src="https://img.shields.io/badge/TypeScript-5.5-blue?style=flat-square" alt="TypeScript">
+    <img src="https://img.shields.io/badge/TypeScript-5.4-blue?style=flat-square" alt="TypeScript">
     <img src="https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?style=flat-square" alt="Tailwind CSS">
-    <img src="https://img.shields.io/badge/Vite-5-purple?style=flat-square" alt="Vite">
+    <img src="https://img.shields.io/badge/Vite-6-purple?style=flat-square" alt="Vite">
+    <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker">
   </p>
 
 </div>
@@ -51,6 +52,7 @@ Para garantir que **tanto o Banco de Dados (API/Backend) quanto a Interface (Fro
 
 1. Dê um duplo clique no arquivo **`INICIAR_PROJETO.bat`** (localizado na raiz do projeto). Ele limpará processos travados, iniciará o backend e o frontend simultaneamente, e abrirá o navegador automaticamente. Mantenha a janela do terminal aberta.
 2. Alternativamente, abra o terminal na raiz do projeto e execute: `npm run dev`.
+3. **Com Docker (sem instalar Node/MySQL na máquina):** com o Docker Desktop aberto, rode `docker compose up -d --build` na raiz do projeto. A stack sobe MySQL + API + Web; a aplicação fica em **http://localhost:8080** e a API em **http://localhost:3000**. O backend executa as migrações e o seed do catálogo sozinho no primeiro boot. Veja a seção [Rodar com Docker](#-rodar-com-docker).
 
 ---
 
@@ -61,8 +63,11 @@ O **Nexus Control App** é uma plataforma completa de controle e gerenciamento c
 - **🔐 Autenticação Multi-Perfil**: Login seguro com JWT + Refresh Token. Perfis: Admin, Funcionário e Cliente com permissões granulares por página.
 - **📦 Catálogo de Produtos e Serviços**: Grid responsivo com filtros por categoria, busca em tempo real, imagens, fabricante, preço de compra e aluguel mensal. Produtos reais: Dell, Cisco, Ubiquiti, Intelbras, APC.
 - **🛒 Carrinho Dinâmico**: Estado persistido via `localStorage`. Atualização instantânea de contador no header, edição de quantidades e recálculo de total em tempo real. Suporte a itens de compra e aluguel.
-- **💳 Checkout Completo**: Pix (com QR Code + Copia e Cola) e Cartão de Crédito. Confirmação automática com overlay de sucesso e redirecionamento em 4 segundos.
-- **🛠️ Painel Admin**: Dashboard com métricas ao vivo, gestão de usuários (criar, editar, definir permissões), gestão do catálogo e acompanhamento de todos os pedidos.
+- **💳 Checkout Completo (Pix/Cartão)**: no **modo simulado** (sem gateway) o backend confirma o pagamento na hora — Pix e Cartão caem direto no modal de sucesso; com o **Mercado Pago** configurado, o Pix gera QR real e a liberação vem do **webhook** (HMAC). A regra de liberação fica sempre no **backend**, nunca no frontend, e um pedido pendente pode ser concluído pelo dono pelo alerta no perfil.
+- **🛠️ Painel Admin**: Dashboard com métricas ao vivo, gestão de usuários (criar, editar, definir permissões por página), gestão do catálogo e acompanhamento de pedidos, aluguéis e alertas.
+- **🔁 Aluguéis e Retiradas**: controle de período (início/devolução), dias, retirada, vencimento automático e cobrança de dias excedentes — visível na aba **Aluguéis** do admin.
+- **🔔 Alertas e Varreduras Periódicas**: avisos de pagamento pendente, aluguel vencido e inatividade comercial, calculados por um **loop de manutenção no backend** (`setInterval`), nunca por request do cliente.
+- **🧾 Histórico e Desativação de Conta**: exclusão de usuário **preserva o histórico** — conta com pedidos/aluguéis é **desativada** (soft delete) em vez de apagada; o vínculo de conta mantém os registros legíveis.
 - **🌙 Dark/Light Mode**: Toggle de tema com preferência salva na sessão. Tema Light com 400+ estilos customizados.
 - **📱 Mobile First**: Layout 100% responsivo com breakpoints para 480px e 768px, zero horizontal overflow.
 
@@ -90,10 +95,10 @@ O **Nexus Control App** é uma plataforma completa de controle e gerenciamento c
 | Tecnologia | Versão | Uso |
 |---|---|---|
 | React | 18 | SPA com Hooks e Context API |
-| React Router | 6 | Roteamento client-side |
+| React Router | 7 | Roteamento client-side |
 | Tailwind CSS | 3 | Design System e utilitários |
 | CSS Custom (Glassmorphism + Neumorphism) | — | Efeitos visuais premium |
-| Vite | 5 | Build tool e dev server |
+| Vite | 6 | Build tool e dev server |
 | Axios | 1.x | Chamadas à API REST |
 | Google Fonts (Inter) | — | Tipografia |
 
@@ -110,9 +115,10 @@ O **Nexus Control App** é uma plataforma completa de controle e gerenciamento c
 | Helmet | 7 | Segurança de headers HTTP |
 | Morgan | 1 | Logging de requisições |
 | Express Rate Limit | 8 | Proteção contra DDoS |
+| Docker / Compose | — | Stack local reproduzível (MySQL + API + Web via Nginx) |
 
 ### Banco de Dados
-- **MySQL 8+** com tabelas: `usuarios`, `itens`, `pedidos`, `negociacoes`, `usuario_permissoes`, `password_resets`
+- **MySQL 8+** com tabelas: `usuarios`, `itens`, `pedidos`, `alugueis`, `negociacoes` (simulações), `usuario_permissoes`, `password_resets`, `historico_eventos`, `vinculos_conta`
 
 ## 📂 Estrutura do Projeto
 
@@ -275,6 +281,36 @@ e410996 - feat(frontend): implement 4 executive resources for enhanced UX
 aa06cd1 - feat(frontend): add 'Quem Somos' about page with professional profile
 b52417f - refactor(cleanup): remove redundant files and legacy configurations
 ```
+
+## 🐳 Rodar com Docker
+
+Sobe a stack inteira (**MySQL + API + Web**) sem instalar Node/MySQL na máquina — ideal
+para demonstração e para qualquer pessoa rodar o projeto com um único comando.
+
+```bash
+# com o Docker Desktop aberto, a partir da raiz do projeto:
+docker compose up -d --build
+```
+
+| Serviço | Container | URL |
+|---|---|---|
+| Aplicação (Nginx + bundle do Vite) | `nexus-web` | http://localhost:8080 |
+| API (Express + TypeScript) | `nexus-backend` | http://localhost:3000/api/status |
+| Banco | `nexus-db` (MySQL 8) | localhost:3306 (nexusdb) |
+
+- No **primeiro boot** o backend roda as **migrações idempotentes** e sincroniza o catálogo
+  automaticamente — **sem nenhum SQL destrutivo**. Os dados persistem no volume `nexus_mysql_data`.
+- **Credenciais de teste** (seed): Admin `marcelo10@gmail.com` / senha `123456#`;
+  Funcionário `funcionario@nexuscontrol.com` / `123457#`; Cliente `cliente@nexuscontrol.com` / `123456#`.
+- **Variáveis por ambiente, sem segredo no código**: os `Dockerfile`s não embutem nada sensível.
+  Os valores padrão do `docker-compose.yml` são **apenas para desenvolvimento local**
+  (troque antes de qualquer deploy real exportando as variáveis ou criando um arquivo `.env`
+  na raiz: `DB_PASS`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `ROOT_ADMIN_PASSWORD`). O modo de
+  pagamento vem **simulado** (sem gateway).
+- Comandos úteis: `docker compose logs -f backend` (acompanhar o boot) e
+  `docker compose down -v` (parar e apagar o volume do banco).
+
+---
 
 ## 🚀 Deployment & Produção (AWS Academy)
 

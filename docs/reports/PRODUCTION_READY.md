@@ -254,12 +254,12 @@ The Nexus Control App is **fully production-ready** for AWS Academy deployment. 
 
 ## Quick Links
 
-📖 [AWS Infrastructure Guide](./AWS_ACADEMY_INFRASTRUCTURE.md)  
+📖 [AWS Infrastructure Guide](../../AWS_ACADEMY_INFRASTRUCTURE.md)  
 📋 [Deployment Summary](./DEPLOYMENT_SUMMARY.md)  
 📝 [Changes Log](./CHANGES_LOG.md)  
-🚀 [Frontend Optimization](./frontend/OPTIMIZATION.md)  
-✅ [Lazy Loading Verification](./frontend/LOADING_VERIFICATION.md)  
-📱 [Mobile Audit](./frontend/MOBILE_OVERFLOW_AUDIT.md)
+🚀 [Frontend Optimization](../../frontend/OPTIMIZATION.md)  
+✅ [Lazy Loading Verification](../../frontend/LOADING_VERIFICATION.md)  
+📱 [Mobile Audit](../../frontend/MOBILE_OVERFLOW_AUDIT.md)
 
 ---
 

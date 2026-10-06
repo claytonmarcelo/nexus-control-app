@@ -172,7 +172,7 @@ Agrupada por marcos. Cada entrada cita hash curto e o que foi entregue —
 
   **Docs**:
   - `REGRAS_NEGOCIO.md` (raiz) — enums, migrations, endpoints, regras.
-  - `RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md` (raiz) — entrega final
+  - `RELATORIO_IMPLEMENTACAO_REGRAS_NEGOCIO.md` (hoje em `docs/reports/`) — entrega final
     das 8 fases com checklist §117.
 
 ## Estado atual
