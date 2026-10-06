@@ -48,7 +48,7 @@ export default function Users() {
 
     const confirmed = await confirm({
       title: 'Excluir usuário',
-      message: `Tem certeza que deseja excluir "${targetUser.nome}"? Esta ação não pode ser desfeita.`,
+      message: `Tem certeza que deseja excluir "${targetUser.nome}"? Contas com histórico são desativadas e preservadas; contas sem registros são removidas definitivamente.`,
       confirmText: 'Excluir',
       cancelText: 'Cancelar',
       variant: 'danger',
@@ -57,11 +57,17 @@ export default function Users() {
     if (confirmed) {
       setDeletingUser(targetUser.id);
       try {
-        await userService.delete(targetUser.id);
-        setUsers(prev => prev.filter(u => u.id !== targetUser.id));
-        toast({ message: 'Usuário excluído com sucesso', variant: 'success' });
+        const result = await userService.delete(targetUser.id);
+        if (result?.data?.desativada) {
+          // Soft delete: a conta permanece no banco com histórico, mas sai das
+          // contas ativas. Recarrega para refletir o novo estado real.
+          await loadUsers();
+        } else {
+          setUsers(prev => prev.filter(u => u.id !== targetUser.id));
+        }
+        toast({ message: result?.message || 'Usuário excluído com sucesso', variant: 'success' });
       } catch (error) {
-        toast({ message: 'Erro ao excluir usuário', variant: 'danger' });
+        toast({ message: error.response?.data?.message || 'Erro ao excluir usuário', variant: 'danger' });
       } finally {
         setDeletingUser(null);
       }
@@ -202,6 +208,18 @@ export default function Users() {
                           Você
                         </span>
                       )}
+                      {targetUser.status_conta === 'desativada' && (
+                        <span
+                          className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border"
+                          style={{
+                            backgroundColor: 'var(--color-error-bg)',
+                            color: 'var(--color-error)',
+                            borderColor: 'var(--color-error-border)',
+                          }}
+                        >
+                          Desativada
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs truncate mb-1" style={{ color: 'var(--text-muted)' }}>{targetUser.email}</p>
                     <div className="flex items-center gap-3 text-[11px]" style={{ color: 'var(--text-muted)' }}>
@@ -222,7 +240,7 @@ export default function Users() {
                     >
                       <ShoppingBagIcon className="w-4 h-4" />
                     </button>
-                    {!isRootAdmin(targetUser) && (
+                    {!isRootAdmin(targetUser) && targetUser.status_conta !== 'desativada' && (
                       <button
                         onClick={() => handlePermissionEdit(targetUser)}
                         className="p-2 rounded-lg transition-colors border"
@@ -237,7 +255,7 @@ export default function Users() {
                         <ShieldIcon className="w-4 h-4" />
                       </button>
                     )}
-                    {!isRootAdmin(targetUser) && (
+                    {!isRootAdmin(targetUser) && targetUser.status_conta !== 'desativada' && (
                       <button
                         onClick={() => handleEdit(targetUser)}
                         className="p-2 rounded-lg transition-colors border"
@@ -252,7 +270,7 @@ export default function Users() {
                         <EditIcon className="w-4 h-4" />
                       </button>
                     )}
-                    {targetUser.id !== user.id && !isRootAdmin(targetUser) && (
+                    {targetUser.id !== user.id && !isRootAdmin(targetUser) && targetUser.status_conta !== 'desativada' && (
                       <button
                         onClick={() => handleDelete(targetUser)}
                         disabled={deletingUser === targetUser.id}

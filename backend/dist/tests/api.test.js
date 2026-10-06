@@ -395,6 +395,46 @@ describe('Users API (Admin Only)', () => {
                 .set('Authorization', `Bearer ${adminToken}`);
             expect(response.status).toBe(400);
         });
+        it('remove fisicamente uma conta sem histórico (guardrail: botão sempre funciona)', async () => {
+            // Usuário criado pelo admin não possui pedidos/aluguéis/eventos vinculados.
+            const email = `sem-historico-${Date.now()}@example.test`;
+            const created = await request(app)
+                .post('/api/usuarios')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ nome: 'Conta Sem Histórico', email, senha: '123456#', nivel_acesso: 'cliente' });
+            expect(created.status).toBe(201);
+            const novoId = created.body.data.user.id;
+            const response = await request(app)
+                .delete(`/api/usuarios/${novoId}`)
+                .set('Authorization', `Bearer ${adminToken}`);
+            expect(response.status).toBe(200);
+            expect(response.body.data.desativada).toBe(false);
+            const [rows] = await pool.execute('SELECT id FROM usuarios WHERE id = ?', [novoId]);
+            expect(rows).toHaveLength(0);
+        });
+        it('desativa (soft delete) uma conta com histórico preservando os registros', async () => {
+            // Pedido vinculado faz parte do histórico que o guardrail preserva: a
+            // conta é desativada em vez de apagada (a FK de pedidos cascadearia).
+            const cliente = await createTestClient();
+            const [orderResult] = await pool.execute('INSERT INTO pedidos (usuario_id, items, total, metodo_pagamento) VALUES (?, ?, ?, ?)', [cliente.id, JSON.stringify([]), 0, 'pix']);
+            try {
+                const response = await request(app)
+                    .delete(`/api/usuarios/${cliente.id}`)
+                    .set('Authorization', `Bearer ${adminToken}`);
+                expect(response.status).toBe(200);
+                expect(response.body.data.desativada).toBe(true);
+                const [users] = await pool.execute('SELECT status_conta FROM usuarios WHERE id = ?', [cliente.id]);
+                expect(users).toHaveLength(1);
+                expect(users[0].status_conta).toBe('desativada');
+                const [orders] = await pool.execute('SELECT id FROM pedidos WHERE id = ?', [orderResult.insertId]);
+                expect(orders).toHaveLength(1);
+            }
+            finally {
+                await pool.execute('DELETE FROM pedidos WHERE id = ?', [orderResult.insertId]);
+                await pool.execute('DELETE FROM historico_eventos WHERE usuario_id = ?', [cliente.id]);
+                await deleteTestClient(cliente.id);
+            }
+        });
     });
 });
 describe('DELETE /api/usuarios/me', () => {

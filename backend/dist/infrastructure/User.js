@@ -76,6 +76,18 @@ export const deleteUser = async (id) => {
     const [result] = await pool.execute(`DELETE FROM usuarios WHERE id = ? AND email <> ?`, [id, ROOT_ADMIN_EMAIL]);
     return result.affectedRows > 0;
 };
+/**
+ * Detecta histórico que NÃO pode ser apagado (guardrail: pedidos, pagamentos e
+ * aluguéis são preservados). Como as FKs de pedidos cascadeiam a exclusão
+ * física, a verificação precisa vir ANTES do DELETE — nunca depender do erro.
+ */
+export const usuarioComHistorico = async (id) => {
+    const [rows] = await pool.execute(`SELECT
+       (SELECT COUNT(*) FROM pedidos WHERE usuario_id = ?) AS pedidos,
+       (SELECT COUNT(*) FROM alugueis WHERE usuario_id = ?) AS alugueis`, [id, id]);
+    const { pedidos = 0, alugueis = 0 } = rows[0] || {};
+    return Number(pedidos) > 0 || Number(alugueis) > 0;
+};
 export const deleteOwnUserAccount = async (id) => {
     const connection = await pool.getConnection();
     let transactionStarted = false;

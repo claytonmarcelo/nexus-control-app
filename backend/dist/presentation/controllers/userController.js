@@ -1,4 +1,4 @@
-import { createUser, findUserByEmail, findAllUsers, findUserById, updateUser, deleteUser, updatePassword } from '../../infrastructure/User.js';
+import { createUser, findUserByEmail, findAllUsers, findUserById, updateUser, deleteUser, usuarioComHistorico, updatePassword } from '../../infrastructure/User.js';
 import { USER_ROLES, verifyPassword } from '../../infrastructure/User.js';
 import { desativarConta, obterObrigacoesConta, STATUS_CONTA } from '../../infrastructure/Conta.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
@@ -147,18 +147,31 @@ export const remove = async (req, res) => {
         if (requesterRole !== USER_ROLES.ADMIN) {
             return sendError(res, 'Apenas administradores podem excluir usuários', 403);
         }
+        // Regra central (§23–§25, guardrail do projeto): nunca apagar
+        // pedidos/pagamentos/histórico. As FKs de pedidos cascadeiam a exclusão
+        // física, então a presença de histórico é verificada ANTES do DELETE:
+        // contas com histórico são DESATIVADAS (soft delete, linha preservada);
+        // contas totalmente vazias são removidas fisicamente.
+        if (await usuarioComHistorico(id)) {
+            const result = await desativarConta(id);
+            if (result.reason === 'root-admin') {
+                return sendError(res, 'O administrador raiz não pode ser excluído', 403);
+            }
+            if (result.reason === 'already-desativada') {
+                return sendError(res, 'Esta conta já está desativada', 400);
+            }
+            if (!result.desativada) {
+                return sendError(res, 'Usuário não encontrado', 404);
+            }
+            return sendSuccess(res, { desativada: true }, 'Conta desativada: este usuário possui histórico e ele foi preservado. A conta não volta à lista de contas ativas.');
+        }
         const deleted = await deleteUser(id);
         if (!deleted) {
             return sendError(res, 'Usuário não encontrado', 404);
         }
-        sendSuccess(res, null, 'Usuário excluído com sucesso');
+        sendSuccess(res, { desativada: false }, 'Usuário excluído com sucesso');
     }
     catch (error) {
-        // Histórico de aluguéis preserva a relação com a conta: o banco recusa a
-        // exclusão física nesses casos. A orientação é desativar (soft delete).
-        if (error?.code === 'ER_ROW_IS_REFERENCED_2') {
-            return sendError(res, 'Este usuário possui registros que não podem ser apagados. Utilize a desativação da conta para preservar o histórico.', 409);
-        }
         console.error('Erro ao excluir usuário:', error);
         sendError(res, 'Erro interno do servidor', 500);
     }

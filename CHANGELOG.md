@@ -18,11 +18,36 @@ a história detalhada por marcos também pode ser lida em
 
 ## Estado atual (2026-10-06)
 
-- Backend: **90 testes verdes**, build TypeScript limpo.
+- Backend: **92 testes verdes**, build TypeScript limpo.
 - Frontend: **49 testes verdes**, `npm run build` OK, **ESLint sem erros** (lint
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
+
+---
+
+## 2026-10-06 · Botão "Excluir" da página "Usuários" agora funciona em todos os casos
+
+- `fix(usuarios): excluir conta sem histórico e desativar conta com histórico`
+  - O usuário relatou que em `http://localhost:5173/usuarios` o **botão Excluir
+    não funcionava**. Causa: ao excluir um cliente que já tinha pedido, o backend
+    devolvia um erro específico que o frontend **descartava** mostrando apenas
+    "Erro ao excluir usuário". Além disso, a exclusão física **cascateava** a
+    remoção dos `pedidos` da pessoa (FK `ON DELETE CASCADE`), o que **viola o
+    guardrail** de nunca apagar pedidos/pagamentos/histórico.
+  - `User.js`: novo `usuarioComHistorico(id)` — conta pedidos e aluguéis **antes**
+    de qualquer `DELETE`, para nunca depender de erro de FK nem cascatear histórico.
+  - `userController.ts` (`remove`): conta **com histórico** é **desativada**
+    (soft delete via `desativarConta` — a linha e todo o histórico ficam
+    preservados, e-mail reservado em `email_original`); conta **totalmente vazia**
+    é removida fisicamente. Resposta agora traz `data.desativada` e mensagem
+    específica.
+  - `Users.jsx`: o `catch` passa a exibir a **mensagem real do backend**
+    (`error.response?.data?.message`); após desativação a lista **recarrega** para
+    refletir o estado, e cada linha ganhou o selo **"Desativada"** (escondendo
+    editar/permissões/excluir de contas já desativadas, mantendo só o histórico).
+  - `api.test.js`: +2 testes (exclusão física de conta sem histórico; desativação
+    de conta com pedido preservando o registro). Backend sobe para **92 testes**.
 
 ---
 
