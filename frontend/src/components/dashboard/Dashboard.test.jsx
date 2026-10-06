@@ -5,16 +5,34 @@ import Dashboard from '../dashboard/Dashboard';
 import { AuthProvider } from '../../contexts/AuthContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { ModalProvider } from '../../contexts/ModalContext';
-import { itemService, healthService } from '../../services/services';
+import { itemService, userService, checkoutService } from '../../services/services';
 
 vi.mock('../../contexts/AuthContext', () => ({
   AuthProvider: ({ children }) => children,
   useAuth: vi.fn(),
 }));
 
+vi.mock('../../contexts/CartContext', () => ({
+  useCart: () => ({
+    totalItems: 0,
+    subtotal: 0,
+    items: [],
+    addItem: vi.fn(),
+    removeItem: vi.fn(),
+    clearCart: vi.fn(),
+  }),
+}));
+
 vi.mock('../../services/services', () => ({
   itemService: {
     getAll: vi.fn(),
+  },
+  userService: {
+    getAll: vi.fn(),
+  },
+  checkoutService: {
+    getAllOrders: vi.fn(),
+    getMyOrders: vi.fn(),
   },
   healthService: {
     check: vi.fn(),
@@ -48,6 +66,13 @@ const renderWithProviders = (component, user = mockUser) => {
   );
 };
 
+const mockEmptyData = () => {
+  itemService.getAll.mockResolvedValue({ items: [] });
+  userService.getAll.mockResolvedValue({ users: [] });
+  checkoutService.getAllOrders.mockResolvedValue({ orders: [] });
+  checkoutService.getMyOrders.mockResolvedValue({ orders: [] });
+};
+
 describe('Dashboard Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,11 +85,10 @@ describe('Dashboard Component', () => {
   });
 
   it('renders welcome message with user name', async () => {
-    itemService.getAll.mockResolvedValue({ items: [] });
-    healthService.check.mockResolvedValue({ users: 0 });
-    
+    mockEmptyData();
+
     renderWithProviders(<Dashboard />);
-    
+
     await waitFor(() => {
       expect(screen.getByText(/bom dia|boa tarde|boa noite/i)).toBeInTheDocument();
       expect(screen.getByText(/Test User/)).toBeInTheDocument();
@@ -72,42 +96,43 @@ describe('Dashboard Component', () => {
   });
 
   it('shows stat cards with correct data', async () => {
-    itemService.getAll.mockResolvedValue({ 
+    itemService.getAll.mockResolvedValue({
       items: [
-          { id: 1, nome: 'Item 1', criado_por: 1 },
-          { id: 2, nome: 'Item 2', criado_por: 2 },
-      ]
+        { id: 1, nome: 'Item 1', criado_por: 1 },
+        { id: 2, nome: 'Item 2', criado_por: 2 },
+      ],
     });
-    healthService.check.mockResolvedValue({ users: 5 });
-    
+    checkoutService.getMyOrders.mockResolvedValue({ orders: [] });
+
     renderWithProviders(<Dashboard />);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Total de Itens')).toBeInTheDocument();
-      expect(screen.getByText('Meus Itens')).toBeInTheDocument();
+      expect(screen.getByText('Itens no Catálogo')).toBeInTheDocument();
+      expect(screen.getByText('No Carrinho')).toBeInTheDocument();
+      expect(screen.getAllByText('Meus Pedidos').length).toBeGreaterThan(0);
     });
   });
 
   it('shows quick actions based on user role', async () => {
-    itemService.getAll.mockResolvedValue({ items: [] });
-    healthService.check.mockResolvedValue({ users: 0 });
-    
+    mockEmptyData();
+
     renderWithProviders(<Dashboard />, { ...mockUser, nivel_acesso: 'cliente' });
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Solicitar novo item')).toBeInTheDocument();
+      expect(screen.getByText('Ações Rápidas')).toBeInTheDocument();
+      expect(screen.getByText('Ver carrinho')).toBeInTheDocument();
     });
   });
 
   it('shows admin actions for admin user', async () => {
-    itemService.getAll.mockResolvedValue({ items: [] });
-    healthService.check.mockResolvedValue({ users: 0 });
-    
+    mockEmptyData();
+
     renderWithProviders(<Dashboard />, { ...mockUser, nivel_acesso: 'admin' });
-    
+
     await waitFor(() => {
       expect(screen.getByText('Gerenciar usuários')).toBeInTheDocument();
-      expect(screen.getByText('Gerenciar todos os itens')).toBeInTheDocument();
+      expect(screen.getByText('Gerenciar itens')).toBeInTheDocument();
+      expect(screen.getByText('Painel de controle')).toBeInTheDocument();
     });
   });
 });
