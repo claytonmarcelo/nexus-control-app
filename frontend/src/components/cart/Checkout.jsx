@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useModal } from '../../contexts/ModalContext';
 import { checkoutService, paymentService, itemService } from '../../services/services';
@@ -20,6 +20,16 @@ export default function Checkout() {
   const { items, totalItems, subtotal, clearCart, removeItem, getItemSubtotal } = useCart();
   const { toast } = useModal();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Permite retomar o pagamento de um pedido pendente já existente
+  // (`/checkout?pedido=ID`), a partir do alerta "pagamento_pendente" no perfil.
+  // As regras de pagamento continuam no backend: daqui apenas carregamos o
+  // pedido do usuário e reutilizamos a mesma tela de acompanhamento.
+  const pedidoParam = new URLSearchParams(location.search).get('pedido');
+  const pedidoId = Number(pedidoParam);
+  const isResumed = Number.isInteger(pedidoId) && pedidoId > 0;
+
   const [paymentMethod, setPaymentMethod] = useState('pix');
   const [card, setCard] = useState(INITIAL_CARD);
   const [submitting, setSubmitting] = useState(false);
@@ -27,14 +37,49 @@ export default function Checkout() {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [countdown, setCountdown] = useState(4);
+  const [resuming, setResuming] = useState(isResumed);
 
   const confirmed = paymentStatus?.status_pagamento === 'confirmado';
 
+  // Carrega o pedido pendente indicado na URL, sem criar pedido nem mexer no carrinho.
   useEffect(() => {
+    if (!isResumed) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const order = await checkoutService.getOrderById(pedidoId);
+        if (cancelled) return;
+        setCompletedOrder(order);
+        setPaymentStatus({
+          status_pagamento: order?.status_pagamento || 'pendente',
+          mensagem: order?.pagamento?.mensagem,
+        });
+        setCountdown(4);
+      } catch (error) {
+        if (cancelled) return;
+        const status = error.response?.status;
+        toast({
+          message: status === 404
+            ? 'Este pedido não existe ou foi removido.'
+            : 'Não foi possível carregar o pagamento deste pedido.',
+          variant: 'warning',
+        });
+        navigate('/perfil', { replace: true });
+      } finally {
+        if (!cancelled) setResuming(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [isResumed, pedidoId, navigate, toast]);
+
+  useEffect(() => {
+    if (resuming) return;
     if (!items.length && !completedOrder) {
       navigate('/carrinho', { replace: true });
     }
-  }, [items.length, completedOrder, navigate]);
+  }, [items.length, completedOrder, navigate, resuming]);
 
   // Polling do status do pagamento: a liberação é decidida pelo backend
   // (webhook do gateway ou confirmação do administrador) — nunca pelo cliente.
@@ -59,6 +104,12 @@ export default function Checkout() {
 
     const redirectTimer = window.setTimeout(() => {
       if (countdown <= 1) {
+        // Pedido retomado pelo alerta: não pertence ao carrinho atual,
+        // então apenas voltamos ao perfil sem limpá-lo.
+        if (isResumed) {
+          navigate('/perfil', { replace: true });
+          return;
+        }
         clearCart();
         navigate('/dashboard', { replace: true });
         return;
@@ -68,7 +119,7 @@ export default function Checkout() {
     }, 1000);
 
     return () => window.clearTimeout(redirectTimer);
-  }, [confirmed, countdown, clearCart, navigate]);
+  }, [confirmed, countdown, clearCart, navigate, isResumed]);
 
   const updateCard = (field, value) => {
     if (field === 'number') {
@@ -223,9 +274,22 @@ export default function Checkout() {
   };
 
   const handleLeaveCheckout = () => {
+    if (isResumed) {
+      navigate('/perfil', { replace: true });
+      return;
+    }
     clearCart();
     navigate('/dashboard', { replace: true });
   };
+
+  if (resuming) {
+    return (
+      <div className="flex min-h-[45vh] items-center justify-center gap-3 text-sm text-nexus-400">
+        <SpinnerIcon className="h-5 w-5 animate-spin" />
+        Carregando pagamento do pedido…
+      </div>
+    );
+  }
 
   if (!items.length && !completedOrder) {
     return (

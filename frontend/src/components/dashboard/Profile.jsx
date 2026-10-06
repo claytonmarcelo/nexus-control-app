@@ -954,7 +954,12 @@ function AlertCard({ alert }) {
 }
 
 function acaoHref(alert) {
-  if (alert.acao === 'pagar' || alert.acao === 'regularizar') return '/checkout';
+  // "pagar" retoma o pagamento do próprio pedido pendente (o alerta carrega
+  // pedido_id). As demais ações mantêm o fluxo original.
+  if (alert.acao === 'pagar') {
+    return alert.pedido_id ? `/checkout?pedido=${alert.pedido_id}` : '/checkout';
+  }
+  if (alert.acao === 'regularizar') return '/checkout';
   if (alert.acao === 'explorar') return '/itens';
   return '/profile';
 }

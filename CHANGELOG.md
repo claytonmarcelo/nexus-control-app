@@ -21,6 +21,30 @@ a história detalhada por marcos também pode ser lida em
 
 ---
 
+## 2026-10-06 · Botão "Ir para o checkout" retoma o pagamento do próprio pedido
+
+- `fix(alertas): alerta de pagamento pendente abre o checkout do pedido, não o carrinho vazio`
+  - Em `/perfil` → **Alertas**, o botão "Ir para o checkout" de um alerta
+    `pagamento_pendente` levava para `/checkout` **sem** pedido nem carrinho, e a
+    tela redirecionava para `/carrinho` vazio — o usuário ficava sem caminho para
+    quitar o débito que o próprio alerta apontava.
+  - Agora `acaoHref` (`Profile.jsx`) usa o `pedido_id` que o backend já envia no
+    alerta e gera `/checkout?pedido=<ID>`. O `Checkout.jsx` passou a aceitar esse
+    parâmetro: em **modo retomada** ele carrega o pedido pendente existente via
+    `checkoutService.getOrderById`, ignora o guard de carrinho vazio e reaproveita
+    a **mesma** tela "Pedido #ID registrado / Já paguei — verificar" com o polling
+    de `paymentService.getStatus` que já existia após criar um pedido.
+  - O modo retomada **não cria pedido nem limpa o carrinho**: "Concluir agora" e o
+    redirecionamento pós-confirmação voltam para `/perfil`. Falha de carregamento
+    (404/sem acesso) mostra um aviso e devolve ao perfil.
+  - Mudança **apenas no frontend** (`Checkout.jsx` + `Profile.jsx`); as regras de
+    pagamento (quem paga, quando liberar, reconsulta do gateway) continuam
+    **integralmente no backend**.
+  - Validação: 49 testes frontend verdes, ESLint limpo, `npm run build` OK;
+    navegador confirmou o clique no alerta → tela de pagamento do pedido #233.
+
+---
+
 ## 2026-10-06 · Checkout resiliente a itens removidos do catálogo
 
 - `fix(checkout): remove itens obsoletos do carrinho em vez de travar no 400`
