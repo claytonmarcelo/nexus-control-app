@@ -5,6 +5,8 @@ import pool from '../config/database.js';
 import { STATUS_CONTA, marcarAvisosDeInatividade, listarContasVinculadas } from '../infrastructure/Conta.js';
 import { aplicarStatusPagamento, confirmarPagamentoPedido } from '../infrastructure/Pagamento.js';
 import { marcarAlugueisVencidos } from '../infrastructure/Aluguel.js';
+import { createOrderWithRentals } from '../infrastructure/Order.js';
+import { calcDailyRate, calcRentalTotal, round2 } from '../infrastructure/Preco.js';
 const ADMIN_EMAIL = process.env.ROOT_ADMIN_EMAIL || 'marcelo10@gmail.com';
 const ADMIN_PASSWORD = process.env.ROOT_ADMIN_PASSWORD || '264810#';
 const CLIENTE_SENHA = '123456#';
@@ -18,15 +20,32 @@ const criarCliente = async () => {
     }
     return { email, id: response.body.data.user.id, token: response.body.data.accessToken };
 };
-const checkoutAluguel = async (token, itemId, dias = 7) => {
-    // Usa cartão de propósito: é o método que permanece 'pendente' até a
-    // confirmação manual do admin, permitindo testar o fluxo de liberação (§7/§10).
-    // (Pix em modo fake é confirmado já no checkout e pularia essa etapa.)
-    const response = await request(app)
-        .post('/api/pedidos/checkout')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ items: [{ item_id: itemId, quantidade: 1, tipo: 'aluguel', dias_aluguel: dias }], metodo_pagamento: 'cartao' });
-    return response;
+const checkoutAluguel = async (cliente, itemId, dias = 7) => {
+    // O checkout da API agora confirma o pagamento na hora (como em 2026-10-03),
+    // então não dá mais para obter um pedido 'pendente' por ele. Para testar a
+    // regra de liberação (§7/§10) — pendente → confirmação do admin → aluguel
+    // inicia — criamos direto um pedido de aluguel 'pendente' usando a MESMA
+    // função do backend que a rota usa (gera o pedido e o aluguel na transação).
+    const [rows] = await pool.execute('SELECT valor_aluguel_mensal FROM itens WHERE id = ?', [itemId]);
+    const valorMensal = Number(rows[0]?.valor_aluguel_mensal);
+    const valorDiario = round2(calcDailyRate(valorMensal, dias));
+    const precoUnitario = round2(calcRentalTotal(valorMensal, dias));
+    const items = [{
+            item_id: itemId,
+            quantidade: 1,
+            tipo: 'aluguel',
+            dias_aluguel: dias,
+            preco_unitario: precoUnitario,
+            valor_diario: valorDiario,
+        }];
+    const pedido = await createOrderWithRentals({
+        usuario_id: cliente.id,
+        items,
+        total: precoUnitario,
+        metodo_pagamento: 'pix',
+        status_pagamento: 'pendente',
+    });
+    return { status: 201, body: { data: pedido } };
 };
 const alugueisDoUsuario = async (usuarioId) => {
     const [rows] = await pool.execute('SELECT * FROM alugueis WHERE usuario_id = ? ORDER BY id', [usuarioId]);
@@ -61,7 +80,7 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
         let aluguelId;
         beforeAll(async () => {
             cliente = await criarCliente();
-            const checkout = await checkoutAluguel(cliente.token, rentalItemId);
+            const checkout = await checkoutAluguel(cliente, rentalItemId);
             expect(checkout.status).toBe(201);
             pedidoId = checkout.body.data.id;
             expect(checkout.body.data.status_pagamento).toBe('pendente');
@@ -116,7 +135,7 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
         let aluguelId;
         beforeAll(async () => {
             cliente = await criarCliente();
-            const checkout = await checkoutAluguel(cliente.token, rentalItemId);
+            const checkout = await checkoutAluguel(cliente, rentalItemId);
             const pedidoId = checkout.body.data.id;
             await request(app)
                 .put(`/api/pedidos/${pedidoId}`)
@@ -180,7 +199,7 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
         let pedidoAntigoId;
         beforeAll(async () => {
             cliente = await criarCliente();
-            const checkout = await checkoutAluguel(cliente.token, rentalItemId);
+            const checkout = await checkoutAluguel(cliente, rentalItemId);
             pedidoAntigoId = checkout.body.data.id;
         });
         test('desativação com pendências exige confirmação explícita', async () => {
@@ -263,7 +282,7 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
             // Nada foi bloqueado: o cliente continua navegando e fazendo checkout.
             const itens = await request(app).get('/api/itens').set('Authorization', `Bearer ${cliente.token}`);
             expect(itens.status).toBe(200);
-            const checkout = await checkoutAluguel(cliente.token, rentalItemId);
+            const checkout = await checkoutAluguel(cliente, rentalItemId);
             expect(checkout.status).toBe(201);
             await marcarAvisosDeInatividade();
             const [reativada] = await pool.execute('SELECT status_conta FROM usuarios WHERE id = ?', [cliente.id]);
@@ -291,7 +310,7 @@ describe('Regras de negócio — pagamento, aluguel, conta e inatividade', () =>
             process.env.MP_ACCESS_TOKEN = 'test-token';
             process.env.MP_WEBHOOK_SECRET = 'webhook-secret';
             cliente = await criarCliente();
-            const checkout = await checkoutAluguel(cliente.token, rentalItemId);
+            const checkout = await checkoutAluguel(cliente, rentalItemId);
             pedidoId = checkout.body.data.id;
             await pool.execute("UPDATE pedidos SET payment_provider = 'mercadopago', provider_payment_id = ? WHERE id = ?", [PROVIDER_PAYMENT_ID, pedidoId]);
             global.fetch = async () => ({

@@ -85,13 +85,13 @@ export const checkout = async (req, res) => {
             status_pagamento: STATUS_PAGAMENTO.PENDENTE,
         });
         // A regra de liberação continua integralmente no backend (§7/§10): o pedido
-        // nasce 'pendente'. O que muda por método de pagamento:
-        //  - Pix com gateway Mercado Pago configurado: gera a cobrança real (QR) e
-        //    aguarda o webhook confirmar.
-        //  - Pix em modo fake/manual (sem gateway): o Pix é instantâneo, então o
-        //    pagamento é confirmado AQUI mesmo, disparando aluguéis/eventos pela
-        //    mesma regra atômica de confirmação (nunca por decisão do frontend).
-        //  - Cartão: segue pendente até a confirmação manual do administrador.
+        // nasce 'pendente'. O que define se ele é confirmado na hora:
+        //  - Pix COM gateway Mercado Pago configurado: gera a cobrança real (QR) e
+        //    aguarda o webhook confirmar (único caminho que fica pendente).
+        //  - Qualquer outro caso (sem gateway — modo fake/simulado da academia):
+        //    o pagamento é confirmado AQUI mesmo, na hora, como era em 2026-10-03,
+        //    disparando aluguéis/eventos pela mesma trilha atômica de confirmação.
+        //    Isso vale para Pix e Cartão; o frontend nunca decide a liberação.
         let pagamento = {
             provedor: 'manual',
             status: 'aguardando_confirmacao',
@@ -116,19 +116,21 @@ export const checkout = async (req, res) => {
                 console.error('[Checkout] Gateway indisponível, seguindo em modo manual:', gatewayError.message);
             }
         }
-        else if (metodo === 'pix') {
-            // Pix fake: confirmação imediata no backend, pela mesma trilha atômica
-            // usada na confirmação manual (libera pedido, inicia aluguéis, registra evento).
+        else {
+            // Sem gateway real: confirmação imediata no backend, pela mesma trilha
+            // atômica usada na confirmação manual (libera pedido, inicia aluguéis,
+            // registra evento). Comportamento padrão do modo simulado da academia.
+            const provider = metodo === 'pix' ? 'fake' : 'manual';
             const confirmado = await aplicarStatusPagamento({
                 pedidoId: Number(pedido.id),
                 status_pagamento: STATUS_PAGAMENTO.CONFIRMADO,
-                provider: 'fake',
+                provider,
             });
             if (confirmado.sucesso) {
                 pagamento = {
-                    provedor: 'fake',
+                    provedor: provider,
                     status: STATUS_PAGAMENTO.CONFIRMADO,
-                    mensagem: 'Pagamento Pix confirmado! Seu pedido já está em processamento.',
+                    mensagem: 'Pagamento confirmado! Seu pedido já está em processamento.',
                 };
             }
         }

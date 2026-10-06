@@ -90,9 +90,9 @@ describe('Integration Tests - Carrinho e Checkout', () => {
             expect(response.body.data).toHaveProperty('id');
             expect(response.body.data).toHaveProperty('usuario_id', clienteId);
             expect(response.body.data).toHaveProperty('metodo_pagamento', 'pix');
-            // Regra (§7/§10): o pedido nasce 'pendente', mas o Pix em modo fake/manual
-            // (sem gateway) é instantâneo e é confirmado ainda no backend durante o
-            // próprio checkout — a liberação continua decidida pelo servidor.
+            // Regra (§7/§10) no modo simulado da academia (sem gateway): o checkout
+            // confirma o pagamento na hora, no backend, para qualquer método — como
+            // era em 2026-10-03. Só fica pendente com gateway Mercado Pago real.
             expect(response.body.data).toHaveProperty('status_pagamento', 'confirmado');
             expect(response.body.data.pagamento).toHaveProperty('status', 'confirmado');
             testOrderId = response.body.data.id;
@@ -117,8 +117,8 @@ describe('Integration Tests - Carrinho e Checkout', () => {
                 .send(checkoutData);
             expect(response.status).toBe(201);
             expect(response.body.data.metodo_pagamento).toBe('cartao');
-            // Cartão permanece pendente: a confirmação é feita manualmente pelo admin.
-            expect(response.body.data).toHaveProperty('status_pagamento', 'pendente');
+            // Sem gateway, o cartão também confirma na hora (comportamento de 2026-10-03).
+            expect(response.body.data).toHaveProperty('status_pagamento', 'confirmado');
             console.log(`  ✓ Pedido com Cartão criado: #${response.body.data.id}`);
         });
         test('❌ Deve rejeitar checkout com carrinho vazio', async () => {

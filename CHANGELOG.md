@@ -6,11 +6,13 @@ projeto. As instruções de instalação permanecem no [`README.md`](./README.md
 a história detalhada por marcos também pode ser lida em
 [`docs/HISTORIA.md`](./docs/HISTORIA.md).
 
-> Este projeto é acadêmico (AWS Academy). O pagamento é **fake por design**: o
-> **Pix** é confirmado **na hora** pelo backend quando o gateway Mercado Pago não
-> está configurado (modo simulado); com gateway ativo, o Pix gera o QR real e a
-> liberação vem do webhook. O **Cartão** sempre exige **confirmação manual pelo
-> administrador**. Em todos os casos a regra de liberação fica no backend.
+> Este projeto é acadêmico (AWS Academy). O pagamento é **fake por design**: no
+> **modo simulado** (sem gateway) o checkout **confirma o pagamento na hora**, no
+> **backend**, para **Pix e Cartão** — como era em 2026-10-03 — e o cliente cai
+> direto no modal de sucesso. Com o gateway **Mercado Pago** configurado
+> (`MP_ACCESS_TOKEN`), o **Pix** passa a gerar o QR real e a liberação vem do
+> webhook (único caminho que fica pendente). A regra de liberação fica sempre no
+> backend, nunca no frontend.
 
 ## Estado atual (2026-10-06)
 
@@ -19,6 +21,35 @@ a história detalhada por marcos também pode ser lida em
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
+
+---
+
+## 2026-10-06 · Checkout volta a confirmar o pagamento na hora (fiel a 2026-10-03)
+
+- `feat(pagamento): checkout confirma Pix E Cartão na hora no modo simulado`
+  - Referência ao comportamento de **2026-10-03**: naquela data o checkout criava
+    o pedido direto com `status_pagamento: 'confirmado'` para **qualquer** método
+    (sem tela de "aguardando confirmação", sem alerta de pendência). O fluxo de
+    pendência/confirmação pelo admin só foi introduzido depois, no commit das
+    regras de negócio (`615f5b6`). O usuário pediu para **manter como estava**.
+  - No commit anterior desta data o **Pix** já confirmava na hora e o **Cartão**
+    ficava pendente. Agora o **Cartão também confirma na hora** no modo simulado,
+    igual a 2026-10-03.
+  - Backend (`orderController.ts`, checkout): quando **não** há gateway Mercado
+    Pago configurado, o pedido é criado `pendente` e, na mesma requisição,
+    confirmado via `aplicarStatusPagamento` (`provider: 'fake'` para Pix,
+    `'manual'` para Cartão) — disparando a mesma trilha atômica de liberação
+    (aluguéis + eventos). A **única** situação que segue pendente é **Pix com
+    gateway real** (aguarda webhook) e pedidos legados já pendentes.
+  - `Checkout.jsx` permanece inalterado: já abre o modal de sucesso quando
+    `order.status_pagamento === 'confirmado'`.
+  - Testes: `integration.test.js` agora espera Pix **e** Cartão → `confirmado`;
+    o helper `checkoutAluguel` de `businessRules.test.js` passa a criar o pedido
+    de aluguel `pendente` **direto** via `createOrderWithRentals` (a rota não gera
+    mais pendência), preservando os testes da regra de liberação. **86 testes
+    backend verdes**, `tsc` limpo.
+  - Validação: Pix confirmado na hora verificado no navegador (pedido #249);
+    Cartão cobre o mesmo caminho de código e está coberto por teste automatizado.
 
 ---
 
