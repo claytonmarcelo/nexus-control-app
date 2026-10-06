@@ -6,10 +6,11 @@ projeto. As instruções de instalação permanecem no [`README.md`](./README.md
 a história detalhada por marcos também pode ser lida em
 [`docs/HISTORIA.md`](./docs/HISTORIA.md).
 
-> Este projeto é acadêmico (AWS Academy). O pagamento é **fake/manual por
-> design**: o checkout funciona em **Pix/Cartão com confirmação pelo
-> administrador** em todos os ambientes; o gateway Mercado Pago é opcional e só
-> é ativado se as credenciais de ambiente existirem.
+> Este projeto é acadêmico (AWS Academy). O pagamento é **fake por design**: o
+> **Pix** é confirmado **na hora** pelo backend quando o gateway Mercado Pago não
+> está configurado (modo simulado); com gateway ativo, o Pix gera o QR real e a
+> liberação vem do webhook. O **Cartão** sempre exige **confirmação manual pelo
+> administrador**. Em todos os casos a regra de liberação fica no backend.
 
 ## Estado atual (2026-10-06)
 
@@ -18,6 +19,36 @@ a história detalhada por marcos também pode ser lida em
   limpo para o CI).
 - Deploy: `backend/dist` e `frontend/dist` atualizados; workflow de deploy
   corrigido e pronto para publicar na AWS.
+
+---
+
+## 2026-10-06 · Pix confirma na hora (modal de sucesso), cartão segue manual
+
+- `feat(pagamento): checkout Pix em modo fake confirma o pagamento no backend`
+  - Ao pagar com **Pix**, o checkout mostrava apenas
+    *"Seu pedido foi criado e aguarda a confirmação do pagamento"* — o pedido
+    nascia `pendente` para **todos** os métodos, e o modal de sucesso só aparecia
+    depois de o administrador confirmar. O usuário pediu o comportamento anterior:
+    **Pix pago → cai direto no modal de sucesso**; a tela de pendência só deve
+    aparecer quando o cliente **não paga** ou há **erro** nos dados.
+  - A mudança foi feita **no backend** (`orderController.ts`, checkout), não no
+    frontend, respeitando a regra de que a liberação nunca é decidida pelo cliente:
+    - **Pix sem gateway (modo fake/simulado):** o pedido é criado `pendente` e,
+      ainda na mesma requisição, confirmado via `aplicarStatusPagamento`
+      (`provider: 'fake'`). Isso dispara a mesma trilha atômica de confirmação —
+      libera o pedido, inicia aluguéis e registra o evento — e devolve
+      `status_pagamento: 'confirmado'` com a mensagem de sucesso.
+    - **Pix com Mercado Pago configurado:** mantém o QR real e aguarda o webhook
+      (inalterado).
+    - **Cartão:** continua `pendente` até a confirmação manual do admin.
+  - O `Checkout.jsx` **não precisou mudar**: ele já lê `order.status_pagamento` e
+    abre o modal de sucesso quando vem `confirmado`.
+  - Testes: `integration.test.js` passa a esperar Pix → `confirmado` (e Cartão →
+    `pendente`); o helper `checkoutAluguel` de `businessRules.test.js` migra para
+    `cartao` para continuar exercitando o fluxo manual pendente→confirma→libera.
+    **86 testes backend verdes**, `tsc` limpo.
+  - Validação no navegador: pedido Pix #249 criado já `confirmado`, com redirecionamento
+    automático ao dashboard e carrinho limpo (modal de sucesso padrão).
 
 ---
 

@@ -90,9 +90,11 @@ describe('Integration Tests - Carrinho e Checkout', () => {
             expect(response.body.data).toHaveProperty('id');
             expect(response.body.data).toHaveProperty('usuario_id', clienteId);
             expect(response.body.data).toHaveProperty('metodo_pagamento', 'pix');
-            // Nova regra (§7/§10): o pedido nasce com pagamento pendente e a
-            // liberação acontece somente na confirmação (webhook ou admin).
-            expect(response.body.data).toHaveProperty('status_pagamento', 'pendente');
+            // Regra (§7/§10): o pedido nasce 'pendente', mas o Pix em modo fake/manual
+            // (sem gateway) é instantâneo e é confirmado ainda no backend durante o
+            // próprio checkout — a liberação continua decidida pelo servidor.
+            expect(response.body.data).toHaveProperty('status_pagamento', 'confirmado');
+            expect(response.body.data.pagamento).toHaveProperty('status', 'confirmado');
             testOrderId = response.body.data.id;
             console.log(`  ✓ Pedido criado: #${response.body.data.id} - Total: R$ ${response.body.data.total}`);
         });
@@ -115,6 +117,8 @@ describe('Integration Tests - Carrinho e Checkout', () => {
                 .send(checkoutData);
             expect(response.status).toBe(201);
             expect(response.body.data.metodo_pagamento).toBe('cartao');
+            // Cartão permanece pendente: a confirmação é feita manualmente pelo admin.
+            expect(response.body.data).toHaveProperty('status_pagamento', 'pendente');
             console.log(`  ✓ Pedido com Cartão criado: #${response.body.data.id}`);
         });
         test('❌ Deve rejeitar checkout com carrinho vazio', async () => {

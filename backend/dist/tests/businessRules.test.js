@@ -19,10 +19,13 @@ const criarCliente = async () => {
     return { email, id: response.body.data.user.id, token: response.body.data.accessToken };
 };
 const checkoutAluguel = async (token, itemId, dias = 7) => {
+    // Usa cartão de propósito: é o método que permanece 'pendente' até a
+    // confirmação manual do admin, permitindo testar o fluxo de liberação (§7/§10).
+    // (Pix em modo fake é confirmado já no checkout e pularia essa etapa.)
     const response = await request(app)
         .post('/api/pedidos/checkout')
         .set('Authorization', `Bearer ${token}`)
-        .send({ items: [{ item_id: itemId, quantidade: 1, tipo: 'aluguel', dias_aluguel: dias }], metodo_pagamento: 'pix' });
+        .send({ items: [{ item_id: itemId, quantidade: 1, tipo: 'aluguel', dias_aluguel: dias }], metodo_pagamento: 'cartao' });
     return response;
 };
 const alugueisDoUsuario = async (usuarioId) => {
